@@ -7,17 +7,16 @@ bird.yeartotal <- read.csv('bird_yeartotal.csv')
 
 library(plyr)
 # checks: get the total bird for the 10 more common species on 3 forest each year 
+
 tab_f <- function(x) {
   x <- x[order(x$count, decreasing=T),]
   data.frame(head(x[,c('count','abbrev')],10) )
 }
 tab <- ddply(bird.yeartotal, .(year,forest), tab_f)
 
-
 # pull out year 2007 to compare with the online report
 library(reshape)
 aux<-reshape(subset(tab, year==2007) , direction='wide', timevar='forest', idvar='abbrev',drop='year')
-
 
 # Overall trend within forest 
 library(ggplot2)
@@ -89,7 +88,6 @@ dev.off()
 # -----------------------------------------------------
 
 #3) shiny application to plot average over years 
-setwd('C:\\Users\\Toshiba\\Documents\\GitHub\\mnfb\\R')
 library(shiny)
 runApp("shiny1")
 
