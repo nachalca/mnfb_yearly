@@ -1,8 +1,10 @@
+library(xtable)
+
 
 # Modelling the yearly average of all species. 
 # Data are created on mnfb repository, with the yearly_data.R code. 
 
-setwd('C:\\Users\\Toshiba\\Documents\\GitHub\\mnfb_yearly\\data')
+#setwd('C:\\Users\\Toshiba\\Documents\\GitHub\\mnfb_yearly\\data')
 bird.yeartotal <- read.csv('bird_yeartotal.csv')
 
 library(plyr)
@@ -17,6 +19,10 @@ tab <- ddply(bird.yeartotal, .(year,forest), tab_f)
 # pull out year 2007 to compare with the online report
 library(reshape)
 aux<-reshape(subset(tab, year==2007) , direction='wide', timevar='forest', idvar='abbrev',drop='year')
+
+tab = xtable(aux)
+print(tab, file="highcounts.tex", include.rownames=FALSE)
+
 
 # Overall trend within forest 
 library(ggplot2)

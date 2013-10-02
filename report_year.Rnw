@@ -31,32 +31,7 @@ According to (REF, Etterson) one of the basic research goals in Ecology consist 
 
 Next table shows total bird count on year 2007 for the most abbundant species, just to compare it with the online annual report. After the table the overall trend for the raw counts over the year are ploted. 
 
-\begin{table}[ht]
-\begin{center}
-\begin{tabular}{rlrrr}
-  \hline
- & abbrev & count.9020 & count.9030 & count.9090 \\ 
-  \hline
-361 & OVEN & 1003 & 835 & 1168 \\ 
-  362 & REVI & 823 & 997 & 771 \\ 
-  363 & BTNW & 254 &  &  \\ 
-  364 & NAWA & 240 & 348 & 867 \\ 
-  365 & BLJA & 222 &  & 230 \\ 
-  366 & CSWA & 211 & 330 & 375 \\ 
-  367 & RBGR & 208 &  &  \\ 
-  368 & WTSP & 180 & 387 & 940 \\ 
-  369 & HETH & 175 & 249 & 265 \\ 
-  370 & AMRO & 156 &  &  \\ 
-  373 & VEER &  & 402 & 264 \\ 
-  375 & LEFL &  & 368 &  \\ 
-  378 & AMRE &  & 260 &  \\ 
-  380 & PIWA &  & 215 &  \\ 
-  386 & MAWA &  &  & 282 \\ 
-  389 & MOWA &  &  & 257 \\ 
-   \hline
-\end{tabular}
-\end{center}
-\end{table}
+\input{data/highcounts}
 
 Forest 9090 (NAMES) is consistently higer than the other two in terms of overal abundance, also it seems to be an increment of the total bird population over time regardless specie.
 
