@@ -47,7 +47,7 @@ Perhaps the simplest model we could be a quadratic regression separatedly for ea
 
 \begin{eqnarray}
 \nonumber Y_{tfs} &=&  \beta_{0fs} + \beta_{1fs}t + \beta_{2fs}t^2 + \epsilon_{tfs}  \\
-\epsilon_{tfs} &\sim& N(0,\sigma^2)
+\epsilon_{tfs} &\sim& N(0,\sigma_{fs}^2)
 \label{mod1}
 \end{eqnarray}
 
@@ -98,7 +98,7 @@ A second model considered is a regression using data from all 73 species in each
 \nonumber \beta_{0fs} &\sim& N(\beta_{0f}, \sigma_{0f}^2 ) \\ 
 \nonumber \beta_{1fs} &\sim& N(\beta_{1f}, \sigma_{1f}^2 ) \\ 
 \nonumber \beta_{2fs} &\sim& N(\beta_{2f}, \sigma_{2f}^2 ) \\ 
-\epsilon_{tfs} &\sim& N(0,\sigma^2)
+\epsilon_{tfs} &\sim& N(0,\sigma_f^2)
 \label{mod2}
 \end{eqnarray}
 
