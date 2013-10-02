@@ -19,5 +19,5 @@ $RECYCLE.BIN/
 ### LaTeX
 *concordance.tex
 *.synctex.gz
-
+*.log
 
