@@ -31,7 +31,7 @@ According to (REF, Etterson) one of the basic research goals in Ecology consist 
 
 Next table shows total bird count on year 2007 for the most abbundant species, just to compare it with the online annual report. After the table the overall trend for the raw counts over the year are ploted. 
 
-\input{data/highcounts}
+%\input{data/highcounts}
 
 Forest 9090 (NAMES) is consistently higer than the other two in terms of overal abundance, also it seems to be an increment of the total bird population over time regardless specie.
 
