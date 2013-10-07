@@ -67,6 +67,15 @@ Table \ref{tab1} shows the summary statistics for each coefficient and figure \r
 \caption{Histograms for coefficients of model \ref{mod1}. \label{histm1}}
 \end{figure}
 
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.6]{scat_m1.pdf}
+%\caption{Histograms for coefficients of model \ref{mod1}. \label{histm1}}
+\end{figure}
+
+
+
+
 \begin{table}[hbpt] 
 \caption{Summary stats for coefficients of model \ref{mod1} \label{tab1}}
 \begin{center}

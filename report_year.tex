@@ -1,155 +1,95 @@
-\documentclass{article}\usepackage{graphicx, color}
-%% maxwidth is the original width if it is less than linewidth
-%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
-\def\maxwidth{ %
-  \ifdim\Gin@nat@width>\linewidth
-    \linewidth
-  \else
-    \Gin@nat@width
-  \fi
-}
-\makeatother
-
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-\definecolor{fgcolor}{rgb}{0.2, 0.2, 0.2}
-\newcommand{\hlnumber}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlfunctioncall}[1]{\textcolor[rgb]{0.501960784313725,0,0.329411764705882}{\textbf{#1}}}%
-\newcommand{\hlstring}[1]{\textcolor[rgb]{0.6,0.6,1}{#1}}%
-\newcommand{\hlkeyword}[1]{\textcolor[rgb]{0,0,0}{\textbf{#1}}}%
-\newcommand{\hlargument}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
-\newcommand{\hlcomment}[1]{\textcolor[rgb]{0.180392156862745,0.6,0.341176470588235}{#1}}%
-\newcommand{\hlroxygencomment}[1]{\textcolor[rgb]{0.43921568627451,0.47843137254902,0.701960784313725}{#1}}%
-\newcommand{\hlformalargs}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
-\newcommand{\hleqformalargs}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
-\newcommand{\hlassignement}[1]{\textcolor[rgb]{0,0,0}{\textbf{#1}}}%
-\newcommand{\hlpackage}[1]{\textcolor[rgb]{0.588235294117647,0.709803921568627,0.145098039215686}{#1}}%
-\newcommand{\hlslot}[1]{\textit{#1}}%
-\newcommand{\hlsymbol}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlprompt}[1]{\textcolor[rgb]{0.2,0.2,0.2}{#1}}%
-
-\usepackage{framed}
-\makeatletter
-\newenvironment{kframe}{%
- \def\at@end@of@kframe{}%
- \ifinner\ifhmode%
-  \def\at@end@of@kframe{\end{minipage}}%
-  \begin{minipage}{\columnwidth}%
- \fi\fi%
- \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
- \colorbox{shadecolor}{##1}\hskip-\fboxsep
-     % There is no \\@totalrightmargin, so:
-     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
- \MakeFramed {\advance\hsize-\width
-   \@totalleftmargin\z@ \linewidth\hsize
-   \@setminipage}}%
- {\par\unskip\endMakeFramed%
- \at@end@of@kframe}
-\makeatother
-
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
-
-\usepackage{alltt}
+\documentclass{article}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{graphicx, color}
 \graphicspath{{figs/}}
 
 %----------------------------------
+%\topmargin      -1.5cm   % read Lamport p.163
+%\oddsidemargin  -0.04cm  % read Lamport p.163
+%\evensidemargin -0.04cm  % same as oddsidemargin but for left-hand pages
+%\textwidth      16.59cm
+%\textheight     22.94cm
+
 \topmargin      -1.5cm   % read Lamport p.163
-\oddsidemargin  -0.04cm  % read Lamport p.163
-\evensidemargin -0.04cm  % same as oddsidemargin but for left-hand pages
-\textwidth      16.59cm
+\oddsidemargin  0.04cm  % read Lamport p.163
+\evensidemargin 0.04cm  % same as oddsidemargin but for left-hand pages
+\textwidth      15cm
 \textheight     22.94cm
+
 \parskip         7.2pt   % sets spacing between paragraphs
 \parindent         3mm   % sets leading space for paragraphs
-
 %-------------------------------------
 \title{ Modelling Birds Population }
 \author{Ignacio Alvarez}
 \date{ Fall 2013 }
 
-
 \begin{document}
 \maketitle 
+
+\vspace{3cm}
 
 \section{Introduction} 
 According to (REF, Etterson) one of the basic research goals in Ecology consist on understand the distribution and abundance of the animal population. In this work, the particular goal will be to explore alternatives to model the time trends in Western Great Lakes Birds population over 1994 to 2011. 
 
-\vspace{2cm}
-
 \subsection{Data description}
 
-Next table shows total bird count on year 2007 for the most abbundant species, just to compare it with the online annual report. After the table the overall trend for the raw counts over the year are ploted. 
+The data source for this study came from ``an extensive, long-term monitoring program with over 1600 off-road sampling points designed to track regional population trends and investigate the response of forest birds to regional land use patterns''(REF:). 
 
-%\input{data/highcounts}
+This monitoring program is carry out by Natural Resources Research Institute (University of Minnesota Duluth) with the objective of ``sustain forest resources and bird diversity in western Great Lakes forests'' (REF: ). 
 
-Forest 9090 (NAMES) is consistently higer than the other two in terms of overal abundance, also it seems to be an increment of the total bird population over time regardless specie.
+For this report in particular the dataset which will be used in this report consist in the yearly bird count for 73 species on three National Forest from 1995 to 2013. There are several interesting covariate that are relavated in the sampling procedure, however most of them are site characteristics at the moment when the sampling was done, therefore they are not so meaningfully when we consider yearly aggregated data.  
+
+We can see a first look of the data in Figure \ref{figtr}, where the total bird count per year is plotted for all three forest. We can see Superior is consistently over all years the forest with more bird counts (why? is bigger ?) reaching 10000 counts on three time during the monitoring period. The others two forest, Chequamegon and Chippewa show a similar trend in the total bird count. 
+
+Overall, it seems to be a first sub-period from 1995 to 2003 where the total bird count is increasing every year but from that this increment stop. From 2003 on Superior forest it seem to oscillate around a little more than 8000 birds while for Chequamegon the count are getting smaller each year. 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=8cm, width=14cm]{rawtrend.pdf}
-\caption{Raw trend in the data}
+\includegraphics[scale=.4, angle=-90]{rawtrend.ps}
+\caption{Raw trend in the data \label{figtr} }
 \end{figure}
+
+There is a big variability of the counts among species. Table \ref{t1} presents the total bird count on year 2007 for the most abundant species, (just to compare it with the on line annual report). We can see that OVEN and REVI are very abundant species among all forest. 
+
+However the structure of abundant is different on each forest. Species like NAWA and WTSP are abundant only in Superior forest, while VEER it is only abundant for Chippewa. In order to model the species count along time it might be better to work separately by forest (at least in a initial steps).  
+
+\input{highcounts}
+
 
 \subsection{Initial models} 
 
-Perhaps the simplest model we could be a quadratic regression separatedly for each specie and forest. 
-
+As a starting point we fit quadratic regression model separately for each specie and forest. Equation \ref{mod1} represent one of the regressions, for one species in one forest. 
 \begin{eqnarray}
 \nonumber Y_{tfs} &=&  \beta_{0fs} + \beta_{1fs}t + \beta_{2fs}t^2 + \epsilon_{tfs}  \\
 \epsilon_{tfs} &\sim& N(0,\sigma_{fs}^2)
 \label{mod1}
 \end{eqnarray}
+where $Y_{tfs}$ represent the average bird count on year $t$ in the forest $f$ for the specie $s$. There are 73 species and 3 forest in the data set so there are 219 models in total. We can use the results of these models to get idea of the distribution for intercept, slope and quadratic term on each forest. 
 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcomment{# ave : average count per year.}
-\hlfunctioncall{lm}(ave ~ year + \hlfunctioncall{I}(year^2), data = d)
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-
-
-
-where $Y_{tfs}$ represent the average bird count on year $t$ in the forest $f$ for the specie $s$. There are 73 species and 3 forest in the data set so there are 219 models in total. 
-
-Table \ref{tab1} shows the summary statistics for each coefficient and figure \ref{hism1} presents histograms for each one of the model coefficients.
-
+Using R function {\tt density} we get an estimate for each parameter based on 73 observations, these are shown on Figure \ref{histm1}. There are 12 panels, each row represent one of the coefficient (intercept, slope, quadratic term and variance) and each column represent one forest. 
 \begin{figure}[h!]
 \centering
-\includegraphics[scale=.6]{hist_m1.pdf}
-\caption{Histograms for coefficients of model \ref{mod1}. \label{histm1}}
+\includegraphics[scale=.4, angle=-90]{hist_m1.ps}
+\caption{Densities for coefficients of model \ref{mod1}. \label{histm1}}
 \end{figure}
 
-\begin{table}[hbpt] 
-\caption{Summary stats for coefficients of model \ref{mod1} \label{tab1}}
-\begin{center}
-\begin{tabular}{rrlrrrrrr} 
-  \hline
- & forest & parameter & Min. & 1st Qu. & Median & Mean & 3rd Qu. & Max. \\ 
-  \hline
-1 & 9020 & b0 & 0.003 & 0.043 & 0.115 & 0.238 & 0.212 & 3.003 \\ 
-  2 & 9020 & b1 & -0.012 & 0.001 & 0.003 & 0.010 & 0.011 & 0.140 \\ 
-  3 & 9020 & b2 & -0.029 & -0.002 & -0.001 & -0.002 & -0.000 & 0.000 \\ 
-  4 & 9020 & sigma & 0.004 & 0.021 & 0.041 & 0.063 & 0.071 & 0.528 \\ \hline
-  5 & 9030 & b0 & 0.001 & 0.042 & 0.082 & 0.224 & 0.244 & 2.221 \\ 
-  6 & 9030 & b1 & -0.007 & 0.001 & 0.003 & 0.010 & 0.014 & 0.125 \\ 
-  7 & 9030 & b2 & -0.015 & -0.001 & -0.000 & -0.001 & -0.000 & 0.001 \\ 
-  8 & 9030 & sigma & 0.002 & 0.018 & 0.032 & 0.054 & 0.074 & 0.370 \\ \hline
-  9 & 9090 & b0 & 0.000 & 0.015 & 0.072 & 0.217 & 0.223 & 2.407 \\ 
-  10 & 9090 & b1 & -0.004 & -0.000 & 0.003 & 0.008 & 0.007 & 0.110 \\ 
-  11 & 9090 & b2 & -0.016 & -0.001 & -0.000 & -0.001 & 0.000 & 0.001 \\ 
-  12 & 9090 & sigma & 0.001 & 0.011 & 0.028 & 0.054 & 0.070 & 0.349 \\ 
-   \hline
-\end{tabular}
-\end{center}
-\end{table}
+The distribution fore each coefficient is similar on the 3 forest. The Intercept is mostly on negative values, as the year covariate is centered on 2000, this represent the expected count in that year which is  less than 1 bird for most of the species. The slope densities show the slope is centered arround 0 for most of the species but with some values far from it on each forest. 
+
+In the quadratic term the densities show some differences among forest. There is a left skewed in Chequamegon, relatively simeric on Chippewa and right skewed in Superior forest (meaning ????). 
+
+Table \ref{tab1} shows the summary statistics for each coefficient and figure \ref{hism1} presents histograms for each one of the model coefficients.
+\input{summ_modlm}
+
+The next step would be to explore the bivariate relation among the coefficients in the model. With this in mind we can see a sccatter matrix of the estimated coefficients in Figure \ref{pairss1}. The main point to see here is a negative relation between the slope and the quadratic term for all forest, is .67, .82 and .83 on Chequamegon, Chippewa and Superior respectively. (KAISER dixit: while polynomials are wonderfully flexible functions for describing data patterns, they do not lend themselves to interpretation of coefficient values -different combinations of constant, linear, and quadratic terms can lead to quite similar functions over a finite range of covariate values) 
+Also, there is a negative relation between between intercept and variance, specially for Chequamegon and Chippewa forest. 
+
+Maybe the main message for this plot is that we should not treat this parameters as independent and try to include their dependence into the model we are fitting. 
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.6, angle=-90]{scat_m1.ps}
+\caption{Bivarieate relation among coefficients of model \ref{mod1}. \label{pairs1}}
+\end{figure}
 
 A second model considered is a regression using data from all 73 species in each forest and including random terms for the species coefficients. 
 
@@ -162,48 +102,7 @@ A second model considered is a regression using data from all 73 species in each
 \label{mod2}
 \end{eqnarray}
 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcomment{# ave : average count per year.}
-\hlfunctioncall{library}(lme4)
-\hlfunctioncall{lmer}(ave ~ year + \hlfunctioncall{I}(year^2) + (year + \hlfunctioncall{I}(year^2) | abbrev), data = d)
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-
-
-
-\begin{figure}
-\centering
-\includegraphics[scale=.45]{box_m2.pdf}
-\caption{Boxplots for random effects in model \ref{mod2}. \label{boxm2}}
-\end{figure}
-
-\begin{table}[ht]
-\caption{Estimated mean and variance in model \ref{2}}
-\begin{center}
-\begin{tabular}{rrlrr}
-  \hline
- & forest & parameter & mean & variance \\ 
-  \hline
-1 & 9020 & b0 & -2.900 & 1.462 \\ 
-  2 & 9020 & b1 & 0.119 & 0.126 \\ 
-  3 & 9020 & b2 & -0.007 & 0.008 \\ 
-  4 & 9020 & residual & 0.000 & 0.487 \\ \hline
-  5 & 9030 & b0 & -3.131 & 1.602 \\ 
-  6 & 9030 & b1 & 0.143 & 0.090 \\ 
-  7 & 9030 & b2 & -0.008 & 0.004 \\ 
-  8 & 9030 & residual & 0.000 & 0.496 \\ \hline
-  9 & 9090 & b0 & -3.236 & 1.704 \\ 
-  10 & 9090 & b1 & 0.067 & 0.121 \\ 
-  11 & 9090 & b2 & -0.003 & 0.006 \\ 
-  12 & 9090 & residual & 0.000 & 0.518 \\ 
-   \hline
-\end{tabular}
-\end{center}
-\end{table}
-
+\input{summ_modrnd}
 
 \newpage
 

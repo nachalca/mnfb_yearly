@@ -2,8 +2,12 @@
 # Modelling the yearly average of all species. 
 # Data are created on mnfb repository, with the yearly_data.R code. 
 
-setwd('~\\GitHub\\mnfb_yearly\\data')
-bird.yeartotal <- read.csv('bird_yeartotal.csv')
+bird.yeartotal <- read.csv('~\\GitHub\\mnfb\\data\\bird_yeartotal.csv')
+
+# compute average using the count.add (this step should be on yearly_data.R)
+bird.yeartotal$ave.add <- with(bird.yeartotal, count.add/samples)
+
+setwd('~\\GitHub\\mnfb_yearly')
 
 # libraries 
 library(xtable)
@@ -12,14 +16,10 @@ library(reshape2)
 library(ggplot2)
 library(lme4)
 library(shiny)
+library(GGally)
 
-# forest names : Chequamegon=9020,Chippewa=9030, Superior=9090
-bird.yeartotal$forestN <- as.factor(bird.yeartotal$forest) 
-levels(bird.yeartotal$forestN) = c('Chequamegon','Chippewa','Superior') 
-with(bird.yeartotal, table(forestN,forest))
 
 # 0) data description
-
 tab_f <- function(x,sp) {
   x <- x[x$abbrev %in% sp,]
   data.frame(x[,c('count','abbrev')])
@@ -34,37 +34,47 @@ aux <- reshape(subset(tab, year==2007) , direction='wide', timevar='forestN', id
 aux <- aux[order(aux[,2],decreasing=T),]
 colnames(aux) <- c('Specie',levels(bird.yeartotal$forestN) )
 tab = xtable(aux)
-print(tab, file="..//highcounts.tex", include.rownames=FALSE)
-
+print(tab, file="highcounts.tex", include.rownames=FALSE)
 
 # Overall trend within forest 
-totales <- ddply(bird.yeartotal, .(year,forest), summarise, count=sum(count) )
+totales <- ddply(bird.yeartotal, .(year,forestN), summarise, count=sum(count) )
 totales$forest <- factor(totales$forest)
 
-pdf('../figs/rawtrend.pdf')
-qplot(data=subset(totales,year<2010),x=year, y=count,shape=forest,color=forest, size=I(3))+geom_line()
+postscript('figs/rawtrend.ps')
+qplot(data=totales,x=year,xlab='Year',ylab='Bird Count',y=count,shape=forestN,color=forestN, size=I(3))+geom_line()
 dev.off()
 #--------------
 
 # 1) Simplest model: linear models without random terms one per specie*forest
-
 m_f = function(x) {
-  m = lm(log(ave) ~ I(year-2000) + I((year-2000)^2), x)
+  m = lm(log(ave.add) ~ I(year-2000) + I((year-2000)^2), x)
   data.frame(parameter=c("b0","b1","b2","sigma"),
              estimate=c(coef(m), summary(m)$sigma))
 }
 
-models.lm = ddply(bird.yeartotal, .(forest,abbrev), m_f)
+models.lm = ddply(bird.yeartotal, .(forestN,abbrev), m_f)
 
+tab1 <- ddply(models.lm, .(forestN,parameter),function(x) summary(x$estimate) ) 
+tab1 <- xtable(tab1, digits=3)
+print(tab1, file="summ_modlm.tex", include.rownames=FALSE)
 
-tab1 <- ddply(models.lm, .(forest,parameter),function(x) summary(x$estimate) ) 
-library(xtable)
-# xtable(tab1, digits=3)
+den.fun <- function(z) {
+  d <- density(z$estimate)
+  data.frame(knots=d$x,dens=d$y) 
+}
+densities <- ddply(models.lm, .(forestN, parameter), den.fun)
 
-pdf('../figs/hist_m1.pdf')
-qplot(data=models.lm, x=estimate,y=..density..,geom='histogram')+facet_grid(facets=parameter~forest,scale='free')
+postscript('figs/hist_m1.ps')
+#qplot(data=models.lm, x=estimate,y=..density..,geom='histogram')+facet_grid(facets=parameter~forest,scale='free')
+qplot(data=densities, x=knots,y=dens,geom='line')+facet_wrap(facets=parameter~forestN, scales="free",ncol=3)  
 dev.off()
 
+aux <- reshape(models.lm , direction='wide', timevar='parameter', idvar=c('forestN','abbrev') )
+postscript('figs/scat_m1.ps')
+ggpairs(data=aux, columns=3:6, color='forestN')
+dev.off()
+
+#=====================================================
 # 2) Include random terms in the model
 
 # model using lmer, adding random effects. 
@@ -82,7 +92,8 @@ mrnd_f <- function(x) {
 }
 
 models.rnd = ddply(bird.yeartotal, .(forest), mrnd_f)
-xtable(models.rnd, digits=3)
+tab2 <- xtable(models.rnd, digits=3)
+print(tab2, file="summ_modrnd.tex", include.rownames=FALSE)
 
 mrnd_f2 <- function(x) {
   x$year <- x$year-1994
@@ -96,7 +107,7 @@ mrnd_f2 <- function(x) {
 models.rndeff = ddply(bird.yeartotal, .(forest), mrnd_f2)
 aux <- melt(data=models.rndeff, id.vars='forest')
 
-pdf('..\\figs\\box_m2.pdf')
+postscript('..\\figs\\box_m2.pdf')
 qplot(data=aux, x=factor(forest), group=factor(forest), y=value, geom='boxplot')+facet_grid(facets=variable~., scale='free')
 dev.off()
 
