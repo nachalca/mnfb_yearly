@@ -70,7 +70,7 @@ where $Y_{tfs}$ represent the average bird count on year $t$ in the forest $f$ f
 Using R function {\tt density} we get an estimate for each parameter based on 73 observations, these are shown on Figure \ref{histm1}. There are 12 panels, each row represent one of the coefficient (intercept, slope, quadratic term and variance) and each column represent one forest. 
 \begin{figure}[h!]
 \centering
-\includegraphics[scale=.4, angle=-90]{hist_m1.ps}
+\includegraphics[scale=.5, angle=-90]{hist_m1.ps}
 \caption{Densities for coefficients of model \ref{mod1}. \label{histm1}}
 \end{figure}
 
@@ -82,17 +82,16 @@ Table \ref{tab1} shows the summary statistics for each coefficient and figure \r
 \input{summ_modlm}
 
 The next step would be to explore the bivariate relation among the coefficients in the model. With this in mind we can see a sccatter matrix of the estimated coefficients in Figure \ref{pairss1}. The main point to see here is a negative relation between the slope and the quadratic term for all forest, is .67, .82 and .83 on Chequamegon, Chippewa and Superior respectively. (KAISER dixit: while polynomials are wonderfully flexible functions for describing data patterns, they do not lend themselves to interpretation of coefficient values -different combinations of constant, linear, and quadratic terms can lead to quite similar functions over a finite range of covariate values) 
-Also, there is a negative relation between between intercept and variance, specially for Chequamegon and Chippewa forest. 
 
-Maybe the main message for this plot is that we should not treat this parameters as independent and try to include their dependence into the model we are fitting. 
 \begin{figure}[h!]
 \centering
 \includegraphics[scale=.6, angle=-90]{scat_m1.ps}
 \caption{Bivarieate relation among coefficients of model \ref{mod1}. \label{pairs1}}
 \end{figure}
+Also, there is a negative relation between between intercept and variance, specially for Chequamegon and Chippewa forest. Maybe the main message for this plot is that we should not treat this parameters as independent and try to include their dependence into the model we are fitting. 
+
 
 A second model considered is a regression using data from all 73 species in each forest and including random terms for the species coefficients. 
-
 \begin{eqnarray}
 \nonumber log(Y_{tfs}) &=&  \beta_{0fs} + \beta_{1fs}t + \beta_{2fs}t^2 + \epsilon_{tfs}  \\
 \nonumber \beta_{0fs} &\sim& N(\beta_{0f}, \sigma_{0f}^2 ) \\ 
