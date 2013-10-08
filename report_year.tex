@@ -92,22 +92,17 @@ Also, there is a negative relation between between intercept and variance, speci
 
 
 A second model considered is a regression using data from all 73 species in each forest and including random terms for the species coefficients. 
-\begin{equation}
+\begin{eqnarray}
 \nonumber log(Y_{tfs}) &=&  \beta_{0fs} + \beta_{1fs}t + \beta_{2fs}t^2 + \epsilon_{tfs}  \\
-\end{equation}
-
-\[ \beta_{fs} \sim N \left( \left[ \begin{array}{c}
-    \beta_{0fs}   \\ 
-    \beta_{1fs}  \\ 
-    \beta_{2fs}  
-\end{array} \right],   
-\left[ \begin{array}{ccc}   
-\rho_ & b & c
-\end{array} \right) \\ 
-
+\beta_{fs} &\sim& N \left( \left[ \begin{array}{c}
+    \beta_{0f}   \\ 
+    \beta_{1f}  \\ 
+    \beta_{2f}  
+\end{array} \right],   \Sigma_f \right) \\ 
 \epsilon_{tfs} &\sim& N(0,\sigma_f^2)
 \label{mod2}
 \end{eqnarray}
+where the matrix $\Sigma$ is fomrmed as $(\Sigma)_{ij}=\rho_{ij}\sigma_i\sigma_j$ when $i\neq j$ and $(\Sigma)_{ii}=\sigma_i^2$ on the diagonal, having 6 parameter in total.     
 
 \input{modrnd_t1}
 \input{modrnd_t2}
