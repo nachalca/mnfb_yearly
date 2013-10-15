@@ -7,6 +7,9 @@ bird.yeartotal <- read.csv('~\\GitHub\\mnfb\\data\\bird_yeartotal.csv')
 # compute average using the count.add (this step should be on yearly_data.R)
 bird.yeartotal$ave.add <- with(bird.yeartotal, count.add/samples)
 
+# create a centered year variable
+bird.yeartotal$yearc <- bird.yeartotal$year-2000
+
 setwd('~\\GitHub\\mnfb_yearly')
 
 # libraries 
@@ -24,6 +27,7 @@ tab_f <- function(x,sp) {
   x <- x[x$abbrev %in% sp,]
   data.frame(x[,c('count','abbrev')])
 }
+
 # get the 15 more abundant species
 aux <- sort(with(bird.yeartotal, tapply(count,abbrev,sum)),decreasing=T )[1:15]
 spn <- names(aux)
@@ -47,7 +51,7 @@ dev.off()
 
 # 1) Simplest model: linear models without random terms one per specie*forest
 m_f = function(x) {
-  m = lm(log(ave.add) ~ I(year-2000) + I((year-2000)^2), x)
+  m = lm(log(ave.add) ~ I(yearc) + I((yearc)^2), x)
   data.frame(parameter=c("b0","b1","b2","sigma"),
              estimate=c(coef(m), summary(m)$sigma))
 }
@@ -56,6 +60,7 @@ models.lm = ddply(bird.yeartotal, .(forestN,abbrev), m_f)
 
 tab1 <- ddply(models.lm, .(forestN,parameter),function(x) summary(x$estimate) ) 
 tab1 <- xtable(tab1, digits=3)
+
 print(tab1, file="summ_modlm.tex", include.rownames=FALSE)
 
 den.fun <- function(z) {
@@ -80,39 +85,29 @@ dev.off()
 # model using lmer, adding random effects. 
 
 mrnd_f <- function(x) {
-  x$year <- x$year-1994
   x$abbrev <- factor(x$abbrev)
-  x$lave <- log(x$ave) 
-  x$lave[x$lave==-Inf] <- NA
-  
-  mod <-lmer(lave ~ year+I(year^2)+(year+I(year^2)|abbrev),data=x)  
-  
-  data.frame(parameter=c("b0","b1","b2","residual"),
-            mean=c(fixef(mod)[1:3],0), variance=c(attributes(VarCorr(mod)$abbrev)$stddev,attributes(VarCorr(mod))$sc) )
+  x$lave <- log(x$ave.add) 
+  mod <-lmer(lave ~ yearc+I(yearc^2)+(yearc+I(yearc^2)|abbrev),data=x)  
+  data.frame(parameter=c("b0","b1","b2","residual",'rho_01','rho_02','rho_12'),
+             mean=c(fixef(mod)[1:3],0,attributes(VarCorr(mod)$abbrev)$correlation[c(2,3,6)]),
+             variance=c(attributes(VarCorr(mod)$abbrev)$stddev,
+                        attributes(VarCorr(mod))$sc,rep(0,3)) )
 }
+
+x <- subset(bird.yeartotal, forest==9020) 
+qplot(data=x, year,lave)
+qplot(data=x[x$abbrev=='ALFL',], year,lave) + geom_line()
 
 models.rnd = ddply(bird.yeartotal, .(forest), mrnd_f)
 tab2 <- xtable(models.rnd, digits=3)
 print(tab2, file="summ_modrnd.tex", include.rownames=FALSE)
 
-mrnd_f2 <- function(x) {
-  x$year <- x$year-1994
-  x$abbrev <- factor(x$abbrev)
-  x$lave <- log(x$ave) 
-  x$lave[x$lave==-Inf] <- NA
-  
-  mod <-lmer(lave ~ year+I(year^2)+(year+I(year^2)|abbrev),data=x)  
-  data.frame(coef(mod)$abbrev)
-}
-models.rndeff = ddply(bird.yeartotal, .(forest), mrnd_f2)
-aux <- melt(data=models.rndeff, id.vars='forest')
-
-postscript('..\\figs\\box_m2.pdf')
-qplot(data=aux, x=factor(forest), group=factor(forest), y=value, geom='boxplot')+facet_grid(facets=variable~., scale='free')
-dev.off()
-
 # -----------------------------------------------------
 # -----------------------------------------------------
+
+
+
+
 
 #3) shiny application to plot average over years 
 runApp("shiny1")
