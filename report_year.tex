@@ -20,7 +20,7 @@
 \parskip         7.2pt   % sets spacing between paragraphs
 \parindent         3mm   % sets leading space for paragraphs
 %-------------------------------------
-\title{ Modelling Birds Population }
+\title{ Modelling Bird Populations }
 \author{Ignacio Alvarez}
 \date{ Fall 2013 }
 
@@ -38,7 +38,7 @@ The data source for this study came from ``an extensive, long-term monitoring pr
 
 This monitoring program is carry out by Natural Resources Research Institute (University of Minnesota Duluth) with the objective of ``sustain forest resources and bird diversity in western Great Lakes forests'' (REF: ). 
 
-For this report in particular the dataset which will be used in this report consist in the yearly bird count for 73 species on three National Forest from 1995 to 2013. There are several interesting covariate that are relavated in the sampling procedure, however most of them are site characteristics at the moment when the sampling was done, therefore they are not so meaningfully when we consider yearly aggregated data.  
+For this report in particular the dataset which will be used in this report consist in the yearly bird count for 73 species on three National Forest from 1995 to 2013. There are several interesting covariate that are measured in the sampling procedure, however most of them are site characteristics at the moment when the sampling was done, therefore they are not so meaningfully when we consider yearly aggregated data.  
 
 We can see a first look of the data in Figure \ref{figtr}, where the total bird count per year is plotted for all three forest. We can see Superior is consistently over all years the forest with more bird counts (why? is bigger ?) reaching 10000 counts on three time during the monitoring period. The others two forest, Chequamegon and Chippewa show a similar trend in the total bird count. 
 
@@ -74,19 +74,19 @@ Using R function {\tt density} we get an estimate for each parameter based on 73
 \caption{Densities for coefficients of model \ref{mod1}. \label{histm1}}
 \end{figure}
 
-The distribution fore each coefficient is similar on the 3 forest. The Intercept is mostly on negative values, as the year covariate is centered on 2000, this represent the expected count in that year which is  less than 1 bird for most of the species. The slope densities show the slope is centered arround 0 for most of the species but with some values far from it on each forest. 
+The distribution fore each coefficient is similar on the 3 forest. The Intercept is mostly on negative values, as the year covariate is centered on 2000, this represent the expected count in that year which is  less than 1 bird for most of the species. The slope densities show the slope is centered around 0 for most of the species but with some values far from it on each forest. 
 
 In the quadratic term the densities show some differences among forest. There is a left skewed in Chequamegon, relatively simeric on Chippewa and right skewed in Superior forest (meaning ????). 
 
 Table \ref{tab1} shows the summary statistics for each coefficient and figure \ref{hism1} presents histograms for each one of the model coefficients.
 \input{summ_modlm}
 
-The next step would be to explore the bivariate relation among the coefficients in the model. With this in mind we can see a sccatter matrix of the estimated coefficients in Figure \ref{pairss1}. The main point to see here is a negative relation between the slope and the quadratic term for all forest, is .67, .82 and .83 on Chequamegon, Chippewa and Superior respectively. (KAISER dixit: while polynomials are wonderfully flexible functions for describing data patterns, they do not lend themselves to interpretation of coefficient values -different combinations of constant, linear, and quadratic terms can lead to quite similar functions over a finite range of covariate values) 
+The next step would be to explore the bivariate relation among the coefficients in the model. With this in mind we can see a scatter matrix of the estimated coefficients in Figure \ref{pairss1}. The main point to see here is a negative relation between the slope and the quadratic term for all forest, is .67, .82 and .83 on Chequamegon, Chippewa and Superior respectively. (KAISER Dix it: while polynomials are wonderfully flexible functions for describing data patterns, they do not lend themselves to interpretation of coefficient values -different combinations of constant, linear, and quadratic terms can lead to quite similar functions over a finite range of covariate values) 
 
 \begin{figure}[h!]
 \centering
 \includegraphics[scale=.6, angle=-90]{scat_m1.ps}
-\caption{Bivarieate relation among coefficients of model \ref{mod1}. \label{pairs1}}
+\caption{Bivariate relation among coefficients of model \ref{mod1}. \label{pairs1}}
 \end{figure}
 Also, there is a negative relation between between intercept and variance, specially for Chequamegon and Chippewa forest. Maybe the main message for this plot is that we should not treat this parameters as independent and try to include their dependence into the model we are fitting. 
 
@@ -102,32 +102,40 @@ A second model considered is a regression using data from all 73 species in each
 \epsilon_{tfs} &\sim& N(0,\sigma_f^2)
 \label{mod2}
 \end{eqnarray}
-where the matrix $\Sigma$ is fomrmed as $(\Sigma)_{ij}=\rho_{ij}\sigma_i\sigma_j$ when $i\neq j$ and $(\Sigma)_{ii}=\sigma_i^2$ on the diagonal, having 6 parameter in total.     
+where the matrix $\Sigma$ is formed as $(\Sigma)_{ij}=\rho_{ij}\sigma_i\sigma_j$ when $i\neq j$ and $(\Sigma)_{ii}=\sigma_i^2$ on the diagonal, having 6 parameter in total.     
 
-\input{modrnd_t1}
-\input{modrnd_t2}
-\input{modrnd_t3}
-\input{modrnd_t4}
+\input{summ_modrnd}
 
 \newpage
 
 \section{Statistical Model} 
 
+
+
 \begin{eqnarray}
-\nonumber log(Y_{tfs}) &=&  \beta_{0fs} + \beta_{1fs}t + \beta_{2fs}t^2 + \epsilon_{tfs}  \\
+\nonumber Y_{tfs} &=&  \beta_{0fs} + \beta_{1fs}t + \beta_{2fs}t^2 + \epsilon_{tfs}  \\
 \nonumber \beta_{fs} &=& \left(\begin{array}{c}
     \beta_{0fs}   \\ 
     \beta_{1fs}  \\ 
     \beta_{2fs}  
-\end{array}\right) \sim N(0, \Sigma_{fs}) \\
-\nonumber \Sigma_{fs}  &\sim& \mbox{inv-gamma, scaled inv-gamma, ...} \\ 
+\end{array}\right) \sim N(\mu_f, \Sigma_{f}) \\
+\nonumber \mu \sim N(0, 100) \\
+\nonumber \Sigma_{f}  &\sim& p(\Sigma) \\ 
 \nonumber \epsilon_{tfs}  &\sim& N(0,\sigma_{\epsilon}^2) \\
-\nonumber \sigma_{\epsilon}^2  &\sim& inv-gama(\alpha,\gamma) \\
-\label{mod3}
+\sigma_{s}^2  &\sim& inv-gama(\alpha,\gamma) \\
+\label{mod.wish}
 \end{eqnarray}
 
 
+\input{summ_wishart}
 
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.6, angle=-90]{trace_wis.ps}
+\caption{traceplots}
+\end{figure}
 
 
 
