@@ -303,17 +303,18 @@ rndcoef$up2 <- with(rndcoef, mean + 1.96*sqrt(variance) )
 
 # Plot
 aux <- data.frame(sepcoef, rndcoef)
-p1 <- qplot(data=aux, x=estimate, y=mean, facets=~forestN, main='Separate Regresions vs Random coef', xlab='sepreg', ylab='rndcoef')
+p1 <- qplot(data=aux, x=estimate, y=mean, facets=~forestN, main='Separate Regresions vs Random coef', xlab='sepreg', ylab='rndcoef') + geom_abline(slope=1)
 p1e <- p1 + geom_errorbar(aes(ymax =up2, ymin=lo2), width = 0.05) 
 p1e <- p1e + geom_errorbarh(aes(xmax=up, xmin=lo), width = 0.05) 
 
+
 aux <- data.frame(sepcoef, wishcoef)
-p2 <- qplot(data=aux, x=estimate, y=X50., facets=~forestN, main='Wishart Prior vs Separate Regresions', xlab='sepreg', ylab='wishart')
+p2 <- qplot(data=aux, x=estimate, y=X50., facets=~forestN, main='Wishart Prior vs Separate Regresions', xlab='sepreg', ylab='wishart')  + geom_abline(slope=1)
 p2e <- p2 + geom_errorbar(aes(ymax =X97.5., ymin=X2.5.), width = 0.05) 
 p2e <- p2e + geom_errorbarh(aes(xmax=up, xmin=lo), width = 0.05) 
 
 aux <- data.frame(rndcoef, wishcoef)
-p3 <- qplot(data=aux, x=mean, y=X50., facets=~forestN, main='Random coef vs Wishart Prior', xlab='rndcoef', ylab='wishart')
+p3 <- qplot(data=aux, x=mean, y=X50., facets=~forestN, main='Random coef vs Wishart Prior', xlab='rndcoef', ylab='wishart')  + geom_abline(slope=1)
 p3e <- p3 + geom_errorbar(aes(ymax =X97.5., ymin=X2.5.), width = 0.05) 
 p3e <- p3e + geom_errorbarh(aes(xmax=up2, xmin=lo2), width = 0.05) 
 
