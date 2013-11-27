@@ -9,7 +9,6 @@ bird.yeartotal$ave.add <- with(bird.yeartotal, count.add/samples)
 
 # create a centered year variable
 bird.yeartotal$yearc <- bird.yeartotal$year-2000
-
 setwd('~\\GitHub\\mnfb_yearly')
 
 # libraries 
@@ -22,8 +21,8 @@ library(ggplot2)
 library(GGally)
 library(rjags)
 library(gridExtra)
-#-------------------------------------------------
 
+#-------------------------------------------------
 # 0) data description
 tab_f <- function(x,sp) {
   x <- x[x$abbrev %in% sp,]
@@ -51,11 +50,10 @@ qplot(data=totales,x=year,xlab='Year',ylab='Bird Count',y=count,shape=forestN,co
 dev.off()
 #--------------
 
-# 2) Run 6 'cells' of models, calling file codemodels.R to run them and save results. 
-
-# mod.dd:     dif beta, dif sigma, using lm()
-# mod.ds:     dif beta, same sigma, using lm() 
-# mod.hs:     hier beta, same sigma, using lmer()
+# 1) Run 6 'cells' of models, calling file codemodels.R to run them and save results. 
+# mod.dd:     dif beta, dif sigma 
+# mod.ds:     dif beta, same sigma
+# mod.hs:     hier beta, same sigma
 # res.dh.lin: dif beta, hier sigma, lin model, using jags 
 # res.dh.q:   dif beta, hier sigma, quad model, using jags
 # res.hd.lin: hier beta, dif sigma, lin model, using jags
@@ -64,147 +62,132 @@ dev.off()
 # res.hh.q:   hier beta, hier sigma, quad model, using jags    
 
 source('R\\codemodels.R')
-save(mod.dd, mod.ds, mod.hs, res.dh.lin, 
-     res.dh.q, res.hd.lin,res.hd.q, res.hh.lin,res.hh.q, 
-     file='modresults.Rdata')
+# Run all models
+runjags <- function(d, model, l,lg) {
+  # d <- subset(bird.yeartotal, forest=='9020')
+  if (lg=='logs') d$ave.add <- log(d$ave.add)
+  dat = list(y = d$ave.add , 
+             abbrev = as.numeric(d$abbrev) ,
+             year= d$yearc, 
+             n = nrow(d), 
+             ns = nlevels(d$abbrev),
+             R = diag(l))
+  m = jags.model(textConnection(model), dat, n.chains=3, n.adapt=100)
+  update(m, 500)
+  coda.samples(m, c('alpha','lambda','mu',"sigma.be",'beta','sigma.e'), 3000)
+}
+
+g  <- expand.grid('mtext' , c('dd', 'dh', 'ds', 'hd', 'hh', 'hs'), c('lin','quad'),  lg = c('logs', 'count') ) 
+g$l <- 3 ; g$l[g$Var3=='lin'] <- 2
+ml <- data.frame(mn = paste(g[,1],g[,2],g[,3],sep='.'), l=g$l, lg=g$lg)
+
+runmod <- function( mdat ) { 
+  m <- as.character(mdat$mn); ls <- mdat$l ; lgs <-as.character(mdat$lg)
+  res  <-   dlply(bird.yeartotal, .(forestN), .fun=runjags, model=get(m), l=ls,lg=lgs)
+}
+# results ia list of 24 model results, each element is a list of 
+# 3 models one for each forest. 
+
+ptm <- proc.time()
+results <- alply(ml, .margins=1, runmod,  .progress='text')
+proc.time() - ptm
+
+# to name it 
+a <- adply(as.matrix(ml$mn),1, .fun=function(x) unlist(strsplit(x, '\\.')) )
+a1 <- a[,3]
+a2 <- paste(substr(a[,4], 1,1),substr(ml$lg, 1,1),sep='') 
+#aux<- data.frame(ml, name=paste('res',a1,a2, sep='.'))
+names(results) <- paste('res',a1,a2, sep='.')
+save(results, file='modresults.Rdata')
+
 #===============================================================
-# 3 ) Summary of models, plots and tables 
+# 2 ) Summary of models, plots and tables 
+load('modresults.Rdata')
 
-# Separate regresions: lm without random terms one per specie*forest
-qplot(data=subset(mod.dd, parameter=='b1'), x=model, y=aic,color=ci.sig, facets=~forestN)
-with(mod.dd, table(parameter, ci.sig,model))
-tab1 <- ddply(mod.dd, .(forestN,model,parameter),function(x) quantile(x$estimate, probs=c(0.25, 0.5, 0.975)) ) 
-tab1 <- xtable(tab1, digits=3, caption='Percentiles for Separate Regresion model coefficients')
-print(tab1, file="summ_modlm.tex", include.rownames=FALSE)
+# Bayesian models diag, models dh, hd, hh (lin and quad) 
+attach(results)
+rs <- names(results) 
+for (resu in rs) {
+  nam <- paste('pnam', sub(resu, pattern='res', replace=''), sep='')
+  g <- get(resu)
+  assign(nam , attributes(g$Chippewa[[1]])$dimnames[[2]])
+}
+remove(g, resu, rs, nam)
 
+# Separate regresions: lm without random terms one per specie*forest, 
+# response variable count, quadratic model 
+pr <- agrep( "beta 2", pnam.dd.cc)
+mr <- grep('dd', names(results))
+sepcoef <- NULL
+for (i in mr) {
+  d <- ldply(results[[i]], function(x) {
+    s <- summary(x[,pnam.dd.cc[pr]])$quantile[,3]
+  data.frame(estimate=s,row.names=NULL)
+  })
+  sepcoef <-  rbind(sepcoef,data.frame(mod=names(results)[i], d))
+}
 postscript('figs/hist_m1.ps')
 #qplot(data=models.lm, x=estimate,y=..density..,geom='histogram')+facet_wrap(facets=forestN~parameter,scale='free')
-qplot(data=subset(mod.dd, parameter=='b1'), x=estimate,y=..density..,geom='histogram') +facet_wrap(facets=forestN~model,scale='free')
+qplot(data=sepcoef, x=estimate,y=..density..,geom='histogram') +facet_wrap(facets=forestN~mod,scale='free')
 dev.off()
 
-aux <- reshape(mod.dd , direction='wide', timevar='parameter', idvar=c('forestN','abbrev') )
-postscript('figs/scat_m1.ps')
-ggpairs(data=aux, columns=3:6, color='forestN')
+# --------------------------
+
+# gelman diagnostic .... 
+
+gm <- function(x, multi=TRUE) {
+  param <- attributes(x[[1]])$dimnames[[2]]
+  aux.s <- grep('sigma.b', param)
+  if (length(aux.s)==9) aux <- param[-aux.s[c(4,7,8)] ]
+  if (length(aux.s)==4) aux <- param[-aux.s[3] ]
+  if (length(aux.s)==0) aux <- param
+  g <- gelman.diag(x[,aux])
+  if (multi==TRUE) out <-  g$mpsrf
+  (multi==FALSE) out <- if g
+  return(out)
+}
+
+gr.multi <- ldply(results, function(z) ldply(z, gm) )
+
+subset(gr.multi, lg=='logs' & l==2)
+
+aux <- gm(results[[23]][[1]], multi=FALSE)
+
+
+cfn <- attributes( results[[2]][[1]][[1]])$dimnames[[2]]
+aux <- c(grep('beta', cfn),grep('sigma', cfn) )
+plot( results[[2]][[1]][,cfn[-aux]], auto.layout=FALSE, ask=TRUE)
+
+#---------------------------------------
+# collect slopes for linear models in logs
+mr <- grep('ll', names(results))
+slopes.ll <- NULL
+for (i in mr) {
+  d <- ldply(results[[i]], function(x) {
+    cfn <- attributes(x[[1]])$dimnames[[2]]
+    pr <- agrep('beta 2', cfn)
+    s <- summary(x[,cfn[pr]])$quantile[,3]
+    data.frame(estimate=s,row.names=NULL)
+  })
+  a <- unlist(strsplit(names(results)[i], '\\.'))[2]
+  slopes.ll <-  rbind(slopes.ll,data.frame(mod=a, d))
+}
+
+# function to plot 
+sloplot <- function(lms) {
+  lms <- unlist(strsplit(lms, '\\.'))
+  a <- lms[1] ; b <- lms[2]
+  aux <- data.frame( subset(slopes.ll, mod==a), subset(slopes.ll, mod==b) )
+  titu <- paste(a,b)
+  qplot(data=aux, x=estimate, y=estimate.1, facets=~forestN, main=titu,xlab=a, ylab=b) + geom_abline(slope=1)
+}
+#sloplot("dd.dd")
+plts <- list('dd.hd', 'dh.hh', 'ds.hs', 'hd.hh', 'hd.hs', 'hh.hs')
+slp.plts <- llply(plts,  sloplot)
+
+postscript('figs/slp_sig2.ps')
+grid.arrange(p.hdhh, p.hdhs, p.hhhs, nrow=3)
 dev.off()
-
-levels(models.rnd$parameter)[c(1:2,4,5)] <- c('b0','sigma', 'b1', 'b2')
-tab2 <- xtable(models.rnd, digits=3, caption='Random coefficent regresion results')
-print(tab2, file="summ_modrnd.tex", include.rownames=FALSE)
-
-
-# Bayesian models diag, models 4,5,6
-
-par.names <- attributes(res.wishart$Chippewa[[1]])$dimnames[[2]]
-par.names.lin <- attributes(res.wishart.lin$Chippewa[[1]])$dimnames[[2]]
-# gelman diagnostic, only 6 param from the covariance matrix  
-gquad <- llply(res.wishart, .fun=function(x) gelman.diag(x[, par.names[c(1,221:227,229:230,233)] ]) )
-llply(res.wishart, .fun=function(x) gelman.diag(x[, par.names.lin[c(1,148:152,154)] ]) )
-
-#plot(res.wishart[[1]][, par.names[1:3]])
-# rearrange simulations for ploting
-resdd <- function(res) {
-  p  <- dim(res[[1]])[2]
-  it <- dim(res[[1]])[1]
-  cn <- length(res)
-  df <- NULL 
-  for (i in 1:cn) {
-    df1 <- data.frame(iter=1:it, chain=i, as.data.frame(res[[i]]))
-    df <- rbind(df, df1)
-  }
-  melt(df, id.vars=c('iter', 'chain'), variable_name='par')    
-}
-dd <- ldply(res.wishart, resdd)
-levels(dd$par)
-# trace and den for alpha, lambda
-dd1 <- subset(dd, par %in% c('alpha','lambda') )
-qplot(data=dd1, x=iter, y=value,size=I(1), color=factor(chain))+ facet_grid(facets=par~forestN,scale='free_y')
-plot(data=dd1, x=value, y=..density..,geom='histogram')+ facet_wrap(facets=forestN~par,scale='free')
-# trace and den for mus
-dd1 <- subset(dd, par %in% c('mu.1.','mu.2.','mu.3.') )
-qplot(data=dd1, x=iter, y=value,size=I(1), color=factor(chain))+ facet_grid(facets=par~forestN,scale='free_y')
-qplot(data=dd1, x=value, y=..density..,geom='histogram')+ facet_wrap(facets=forestN~par,scale='free')
-# trace and den for vars
-dd1 <- subset(dd, par %in% c('sigma.be.1.1.','sigma.be.2.2.','sigma.be.3.3.') )
-qplot(data=dd1, x=iter, y=value,size=I(1), color=factor(chain))+ facet_grid(facets=par~forestN,scale='free_y')
-qplot(data=dd1, x=value, y=..density..,geom='histogram')+ facet_wrap(facets=forestN~par,scale='free')
-# trace and den for COV
-dd1 <- subset(dd, par %in% c('sigma.be.1.2.','sigma.be.1.3.','sigma.be.2.3.') )
-qplot(data=dd1, x=iter, y=value,size=I(1), color=factor(chain))+ facet_grid(facets=par~forestN,scale='free_y')
-qplot(data=dd1, x=value, y=..density..,geom='histogram')+ facet_wrap(facets=forestN~par,scale='free')
-tab3 <- ddply(dd, .(forestN, par), function(x) quantile(x$value, probs=c(.025, .5, .975)) )
-
-t <- tab3[tab3$par %in% c('mu.1.','mu.2.','mu.3.','sigma.be.1.1.','sigma.be.2.2.','sigma.be.3.3.', 'sigma.be.2.1.','sigma.be.3.1.','sigma.be.2.3.'), ]
-t <- xtable(t, digits=3, caption='Mean and variances for Wishar Prior model')
-print(t, file="summ_wishart.tex", include.rownames=FALSE)
-#========================================================
-
-
-# collect results for bayesian model
-summfun <- function(res) {
-  s <- summary(res)
-  data.frame(par = rownames(s$quantiles), s$quantiles[,c(1,3,5)] )
-}
-
-sum.wis <- ldply(res.wishart, summfun )
-sum.wis.lin <- ldply(res.wishart.lin, summfun )
-
-
-# With the results from all 'only linear' models compare slopes 
-
-wishcoef <- ddply(sum.wis.lin, .(forestN), function(x) x[seq(3,147,2),-c(1,2)] )
-
-sepcoef    <- subset(models.lm, parameter=='b1' & model=='llin')[,c(1,5,8)]
-sepcoef$lo <- with(sepcoef, estimate - 1.96*sqrt(var) )                  
-sepcoef$up <- with(sepcoef, estimate + 1.96*sqrt(var) )
-
-rndcoef <- ddply(subset(models.rnd, .id=='lin'), .(forestN), function(x) x[-c(1:77),-c(1,2)] )
-rndcoef$lo2 <- with(rndcoef, mean - 1.96*sqrt(variance) )                  
-rndcoef$up2 <- with(rndcoef, mean + 1.96*sqrt(variance) )
-
-# Plot
-aux <- data.frame(sepcoef, rndcoef)
-p1 <- qplot(data=aux, x=estimate, y=mean, facets=~forestN, main='Separate Regresions vs Random coef', xlab='sepreg', ylab='rndcoef') + geom_abline(slope=1)
-p1e <- p1 + geom_errorbar(aes(ymax =up2, ymin=lo2), width = 0.05) 
-p1e <- p1e + geom_errorbarh(aes(xmax=up, xmin=lo), width = 0.05) 
-
-
-aux <- data.frame(sepcoef, wishcoef)
-p2 <- qplot(data=aux, x=estimate, y=X50., facets=~forestN, main='Wishart Prior vs Separate Regresions', xlab='sepreg', ylab='wishart')  + geom_abline(slope=1)
-p2e <- p2 + geom_errorbar(aes(ymax =X97.5., ymin=X2.5.), width = 0.05) 
-p2e <- p2e + geom_errorbarh(aes(xmax=up, xmin=lo), width = 0.05) 
-
-aux <- data.frame(rndcoef, wishcoef)
-p3 <- qplot(data=aux, x=mean, y=X50., facets=~forestN, main='Random coef vs Wishart Prior', xlab='rndcoef', ylab='wishart')  + geom_abline(slope=1)
-p3e <- p3 + geom_errorbar(aes(ymax =X97.5., ymin=X2.5.), width = 0.05) 
-p3e <- p3e + geom_errorbarh(aes(xmax=up2, xmin=lo2), width = 0.05) 
-
-grid.arrange(p1, p2, p3, nrow=3)
-
-grid.arrange(p1e, p2e, p3e, nrow=3)
-
-# or..... 
-aux1 <- data.frame(sepcoef, rndcoef, compare='Random vs Separate')
-aux2 <- data.frame(sepcoef, wishcoef, compare='Separate vs Wishart')
-aux3 <- data.frame(rndcoef, wishcoef, compare='Random vs Wishart')
-
-colnames(aux1)[8]   <- 'estimate2'
-colnames(aux2)[7:9] <- c('lo2', 'estimate2', 'up2')
-colnames(aux3)[c(3,5,6,8:10)] <- c('estimate','lo', 'up', 'lo2', 'estimate2', 'up2')
-
-aux <- rbind(aux1[,c(1:2,4,5,8,10:12)],
-      aux2[,c(1,2,4,5,8,7,9,10)],
-      aux3[,c(1,3,5,6,9,8,10,11)]
-      )
-p <- qplot(data=aux, x=estimate, y=estimate2, facets=compare~forestN)
-pe <- p + geom_errorbar(aes(ymax =up2, ymin=lo2), width = 0.05) 
-pe <- pe + geom_errorbarh(aes(xmax=up, xmin=lo), width = 0.05) 
-
-# or .... 
-aux$est.sig <- with(aux, lo*up > 0)
-aux$est2.sig <- with(aux, lo2*up2 > 0)
-
-
-qplot(data=aux, x=estimate, y=estimate2,color=est.sig, shape=est2.sig, facets=compare~forestN)
 
 
 
