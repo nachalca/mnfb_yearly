@@ -19,7 +19,7 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 for (j in 1:ns) {
 for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
 eta.e[j]    <- 1/(sigma.e[j]^2)
-sigma.e[j] ~ dunif(0, 1000)      
+sigma.e[j] ~ dunif(0, 100)      
 }
 
 # predictives 
@@ -44,7 +44,7 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 for (j in 1:ns) {
 for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
 eta.e[j]    <- 1/(sigma.e[j]^2)
-sigma.e[j] ~ dunif(0, 1000)      
+sigma.e[j] ~ dunif(0, 100)      
 }
 }
 "
@@ -66,7 +66,7 @@ for (j in 1:ns) {
 for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
 }
 eta.e   <- 1/(sigma.e^2)
-sigma.e ~  dunif(0, 1000)      
+sigma.e ~  dunif(0, 100)      
 
 
 # predictives 
@@ -92,7 +92,7 @@ for (j in 1:ns) {
 for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
 }
 eta.e   <- 1/(sigma.e^2)
-sigma.e ~ dunif(0, 1000)      
+sigma.e ~ dunif(0, 100)      
 }
 "
 #--------------------------------------------------------
@@ -116,8 +116,8 @@ sigma.e[j] <- 1/sqrt(eta.e[j])
 }
 
 # hyperpriors
-alpha  ~ dunif(0,1000)
-lambda ~ dunif(0,1000)
+alpha  ~ dunif(0,100)
+lambda ~ dunif(0,100)
 
 # predictives 
 # for (i in 1:ns) { 
@@ -145,8 +145,8 @@ sigma.e[j]    <- 1/sqrt(eta.e[j])
 }
 
 # hyperpriors
-alpha  ~ dunif(0,1000)
-lambda ~ dunif(0,1000)
+alpha  ~ dunif(0,100)
+lambda ~ dunif(0,100)
 }
 "
 #--------------------------------------------------------
@@ -165,7 +165,7 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 for (j in 1:ns) {
 beta[1:2,j]  ~ dmnorm(mu,prec.be )
 }
-sigma.e   ~ dunif(0,1000)       
+sigma.e   ~ dunif(0,100)       
 eta.e     <- 1/(sigma.e)^2
 
 # hyperpriors
@@ -189,7 +189,7 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 for (j in 1:ns) {
 beta[1:3,j]  ~ dmnorm(mu,prec.be )
 }
-sigma.e   ~ dunif(0,1000)       
+sigma.e   ~ dunif(0,100)       
 eta.e     <- 1/(sigma.e)^2
 
 # hyperpriors
@@ -218,7 +218,7 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 # Priors.  
 for (j in 1:ns) {
 beta[1:2,j]  ~ dmnorm(mu,prec.be )
-sigma.e[j]   ~ dunif(0,1000)       
+sigma.e[j]   ~ dunif(0,100)       
 eta.e[j]     <- 1/sqrt(sigma.e[j])
 }
 
@@ -243,7 +243,7 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 # Priors.  
 for (j in 1:ns) {
 beta[1:3,j]  ~ dmnorm(mu,prec.be )
-sigma.e[j]   ~ dunif(0,1000)       
+sigma.e[j]   ~ dunif(0,100)       
 eta.e[j]     <- 1/sqrt(sigma.e[j])
 }
 
@@ -282,13 +282,10 @@ sigma.be  <- inverse(prec.be)
 for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
 
 df     <- 4  
-alpha  ~ dunif(0,1000)
-lambda ~ dunif(0,1000)
+alpha  ~ dunif(0, 100)
+lambda ~ dunif(0, 100)
 
 # predictives 
-eta.epred ~ dgamma(alpha,lambda)
-sigma.epred <- 1/sqrt(eta.epred)
-
 # for (i in 1:ns) { 
 # y14[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbrev[i]]  )
 # e[i]  <-  beta[1, abbrev[i]]
@@ -320,8 +317,8 @@ sigma.be  <- inverse(prec.be)
 for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
 
 df     <- 4  
-alpha  ~ dunif(0,1000)
-lambda ~ dunif(0,1000)
+alpha  ~ dunif(0,100)
+lambda ~ dunif(0,100)
 }
 "
 #---------------------------------------------------------------

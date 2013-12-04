@@ -48,7 +48,7 @@ totales$forest <- factor(totales$forest)
 postscript('figs/rawtrend.ps')
 qplot(data=totales,x=year,xlab='Year',ylab='Bird Count',y=count,shape=forestN,color=forestN, size=I(3))+geom_line()
 dev.off()
-#--------------
+#===============================================================
 
 # 1) Run 6 'cells' of models, calling file codemodels.R to run them and save results. 
 # mod.dd:     dif beta, dif sigma 
@@ -61,8 +61,14 @@ dev.off()
 # res.hh.lin: hier beta, hier sigma, lin model, using jags
 # res.hh.q:   hier beta, hier sigma, quad model, using jags    
 
-source('R\\codemodels.R')
-# Run all models
+source('R\\codemodels.R') # jags text models are here
+
+# runjags : function to run the jags model, and obtain the coda samples
+# parameters: 
+# d: data set, ave.add is the response
+# model: the character object with the jags model
+# l    : nbr of predictors, l=2 for linear and l=3 for quadratic
+# lg   : if lg='logs' then the response is log transformed. 
 runjags <- function(d, model, l,lg) {
   # d <- subset(bird.yeartotal, forest=='9020')
   if (lg=='logs') d$ave.add <- log(d$ave.add)
@@ -73,10 +79,12 @@ runjags <- function(d, model, l,lg) {
              ns = nlevels(d$abbrev),
              R = diag(l))
   m = jags.model(textConnection(model), dat, n.chains=3, n.adapt=100)
-  update(m, 500)
+  update(m, 1000)
   coda.samples(m, c('alpha','lambda','mu',"sigma.be",'beta','sigma.e'), 3000)
 }
 
+# Create ml, a data.frame with the arguments needed to run each model. 
+# this will be the argument of the runmod function. 
 g  <- expand.grid('mtext' , c('dd', 'dh', 'ds', 'hd', 'hh', 'hs'), c('lin','quad'),  lg = c('logs', 'count') ) 
 g$l <- 3 ; g$l[g$Var3=='lin'] <- 2
 ml <- data.frame(mn = paste(g[,1],g[,2],g[,3],sep='.'), l=g$l, lg=g$lg)
@@ -85,36 +93,30 @@ runmod <- function( mdat ) {
   m <- as.character(mdat$mn); ls <- mdat$l ; lgs <-as.character(mdat$lg)
   res  <-   dlply(bird.yeartotal, .(forestN), .fun=runjags, model=get(m), l=ls,lg=lgs)
 }
+
+# -----------------
+# Run all 72 models
 # results ia list of 24 model results, each element is a list of 
 # 3 models one for each forest. 
-
 ptm <- proc.time()
 results <- alply(ml, .margins=1, runmod,  .progress='text')
 proc.time() - ptm
+#------------------
 
-# to name it 
+# to name results (I need to make it automatically) 
 a <- adply(as.matrix(ml$mn),1, .fun=function(x) unlist(strsplit(x, '\\.')) )
 a1 <- a[,3]
 a2 <- paste(substr(a[,4], 1,1),substr(ml$lg, 1,1),sep='') 
-#aux<- data.frame(ml, name=paste('res',a1,a2, sep='.'))
 names(results) <- paste('res',a1,a2, sep='.')
+
+# Save the model results
 save(results, file='modresults.Rdata')
 
 #===============================================================
 # 2 ) Summary of models, plots and tables 
 load('modresults.Rdata')
 
-# Bayesian models diag, models dh, hd, hh (lin and quad) 
-attach(results)
-rs <- names(results) 
-for (resu in rs) {
-  nam <- paste('pnam', sub(resu, pattern='res', replace=''), sep='')
-  g <- get(resu)
-  assign(nam , attributes(g$Chippewa[[1]])$dimnames[[2]])
-}
-remove(g, resu, rs, nam)
-
-# Separate regresions: lm without random terms one per specie*forest, 
+# 2.1 Separate regresions: lm without random terms one per specie*forest, 
 # response variable count, quadratic model 
 pr <- agrep( "beta 2", pnam.dd.cc)
 mr <- grep('dd', names(results))
@@ -133,8 +135,9 @@ dev.off()
 
 # --------------------------
 
-# gelman diagnostic .... 
+# 2.2 Diagnostic 
 
+# gm compute the multivariate gelman.diag for one model  
 gm <- function(x, multi=TRUE) {
   param <- attributes(x[[1]])$dimnames[[2]]
   aux.s <- grep('sigma.b', param)
@@ -142,23 +145,35 @@ gm <- function(x, multi=TRUE) {
   if (length(aux.s)==4) aux <- param[-aux.s[3] ]
   if (length(aux.s)==0) aux <- param
   g <- gelman.diag(x[,aux])
-  if (multi==TRUE) out <-  g$mpsrf
-  (multi==FALSE) out <- if g
+  if (multi==TRUE)  out <-  g$mpsrf
+  if (multi==FALSE) out <-  g
   return(out)
 }
 
 gr.multi <- ldply(results, function(z) ldply(z, gm) )
 
 subset(gr.multi, lg=='logs' & l==2)
+subset(gr.multi, V1 > 1.1)
 
-aux <- gm(results[[23]][[1]], multi=FALSE)
+# individually check the models with big multivariate gelman
+# mod <- runmod(ml[11,])
+mod <- results[[20]]
+cfn <- attributes(mod[[1]][[1]])$dimnames[[2]]
+aux <- c(grep('alpha', cfn),grep('lambda', cfn) ) # grep('mu', cfn), agrep('sigma b', cfn)[c(1:3,5,6,9)])
+llply(mod, function(x) gelman.diag(x[,aux]))
 
+plot( mod[[2]][,c('alpha', 'lambda')], auto.layout=FALSE)
 
-cfn <- attributes( results[[2]][[1]][[1]])$dimnames[[2]]
-aux <- c(grep('beta', cfn),grep('sigma', cfn) )
-plot( results[[2]][[1]][,cfn[-aux]], auto.layout=FALSE, ask=TRUE)
+# compare simulations from alpha and lambda
+as <- data.frame(as.matrix(mod[[2]][,c('alpha','lambda')]), 
+                 chain=rep(1:3,each=3000))
+qplot(data=as, x=lambda,y=alpha, size=I(.5),facets=chain~.)
+qplot(data=as, x=rep(1:3000,3), y=lambda/alpha, size=I(.5),facets=chain~.)
+
 
 #---------------------------------------
+# 2.3 Slopes plot to compare differents models
+
 # collect slopes for linear models in logs
 mr <- grep('ll', names(results))
 slopes.ll <- NULL
@@ -174,6 +189,8 @@ for (i in mr) {
 }
 
 # function to plot 
+# lms is a character having the two models to compare "a.b" 
+# compare model a with model b. 
 sloplot <- function(lms) {
   lms <- unlist(strsplit(lms, '\\.'))
   a <- lms[1] ; b <- lms[2]
@@ -185,8 +202,8 @@ sloplot <- function(lms) {
 plts <- list('dd.hd', 'dh.hh', 'ds.hs', 'hd.hh', 'hd.hs', 'hh.hs')
 slp.plts <- llply(plts,  sloplot)
 
-postscript('figs/slp_sig2.ps')
-grid.arrange(p.hdhh, p.hdhs, p.hhhs, nrow=3)
+postscript('figs/slp_bet.ps')
+grid.arrange(slp.plts[[1]],slp.plts[[2]],slp.plts[[3]], nrow=3)
 dev.off()
 
 
