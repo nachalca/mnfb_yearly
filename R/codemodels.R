@@ -19,17 +19,17 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 for (j in 1:ns) {
 for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
 eta.e[j]    <- 1/(sigma.e[j]^2)
-sigma.e[j] ~ dunif(0, 100)      
+sigma.e[j] ~ dunif(0, 1000)      
 }
 
 # predictives 
-# for (i in 1:ns) { 
-# y14[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbrev[i]]  )
-# e[i]  <-  beta[1, abbrev[i]]
-# s[i] <-  beta[2, abbrev[i]]*14
-# q[i] <-  beta[3, abbrev[i]]*14^2
-# rate[i] <- y14[i]/y13[i] - 1 
-# }
+for (i in 1:ns) { 
+ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+e[i]  <-  beta[1, abbvrev.end[i]]
+s[i] <-  beta[2, abbvrev.end[i]]*end
+q[i] <-  beta[3, abbvrev.end[i]]*end^2
+rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+}
 }
 "
 mtext.dd.lin = "
@@ -44,7 +44,7 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 for (j in 1:ns) {
 for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
 eta.e[j]    <- 1/(sigma.e[j]^2)
-sigma.e[j] ~ dunif(0, 100)      
+sigma.e[j] ~ dunif(0, 1000)      
 }
 }
 "
@@ -66,17 +66,17 @@ for (j in 1:ns) {
 for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
 }
 eta.e   <- 1/(sigma.e^2)
-sigma.e ~  dunif(0, 100)      
+sigma.e ~  dunif(0, 1000)      
 
 
 # predictives 
-# for (i in 1:ns) { 
-# y14[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbrev[i]]  )
-# e[i]  <-  beta[1, abbrev[i]]
-# s[i] <-  beta[2, abbrev[i]]*14
-# q[i] <-  beta[3, abbrev[i]]*14^2
-# rate[i] <- y14[i]/y13[i] - 1 
-# }
+for (i in 1:ns) { 
+ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e)
+e[i]  <-  beta[1, abbvrev.end[i]]
+s[i] <-  beta[2, abbvrev.end[i]]*end
+q[i] <-  beta[3, abbvrev.end[i]]*end^2
+rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+}
 }
 "
 mtext.ds.lin = "
@@ -92,7 +92,7 @@ for (j in 1:ns) {
 for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
 }
 eta.e   <- 1/(sigma.e^2)
-sigma.e ~ dunif(0, 100)      
+sigma.e ~ dunif(0, 1000)      
 }
 "
 #--------------------------------------------------------
@@ -111,22 +111,23 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 # Priors.  
 for (j in 1:ns) {
 for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
-eta.e[j]      ~ dgamma(alpha,lambda)
-sigma.e[j] <- 1/sqrt(eta.e[j])      
+# use scale chi param
+eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+sigma.e[j] <- 1/sqrt(eta.e[j])
 }
 
 # hyperpriors
-alpha  ~ dunif(0,100)
-lambda ~ dunif(0,100)
+alpha  ~ dunif(0,1000)
+lambda ~ dunif(0,1000)
 
 # predictives 
-# for (i in 1:ns) { 
-# y14[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbrev[i]]  )
-# e[i]  <-  beta[1, abbrev[i]]
-# s[i] <-  beta[2, abbrev[i]]*14
-# q[i] <-  beta[3, abbrev[i]]*14^2
-# rate[i] <- y14[i]/y13[i] - 1 
-# }
+for (i in 1:ns) { 
+ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+e[i]  <-  beta[1, abbvrev.end[i]]
+s[i] <-  beta[2, abbvrev.end[i]]*end
+q[i] <-  beta[3, abbvrev.end[i]]*end^2
+rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+}
 }
 "
 mtext.dh.lin = "
@@ -140,13 +141,14 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 # Priors.  
 for (j in 1:ns) {
 for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
-eta.e[j]      ~ dgamma(alpha,lambda)
-sigma.e[j]    <- 1/sqrt(eta.e[j])      
+# use scale chi param
+eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+sigma.e[j] <- 1/sqrt(eta.e[j])
 }
 
 # hyperpriors
-alpha  ~ dunif(0,100)
-lambda ~ dunif(0,100)
+alpha  ~ dunif(0,1000)
+lambda ~ dunif(0,1000)
 }
 "
 #--------------------------------------------------------
@@ -165,7 +167,7 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 for (j in 1:ns) {
 beta[1:2,j]  ~ dmnorm(mu,prec.be )
 }
-sigma.e   ~ dunif(0,100)       
+sigma.e   ~ dunif(0,1000)       
 eta.e     <- 1/(sigma.e)^2
 
 # hyperpriors
@@ -175,7 +177,6 @@ for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
 df     <- 3  
 }
 "
-
 mtext.hs.quad = "
 model {
 for (i in 1:n) { 
@@ -189,7 +190,7 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 for (j in 1:ns) {
 beta[1:3,j]  ~ dmnorm(mu,prec.be )
 }
-sigma.e   ~ dunif(0,100)       
+sigma.e   ~ dunif(0,1000)       
 eta.e     <- 1/(sigma.e)^2
 
 # hyperpriors
@@ -197,6 +198,15 @@ prec.be   ~ dwish(R, df)
 sigma.be  <- inverse(prec.be)
 for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
 df     <- 4  
+
+#predictives
+for (i in 1:ns) { 
+ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e )
+e[i]  <-  beta[1, abbvrev.end[i]]
+s[i] <-  beta[2, abbvrev.end[i]]*end
+q[i] <-  beta[3, abbvrev.end[i]]*end^2
+rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+}
 }
 "
 
@@ -218,7 +228,7 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 # Priors.  
 for (j in 1:ns) {
 beta[1:2,j]  ~ dmnorm(mu,prec.be )
-sigma.e[j]   ~ dunif(0,100)       
+sigma.e[j]   ~ dunif(0,1000)       
 eta.e[j]     <- 1/sqrt(sigma.e[j])
 }
 
@@ -243,7 +253,7 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 # Priors.  
 for (j in 1:ns) {
 beta[1:3,j]  ~ dmnorm(mu,prec.be )
-sigma.e[j]   ~ dunif(0,100)       
+sigma.e[j]   ~ dunif(0,1000)       
 eta.e[j]     <- 1/sqrt(sigma.e[j])
 }
 
@@ -251,8 +261,16 @@ eta.e[j]     <- 1/sqrt(sigma.e[j])
 prec.be   ~ dwish(R, df)
 sigma.be  <- inverse(prec.be)
 for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
-
 df     <- 4  
+
+#predictive 
+for (i in 1:ns) { 
+ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+e[i]  <-  beta[1, abbvrev.end[i]]
+s[i] <-  beta[2, abbvrev.end[i]]*end
+q[i] <-  beta[3, abbvrev.end[i]]*end^2
+rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+}
 }
 "
 #--------------------------------------------------------
@@ -272,8 +290,10 @@ quad[i] <-  beta[3, abbrev[i]]*year[i]^2
 # Priors.  
 for (j in 1:ns) {
 beta[1:3,j]   ~ dmnorm(mu,prec.be )
-eta.e[j]      ~ dgamma(alpha,lambda)
-sigma.e[j] <- 1/sqrt(eta.e[j])      
+
+# use scale chi param
+eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+sigma.e[j] <- 1/sqrt(eta.e[j])
 }
 
 # hyperpriors
@@ -282,18 +302,17 @@ sigma.be  <- inverse(prec.be)
 for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
 
 df     <- 4  
-alpha  ~ dunif(0, 100)
-lambda ~ dunif(0, 100)
+alpha  ~ dunif(0, 1000)
+lambda ~ dunif(0, 1000)
 
-# predictives 
-# for (i in 1:ns) { 
-# y14[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbrev[i]]  )
-# e[i]  <-  beta[1, abbrev[i]]
-# s[i] <-  beta[2, abbrev[i]]*14
-# q[i] <-  beta[3, abbrev[i]]*14^2
-# rate[i] <- y14[i]/y13[i] - 1 
-# }
-
+#predictives 
+for (i in 1:ns) { 
+ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+e[i]  <-  beta[1, abbvrev.end[i]]
+s[i] <-  beta[2, abbvrev.end[i]]*end
+q[i] <-  beta[3, abbvrev.end[i]]*end^2
+rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+}
 }
 "
 mtext.hh.lin = "
@@ -307,8 +326,9 @@ slop[i] <-  beta[2, abbrev[i]]*year[i]
 # Priors.  
 for (j in 1:ns) {
 beta[1:2,j]   ~ dmnorm(mu,prec.be )
-eta.e[j]      ~ dgamma(alpha,lambda)
-sigma.e[j] <- 1/sqrt(eta.e[j])      
+# use scale chi param
+eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+sigma.e[j] <- 1/sqrt(eta.e[j])
 }
 
 # hyperpriors
@@ -317,11 +337,89 @@ sigma.be  <- inverse(prec.be)
 for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
 
 df     <- 4  
-alpha  ~ dunif(0,100)
-lambda ~ dunif(0,100)
+alpha  ~ dunif(0,1000)
+lambda ~ dunif(0,1000)
 }
 "
 #---------------------------------------------------------------
+
+# Models changing covariance prior: IW, SIW, and SS
+# choose hh structure, quadratic and log transform response (ql)
+# we have: hh.iw, hh.siw and hh.ss (actually hh.iw = hh.quad)
+
+
+# inverse wishart
+mtext.hh.iw <- mtext.hh.quad
+
+# Scaled Inverse Wishart prior
+mtext.hh.siw = "
+model {
+for (i in 1:n) { 
+y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+eff[i]  <-  beta[1, abbrev[i]]
+slop[i] <-  beta[2, abbrev[i]]*year[i]
+quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+}
+
+# Priors.  
+for (j in 1:ns) {
+beta[1,j] <- xi[1]*beta.raw[1,j]
+beta[2,j] <- xi[2]*beta.raw[2,j]
+beta[3,j] <- xi[3]*beta.raw[3,j]
+beta.raw[1:3,j]   ~ dmnorm(mu.raw, tau.raw)
+
+# use scale chi param
+eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+sigma.e[j] <- 1/sqrt(eta.e[j])
+}
+
+# hyperpriors
+tau.raw   ~ dwish(R, df)
+sigma.raw  <- inverse(tau.raw)
+
+for (i in 1:3) { 
+mu.raw[i] ~ dnorm(0,0.001) 
+xi[i] ~ dunif(0, 100)
+mu[i] <- xi[i]*mu.raw[i]
+}
+
+df     <- 4  
+alpha  ~ dunif(0, 1000)
+lambda ~ dunif(0, 1000)
+
+
+
+#predictives 
+#for (i in 1:ns) { 
+#ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+#e[i]  <-  beta[1, abbvrev.end[i]]
+#s[i] <-  beta[2, abbvrev.end[i]]*end
+#q[i] <-  beta[3, abbvrev.end[i]]*end^2
+#rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+#}
+}
+"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##############################################################################################
 ##############################################################################################
 ##############################################################################################
