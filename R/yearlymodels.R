@@ -20,6 +20,7 @@ library(ggplot2)
 library(GGally)
 library(rjags)
 library(gridExtra)
+library(VisCov)
 #-------------------------------------------------
 # 0) data description
 tab_f <- function(x,sp) {
@@ -44,7 +45,7 @@ print(tab, file="highcounts.tex", include.rownames=FALSE, caption.placement='top
 totales <- ddply(bird.yeartotal, .(year,forestN), summarise, count=sum(count) )
 totales$forest <- factor(totales$forest)
 
-postscript('figs/rawtrend.ps')
+pdf('figs/rawtrend.pdf')
 qplot(data=totales,x=year,xlab='Year',ylab='Bird Count',y=count,shape=forestN,color=forestN, size=I(3))+geom_line()
 dev.off()
 #===============================================================
@@ -119,15 +120,15 @@ save(results, file='modresults.Rdata')
 # 2 ) Summary of models, plots and tables 
 load('modresults73.Rdata')
 
-# function to collect: take the models 'mr' and get the 'par' parameters
-rescol <- function(mr, prm) {
+# function to collect: take the models 'mr' and get the 'par' parameters, col is the column in the summary
+rescol <- function(mr, prm, col) {
   mds <- grep(mr , names(results))
   collection <- NULL
   for (i in mds) {
     d <- ldply(results[[i]], function(x) {
       cfn <- attributes(x[[1]])$dimnames[[2]]
       pr <- agrep(prm, cfn)
-      s <- summary(x[,cfn[pr]])$quantile[,3]
+      s <- summary(x[,cfn[pr]])$quantile[,col]
       data.frame(estimate=s,row.names=NULL)
     })
     a <- unlist(strsplit(names(results)[i], '\\.'))[2]
@@ -140,15 +141,14 @@ rescol <- function(mr, prm) {
 # 2.1 Separate regresions: lm without random terms one per specie*forest, 
 # response variable count, quadratic model 
 
-sepcoef <- rescol('dd', 'beta 2')
+sepcoef <- rescol('dd', 'beta 2', col=3)
 
-postscript('figs/hist_m1.ps')
+pdf('figs/hist_m1.pdf')
 #qplot(data=models.lm, x=estimate,y=..density..,geom='histogram')+facet_wrap(facets=forestN~parameter,scale='free')
 qplot(data=sepcoef, x=estimate,y=..density..,geom='histogram') +facet_wrap(facets=forestN~response,scale='free')
 dev.off()
 
 # bivariate plot
-
 #x<- results$res.dd.ql$Superior
 biv.dd <- ldply(results$res.dd.ql, function(x) {
   cfn <- attributes(x[[1]])$dimnames[[2]]
@@ -156,12 +156,16 @@ biv.dd <- ldply(results$res.dd.ql, function(x) {
     b1 = summary( x[ ,cfn[agrep('beta 1',cfn)] ] )$quantile[,3],
     b2 = summary( x[ ,cfn[agrep('beta 2',cfn)] ] )$quantile[,3],
     b3 = summary( x[ ,cfn[agrep('beta 3',cfn)] ] )$quantile[,3],
-    sig = summary( x[ ,cfn[agrep('sigma.e',cfn)] ] )$quantile[,3])
+    sig = summary( x[ ,cfn[grep('sigma.e',cfn)] ] )$quantile[,3])
   }
 )
-postscript(file='scat_m1.ps')
+pdf(file='figs/scat_m1.pdf')
 ggpairs(data=biv.dd, columns=2:5,color='forestN')
 dev.off()
+
+# beta joint dist  on hh.ql model
+aux <- data.frame(rescol('hh.ql', prm=c('beta 2') ,col=3),
+                  b3=rescol('hh.ql', prm=c('beta 3') ,col=3)$estimate)
 
 
 
@@ -186,9 +190,8 @@ gr.multi <- ldply(results, function(z) ldply(z, gm) )
 #subset(gr.multi, V1 > 1.1)
 
 gr.multi$dim <- ldply(results, function(z) ldply(z, function(x) length(attributes(x[[1]])$dimnames[[2]])) )$V1 
-gr.multi$ind <- 1:
 
-postscript('figs/gelman.ps')  
+pdf('figs/gelman.pdf')  
 qplot(data=gr.multi,x=1:72,ymin=1,ymax=V1,color=dim,geom='linerange', size=I(1),ylim=c(.95,1.3)) + geom_hline(yintercept=1.1, colour='red')
 dev.off()
 
@@ -240,45 +243,79 @@ slp.plts <- llply(plts,  sloplot, coefs=slopes.ll)
 aux <- subset(rates.ql, abs(estimate) <= 3)
 rate.plts <- llply(plts,  sloplot, coefs=aux)
 
-postscript('figs/slp_bet.ps')
+pdf('figs/slp_bet.pdf')
 grid.arrange(slp.plts[[1]],slp.plts[[2]],slp.plts[[3]], nrow=3)
 dev.off()
 
-postscript('figs/rates.ps')
+pdf('figs/rates.pdf')
 grid.arrange(rate.plts[[1]],rate.plts[[2]],rate.plts[[3]], nrow=3)
 dev.off()
+
+
 #----------------------------------
 # 2.4 Study posterior for mu and sigma.be
 # we can study the sigma.be posterior in different context, 
 # all hs, hh, and hd models has posterior for sigma.be
 
-x <- results$res.hh.ll$Superior 
+
+x <- results$res.hh.ql$Superior 
+
+sig <- data.frame(as.matrix(x[,'mu[2]']),
+                  as.matrix(x[,'mu[3]']),
+                  as.matrix(x[,'sigma.be[2,3]']), 
+                  as.matrix(x[,'sigma.be[3,3]']),
+                  as.matrix(x[,'sigma.be[2,2]']) )
+colnames(sig) <- c('mu2','mu3','s23', 's33', 's22')
+rho23 <- adply(sig, .margins=1, summarise, rho=s23/sqrt(s33*s22))
+
+
+pdf('quest.pdf')
+qplot(data=aux, x=estimate,y=b3,color=forestN, main='Slope vs Quadratic on HH model', xlab='b2')
+qplot(data=sig, x=mu2, y=mu3,size=I(.6),main='Posterior distribution for betas mean')+geom_density2d(size=I(1))
+qplot(data=rho23, x=rho, geom='histogram', main='Posterior distribution for Correlation among b2 and b3')
+dev.off()
+
 
 covplot <- function(x) {
   param <- attributes(x[[1]])$dimnames[[2]]
   aux.s <- grep('sigma.b', param)
   l <- sqrt(length(aux.s))
   simx <- data.frame(as.matrix(x[[1]][,aux.s]))
-  mat <- list() 
-  for (i in 1:dim(simx)[1])   {
-    aux <- as.numeric(simx[i,])
-    mat[[i]] <- matrix(aux,ncol=l,nrow=l)
-  }  
-  param = list(prob = 0.5, mat = mat)
-  CovPlotData = VisCov("User defined distribution", param , title.logical = FALSE)  
-  }
-
   
+  if (l==3) {
+    c13 <- matrix(c(0,1,0,0,0,1,1,0,0), ncol=3)
+    r13 <- matrix(c(0,0,1,1,0,0,0,1,0), ncol=3)
+    mat <- list() 
+    for (i in 1:dim(simx)[1])   {
+      aux1 <- as.numeric(simx[i,])
+      aux2 <- matrix(aux1,ncol=l,nrow=l)%*%c13
+      aux <- r13%*%aux2
+      mat[[i]] <- aux
+    }
+  }
+  if (l==2) {
+      mat <- list() 
+        for (i in 1:dim(simx)[1])   {
+              aux1 <- as.numeric(simx[i,])
+                mat[[i]] <- matrix(aux,ncol=l,nrow=l)
+              }
+        }
+  param = list(prob = 0.5, mat = mat)
+  covdata =  VisCov("User defined distribution", param , title.logical = FALSE)  
+  return(covdata)  
+}
+
+pdf(file='var_hhql.pdf')
+cvd <- covplot(results$res.hd.ql$Chippewa)
+dev.off()
+
+
 postscript(file='var_hhll.ps')
-covplot(results$res.hh.ll$Superior)
-dev.off()
-
-postscript(file='var_hhql.ps')
-covplot(results$res.hs.ll$Superior)
+covplot(results$res.hs.ql$Superior)
 dev.off()
 
 
-colnames(simx) <- c('s11', 's21', 's22')
+colnames(simx) <- c('s11', 's21','s12', 's22')
 simx$rho <- with(simx,  s21/sqrt(s11*s22))
 simx$sd11 <- log(sqrt(simx$s11))
 simx$sd22 <- log(sqrt(simx$s22))
@@ -292,13 +329,76 @@ grid.arrange(p1,p4,p2,p5,p3,p6, nrow=3)
 
 plot(density(simx$sd22))
 
+#--------------------------------------------
+# Scaled IW
+
+runjags <- function(d, model, l,lg) {
+  # d <- subset(bird.yeartotal, forest=='9020')
+  if (lg=='logs') d$ave.add <- log(d$ave.add)
+  m <- max(d$yearc)
+  dend <- with(d, d[yearc==m, c('abbrev','ave.add')])
+  dat = list(y = d$ave.add , 
+             abbrev = as.numeric(d$abbrev) ,
+             year= d$yearc, 
+             n = nrow(d), 
+             ns = nlevels(d$abbrev),
+             R = diag(l),
+             end = m+1,
+             yend= dend$ave.add,
+             abbvrev.end = dend$abbrev)
+  m = jags.model(textConnection(model), dat, n.chains=3, n.adapt=100)
+  update(m, 100)
+  #coda.samples(m, c('alpha', ), 30)
+  coda.samples(m, c('alpha','lambda','rho23','mu',"sigma.be",'beta','sigma.e'), 3000)
+}
+
+
+xdat <- subset(bird.yeartotal, forestN=='Superior')
+
+ressup.SIW <- runjags(xdat, mtext.hh.siw, l=3, lg='logs')  
+ressup.IW  <- runjags(xdat, mtext.hh.iw, l=3, lg='logs')  
+
+param <- attributes(res.supSIW[[1]])$dimnames[[2]]
+betamed.siw <- data.frame(b1= summary(ressup.SIW[, param[agrep('beta 1', param)] ])$quantile[,3],
+                          b2=summary(ressup.SIW[, param[agrep('beta 2', param)] ])$quantile[,3],
+                          b3= summary(ressup.SIW[, param[agrep('beta 3', param)] ])$quantile[,3] )
+qplot(data=betamed.siw, x=b2, y=b3)
+
+
+# visualization for SIW model
+simx <- data.frame(as.matrix(ressup.SIW[, c('sigma.be[2]','sigma.be[3]','rho23')]))
+
+mat <- list() 
+for (i in 1:dim(simx)[1])   {
+  aux1 <- as.numeric(simx[i,])
+  mat[[i]] <- matrix(aux1[c(1,3,3,2)],ncol=2)
+}
+dfp <- ldply(mat, function(x) (all(eigen(x)$values > 0)) )
+summary(dfp) # there are 6 matrix not DF positive (check)
+
+mat1 <- mat[!dfp$V1] 
+
+param = list(prob = 0.5, mat = mat)
+covdata =  VisCov("User defined distribution", param , title.logical = FALSE)  
+
+
+
+# correlation b2 b3 using IW or SIW
+save(ressup.IW, ressup.SIW, file='siw.Rdata')
+summary(ressup.IW[, 'rho23'])
+summary(ressup.SIW[, 'rho23'])
+
+
 
 
 #========================================================
 # shiny application to plot average over years 
+#setwd('~\\GitHub\\mnfb_yearly\\data')
 #runApp("shiny1")
 
-
+  
+  
+  
 # if (l==4) {
 #   aux <- param[aux.s[c(1:2,4)]]
 #   simx <- data.frame(as.matrix(x[[1]][,aux]))
@@ -317,4 +417,5 @@ plot(density(simx$sd22))
 #     mat[[i]] <- matrix(aux,ncol=2,nrow=2)
 #   }
 # }
+
 
