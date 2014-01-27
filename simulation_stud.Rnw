@@ -1,0 +1,171 @@
+\documentclass{article}
+
+\begin{document}
+
+<<models,tidy=TRUE>>=
+# inverse wishart
+mtext.hh.iw <-  "
+model {
+for (i in 1:n) { 
+y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+eff[i]  <-  beta[1, abbrev[i]]
+slop[i] <-  beta[2, abbrev[i]]*year[i]
+quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+}
+
+# Priors.  
+for (j in 1:ns) {
+beta[1:3,j]   ~ dmnorm(mu,prec.be )
+
+# use scale chi param
+eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+sigma.e[j] <- 1/sqrt(eta.e[j])
+}
+
+# hyperpriors
+prec.be   ~ dwish(R, df)
+sigma.be  <- inverse(prec.be)
+for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
+
+df     <- 4  
+alpha  ~ dunif(0, 1000)
+lambda ~ dunif(0, 1000)
+rho23 <- sigma.be[3,2]/sqrt(sigma.be[3,3]*sigma.be[2,2])
+}
+"
+
+# Scaled Inverse Wishart prior
+mtext.hh.siw = "
+model {
+for (i in 1:n) { 
+y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+eff[i]  <-  beta[1, abbrev[i]]
+slop[i] <-  beta[2, abbrev[i]]*year[i]
+quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+}
+
+# Priors.  
+for (j in 1:ns) {
+beta[1,j] <- xi[1]*beta.raw[1,j]
+beta[2,j] <- xi[2]*beta.raw[2,j]
+beta[3,j] <- xi[3]*beta.raw[3,j]
+beta.raw[1:3,j]   ~ dmnorm(mu.raw, tau.raw)
+
+# use scale chi param
+eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+sigma.e[j] <- 1/sqrt(eta.e[j])
+}
+
+# hyperpriors
+tau.raw   ~ dwish(R, df)
+sigma.raw  <- inverse(tau.raw)
+
+for (i in 1:3) { 
+mu.raw[i] ~ dnorm(0,0.001) 
+xi[i] ~ dunif(0, 100)
+mu[i] <- xi[i]*mu.raw[i]
+sigma.be[i] <- xi[i]*sqrt(sigma.raw[i,i])
+}
+rho12 <- xi[1]*xi[2]*sigma.raw[1,2]/(sigma.be[1]*sigma.be[2])
+rho13 <- xi[1]*xi[3]*sigma.raw[1,3]/(sigma.be[1]*sigma.be[3])
+rho23 <- xi[3]*xi[2]*sigma.raw[3,2]/(sigma.be[3]*sigma.be[2])
+
+df     <- 4  
+alpha  ~ dunif(0, 1000)
+lambda ~ dunif(0, 1000)
+
+#predictives 
+#for (i in 1:ns) { 
+#ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+#e[i]  <-  beta[1, abbvrev.end[i]]
+#s[i] <-  beta[2, abbvrev.end[i]]*end
+#q[i] <-  beta[3, abbvrev.end[i]]*end^2
+#rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+#}
+}
+"
+@
+
+<<runjag, tidy=TRUE, cache=TRUE>>=
+library(mnormt)
+library(plyr)
+# function to run the jags models
+runjags.sim <- function(d, model) {
+  dat = list(y = d$y , 
+             abbrev = as.numeric(d$group) ,
+             year= d$x, 
+             n = nrow(d), 
+             ns = nlevels(factor(d$group)),
+             R = diag(3))
+  m = jags.model(textConnection(model), dat, n.chains=3, n.adapt=100)
+  update(m, 500)
+  #coda.samples(m, c('alpha','lambda','rho23','mu',"sigma.be",'beta','sigma.e'), 3000)
+  coda.samples(m, 'rho23', 3000)
+}
+@
+
+<<simfun, tidy=TRUE,cache=TRUE>>=
+# Simulation analysis
+# y~ N(xb, sigma.e), b~ N(mu, Sigma), sigma.e~ IG(alpha/2, alpha*lambda/2)
+simularhos <- function(r,mod) {
+  # parameter values
+  rho23 <- r
+  s <- diag(c(3, .01, .01)); s[6] <- rho23*.01^2 ; s[8] <- rho23*.01^2
+  mu <- rep(0,3)
+  alpha <- 2 
+  lambda <- 0.1
+  G <- 70
+  # simulated data
+  beta <- rmnorm(G, varcov=s)
+  sigma.e <- 1/sqrt(rgamma(G,shape=alpha/2, rate=alpha*lambda/2))
+  simpar <- data.frame(group=1:G,beta, sigma.e)
+  colnames(simpar) <- c('group','b1', 'b2', 'b3', 'sigma.e')
+  simy_f <- function(d) {
+    x <- -10:10 
+    eps <- rnorm(length(x), mean=0, sd=sqrt(d$sigma.e))
+    y   <- with(d, b1+b2*x+b3*x^2+eps)
+    data.frame(y,x)
+  }
+  simdat <- ddply(simpar, .(group), simy_f)
+
+  if (mod=='siw') model = mtext.hh.siw 
+  if (mod=='iw') model = mtext.hh.iw
+  
+  res <- runjags.sim(simdat,model)  
+  aux <- summary(res[, 'rho23'])$quantile
+  out <- as.data.frame(t(aux))
+  colnames(out) <- paste('Q', c(2.5,25,50,75,97.5),sep='')
+  return(out)
+}
+@
+
+
+<<simula, cache=TRUE, dependson=c('runjag','simfun','models')>>=
+library(plyr)
+library(reshape2)
+library(ggplot2)
+library(rjags)
+library(gridExtra)
+
+# 5 values of rho, 2 types of sigma prior, N reps of each
+scenario <- expand.grid(r=c(-.8, -.3, 0, .3, .8)  , mod=c('iw','siw') )
+N <- 5
+sim.res <- rdply(.n=N,  mdply(scenario , simularhos)   )
+@
+
+
+<<plt, dependson='simula',echo=FALSE>>=
+qplot(data=sim.res, x=.n, y=Q50, ymin=Q2.5, ymax=Q97.5,geom='pointrange', facets=mod~r) + coord_flip()
+@
+
+
+<<restriction, echo=FALSE,eval=FALSE>>=
+# restrictions in sigma matrix 
+restric <- function(r) {
+  s <- diag( c(3.5,.01,.01)  ); s[6] <- r*.01^2; s[8] <- r*.01^2
+  prod(eigen(s)$values)
+}
+ys <- sapply(seq(-1,1,.01), restric)
+qplot(x=seq(-1,1,.01), y=ys, geom='line')
+@
+\end{document}

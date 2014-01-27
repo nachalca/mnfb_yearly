@@ -375,15 +375,6 @@ df     <- 4
 alpha  ~ dunif(0, 1000)
 lambda ~ dunif(0, 1000)
 rho23 <- sigma.be[3,2]/sqrt(sigma.be[3,3]*sigma.be[2,2])
-
-#predictives 
-for (i in 1:ns) { 
-ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
-e[i]  <-  beta[1, abbvrev.end[i]]
-s[i] <-  beta[2, abbvrev.end[i]]*end
-q[i] <-  beta[3, abbvrev.end[i]]*end^2
-rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-}
 }
 "
 

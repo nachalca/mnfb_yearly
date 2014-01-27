@@ -142,6 +142,10 @@ rescol <- function(mr, prm, col) {
 # response variable count, quadratic model 
 
 sepcoef <- rescol('dd', 'beta 2', col=3)
+sepsig.e <- rescol('dd', 'sigma.e', col=3)
+
+qplot(data=subset(sepsig.e,response='ql'), y=estimate,x=forestN  )
+
 
 pdf('figs/hist_m1.pdf')
 #qplot(data=models.lm, x=estimate,y=..density..,geom='histogram')+facet_wrap(facets=forestN~parameter,scale='free')
@@ -358,7 +362,8 @@ xdat <- subset(bird.yeartotal, forestN=='Superior')
 ressup.SIW <- runjags(xdat, mtext.hh.siw, l=3, lg='logs')  
 ressup.IW  <- runjags(xdat, mtext.hh.iw, l=3, lg='logs')  
 
-param <- attributes(res.supSIW[[1]])$dimnames[[2]]
+param <- attributes(ressup.SIW[[1]])$dimnames[[2]]
+
 betamed.siw <- data.frame(b1= summary(ressup.SIW[, param[agrep('beta 1', param)] ])$quantile[,3],
                           b2=summary(ressup.SIW[, param[agrep('beta 2', param)] ])$quantile[,3],
                           b3= summary(ressup.SIW[, param[agrep('beta 3', param)] ])$quantile[,3] )
@@ -388,16 +393,13 @@ save(ressup.IW, ressup.SIW, file='siw.Rdata')
 summary(ressup.IW[, 'rho23'])
 summary(ressup.SIW[, 'rho23'])
 
-
-
+p <- c('sigma.be[1,1]','sigma.be[3,3]','sigma.be[2,2]','sigma.be[1,2]','sigma.be[1,3]','sigma.be[2,3]' )
+summary(results$res.hh.ql$Superior[,p])
 
 #========================================================
 # shiny application to plot average over years 
 #setwd('~\\GitHub\\mnfb_yearly\\data')
-#runApp("shiny1")
-
-  
-  
+# runApp("shiny1")
   
 # if (l==4) {
 #   aux <- param[aux.s[c(1:2,4)]]
