@@ -374,7 +374,9 @@ for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
 df     <- 4  
 alpha  ~ dunif(0, 1000)
 lambda ~ dunif(0, 1000)
-rho23 <- sigma.be[3,2]/sqrt(sigma.be[3,3]*sigma.be[2,2])
+rho12 <- sigma.be[1,2]/sqrt(sigma.be[1,1]*sigma.be[2,2])
+rho13 <- sigma.be[1,3]/sqrt(sigma.be[1,1]*sigma.be[3,3])
+rho23 <- sigma.be[2,3]/sqrt(sigma.be[2,2]*sigma.be[3,3])
 }
 "
 
@@ -406,26 +408,23 @@ sigma.raw  <- inverse(tau.raw)
 
 for (i in 1:3) { 
 mu.raw[i] ~ dnorm(0,0.001) 
-xi[i] ~ dunif(0, 100)
+xi[i] ~ dunif(0,100)
 mu[i] <- xi[i]*mu.raw[i]
-sigma.be[i] <- xi[i]*sqrt(sigma.raw[i,i])
+sigma.be[i,i] <- sigma.raw[i,i]*xi[i]^2
 }
-rho12 <- xi[1]*xi[2]*sigma.raw[1,2]/(sigma.be[1]*sigma.be[2])
-rho13 <- xi[1]*xi[3]*sigma.raw[1,3]/(sigma.be[1]*sigma.be[3])
-rho23 <- xi[3]*xi[2]*sigma.raw[3,2]/(sigma.be[3]*sigma.be[2])
+rho12 <- sigma.raw[1,2]/sqrt(sigma.raw[1,1]*sigma.raw[2,2])
+rho13 <- sigma.raw[1,3]/sqrt(sigma.raw[1,1]*sigma.raw[3,3])
+rho23 <- sigma.raw[2,3]/sqrt(sigma.raw[2,2]*sigma.raw[3,3])
+sigma.be[1,2] <- rho12*sqrt(sigma.be[1,1]*sigma.be[2,2])
+sigma.be[1,3] <- rho13*sqrt(sigma.be[1,1]*sigma.be[3,3])
+sigma.be[2,3] <- rho23*sqrt(sigma.be[2,2]*sigma.be[3,3])
+sigma.be[2,1] <- sigma.be[1,2]
+sigma.be[3,1] <- sigma.be[1,3]
+sigma.be[3,2] <- sigma.be[2,3]
 
 df     <- 4  
 alpha  ~ dunif(0, 1000)
 lambda ~ dunif(0, 1000)
-
-#predictives 
-#for (i in 1:ns) { 
-#ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
-#e[i]  <-  beta[1, abbvrev.end[i]]
-#s[i] <-  beta[2, abbvrev.end[i]]*end
-#q[i] <-  beta[3, abbvrev.end[i]]*end^2
-#rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-#}
 }
 "
 

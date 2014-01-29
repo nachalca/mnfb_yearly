@@ -2,7 +2,146 @@
 
 \begin{document}
 
-<<models,tidy=TRUE>>=
+\section{Simulation Scenario}
+
+We simulate data from this model 
+\begin{eqnarray}
+\nonumber Y_s \sim N(X_s\beta_s,\sigma_s^2) \\
+\nonumber \beta_s \sim N(\mu, \Sigma) \\
+\sigma^2_s\sim IG(\alpha/2, \alpha\lambda/2)
+\label{s_mod}
+\end{eqnarray}
+
+We use 70 groups in the simulation, so $s=1,\ldots,70$, the explicative variable mimic the centered ''year'' we've used in the real data, {\tt x=-10:10}, in all cases $X_s\beta_s = \beta_{1s} + x\beta_{2s} + x^2\beta_{3s}$. 
+
+We need to set values for $\mu$, $\Sigma$, $\alpha$ and $\lambda$, we've set those values with similar values to those find in bird forest data. We start focusing on one single parameter $\rho_{23}$, the correlation between $\beta_{s2}$ and $\beta_{s3}$, so we repeat the simulation exercise for $\rho_{23} = (-.8, -.3, 0, .3, .8)$. 
+
+The rest parameter are set as $\mu = (0,0,0)$, $\alpha=2$, $\lambda=.1$ and 
+
+\[
+\Sigma = (\begin{array}{ccc} 2 & 0 & 0\\ 
+                              0 & 0.5 & \rho_{23}0.5^2\\ 
+                              0 & \rho_{23}0.5^2 & 0.5
+              \end{array})
+\]
+
+% \begin{table}{hbpt}
+% \caption{Values for the parameters used in simulation}
+% \begin{tabular}{lc} 
+%  \\
+%  $\alpha$ & 2 \\
+%  $\lambda$ & 0.1 \\
+% $\Sigma$  & \begin{array}{ccc} 2 & 0 & 0\\ 0 & 0.5 & $\rho_{23}0.5^2$\\ 0 & $\rho_{23}0.5^2$ & 0.5
+% \end{array}
+% \end{tabular}
+% \end{table}
+
+The structure for $\Sigma$ is actually more extreme in bird data, where the variances for the 2nd and 3rd coefficient are even lower. The problem is the covarince between coef 2 and 3 get too close to cero and is not posible for the models distinguish from it. 
+
+Once we have data simulated from the model (\ref{s_mod}) we estimate a bayesian model on those data. To do this, we neeed to specify priors distributions for the parameters we've fixed, we used
+$ \lambda_s\sim unif(0,1000)$ and $\alpha_s \sim unif(0,1000)$ 
+
+\begin{table}[hbpt]
+\begin{center}
+\caption{Priors for $\mu$ and $\Sigma$}
+\begin{tabular}{l|l} \hline
+IW & SIW \\
+    & $\xi_i=Unif(0,100)$ \\ \hline
+$\mu_i \sim N(0, 1000)$ & $\mu_i = \xi_i\mu_i^*$ \\ 
+    & $\mu_i^*\sim N(0, 1000)$ \\ \hline  
+$\Sigma \sim IW(4, I_3)$  & $Q\sim IW(4, I_3)$ \\
+    &  $\sigma_i^2 = \xi_i^2Q_{ii}$ \\ 
+    &  $\sigma_{ij}=\xi_i\xi_jQ_{ij}$ \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Finally, for each value of $\rho_{23}$ we simulate 5 data sets (25 data sets in total) and for each data set we fit both models, susing IW and SIW priors.  
+
+\newpage 
+
+\section{Simulation Results}
+
+<<getsim, message=FALSE, warning=FALSE,echo=FALSE>>=
+load('simulations.Rdata')
+library(plyr)
+library(reshape2)
+library(ggplot2)
+@
+
+\begin{figure}[h]
+<<diag, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+qplot(data=sim.res ,x=.n,ymin=1,ymax=gd,geom='linerange',size=I(1)) + geom_hline(yintercept=1.1, colour='red') + facet_wrap(facets=r~model, scale='free_y', ncol=2)
+@
+\caption{ Multivariate gelman diagnostic Statistic. $IW$ model presents no problems, but in most cases the $SIW$ have not converged yet. The statistic summarize convergence from all the parameters in the model (about 150), when I've checked some individuals models I've found out almost every parameter has presents good gd statistic exept for the variance of $\beta_3$ or sometimes a individual covariance. For those is like the chains are shifted, as there were 2 modes for instances. This is sensitive to the $\xi$ distribution, which Gelman propose use uniform, and I saw on the web using a gamma and normal  \label{gd}}
+\end{figure}
+
+\begin{figure}[h]
+<<betaplot, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+bet <- ddply(sim.res, .(r,model), function(x) {
+                data.frame(b2 = x$Q50[agrep('beta 2', x$param)], 
+                           b3 = x$Q50[agrep('beta 3', x$param)] )
+                } 
+      )
+qplot(data=bet, x=b2,y=b3, facets=r~model, geom=c('point', 'smooth'))
+@
+\caption{ Relationship among $\beta_{2s}$ and $\beta_{3s}$ medians. The sign of the relationship is correct, however the true correlation is more extreme than the one implies in the plot, I've computed the "sample" correlation coefficient among medians and we can se the same effect, for instance the true $\rho=0.8$ have generated a correlation among medians about 0.4 \label{beta}}
+\end{figure}
+
+<<betacor, dependson=c('getsim', 'betaplot')>>=
+ddply(bet, .(r,model), function(x) cor(x$b2,x$b3))
+@
+
+\begin{figure}[h]
+<<cirho, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+ind <- with(sim.res, c(agrep('rho',param)) )
+d <- sim.res[ind, ]
+d$rs <- d$r + runif(dim(d)[1], -.1,.1)
+qplot(data=d, x=rs, y=Q50, ymin=Q2.5,ymax=Q97.5, geom='pointrange',color=model, facets=~model) + coord_flip()
+@
+\caption{Credible intervals for $\rho_{23}$.   \label{rhoplt}}
+\end{figure}
+
+
+\begin{figure}
+<<cimu, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+ind <- with(sim.res, grep('mu',param)  )
+#  with(sim.res, c(agrep('mu',param),agrep('sigma.be',param),grep('alpha',param),grep('lambda',param)) )
+d <- sim.res[ind, ]
+d$ns <- d$.n + runif(dim(d)[1], -.4,.4)
+
+qplot(data=d, x=ns, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange'),color=param,facets=r~model) + coord_flip()
+@
+\caption{Credible interval for $\mu$, this results are not changing with the covariance matrix distribution and most of the cases are arround the true value \label{mus}}
+\end{figure}
+
+\begin{figure}
+<<cisig, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+ind <- sim.res$param %in% c(paste('sigma.be',c('[1,1]','[2,2]','[3,3]'),sep='') ) 
+#, 'rho12','rho13', 'rho23')  
+d <- sim.res[ind, ]
+d$rs <- d$r + runif(dim(d)[1], -.1,.1)
+
+qplot(data=d, x=rs, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange'),color=model) +  facet_wrap(facets=~param, scale='free_y') 
+@
+\caption{ Credible intervals for $\Sigma$ variance parameters. The true values for the parameter were 2, 0.5 , 0.5 respectivelly. There is a problem with the 3rd variance in the SIW model is much higer than it should be, this is one of the parameters with bad gelman diagnostic statistic so I hope that is the problem. \label{var}}
+\end{figure}
+
+\begin{figure}
+<<cilamal, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+ind <- with(sim.res, c(grep('alpha',param),grep('lambda',param)) )                                                   
+d <- sim.res[ind, ]
+d$rs <- d$r + runif(dim(d)[1], -.1,.1)
+
+qplot(data=d, x=rs, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange') ) + facet_wrap(facets=param~model, ncol=2, scale='free_y')
+@
+\caption{Credible intervals for $\alpha$ and $\lambda$. There seems to be problems in both parameters, for $\alpha$ both models tend to get higher values than the true, actually $\alpha=2$ does not lies in any of the credible intervals in the plot. For $\lambda$ it seem that SIW model is doing a better job.  \label{lamal}}
+\end{figure}
+
+\newpage
+
+\section{R code}
+<<code, eval=FALSE, tidy=TRUE>>=
 # inverse wishart
 mtext.hh.iw <-  "
 model {
@@ -64,33 +203,36 @@ for (i in 1:3) {
 mu.raw[i] ~ dnorm(0,0.001) 
 xi[i] ~ dunif(0, 100)
 mu[i] <- xi[i]*mu.raw[i]
-sigma.be[i] <- xi[i]*sqrt(sigma.raw[i,i])
+sigma.be[i,i] <- (xi[i])^2*sigma.raw[i,i]
 }
-rho12 <- xi[1]*xi[2]*sigma.raw[1,2]/(sigma.be[1]*sigma.be[2])
-rho13 <- xi[1]*xi[3]*sigma.raw[1,3]/(sigma.be[1]*sigma.be[3])
-rho23 <- xi[3]*xi[2]*sigma.raw[3,2]/(sigma.be[3]*sigma.be[2])
+sigma.be[1,2] <- xi[1]*xi[2]*sigma.raw[1,2]
+sigma.be[1,3] <- xi[1]*xi[3]*sigma.raw[1,3]
+sigma.be[2,3] <- xi[3]*xi[2]*sigma.raw[2,3]
+sigma.be[2,1] <- sigma.be[1,2]
+sigma.be[3,1] <- sigma.be[1,3]
+sigma.be[3,2] <- sigma.be[2,3]
+rho23 <- sigma.be[2,3]/sqrt(sigma.be[3,3]*sigma.be[2,2])
 
 df     <- 4  
 alpha  ~ dunif(0, 1000)
 lambda ~ dunif(0, 1000)
-
-#predictives 
-#for (i in 1:ns) { 
-#ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
-#e[i]  <-  beta[1, abbvrev.end[i]]
-#s[i] <-  beta[2, abbvrev.end[i]]*end
-#q[i] <-  beta[3, abbvrev.end[i]]*end^2
-#rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-#}
 }
 "
-@
-
-<<runjag, tidy=TRUE, cache=TRUE>>=
-library(mnormt)
+#-----------------------------------------------------------------
 library(plyr)
-# function to run the jags models
-runjags.sim <- function(d, model) {
+library(reshape2)
+library(ggplot2)
+library(rjags)
+library(gridExtra)
+library(mnormt)
+
+# function to run the jags models with simulated data
+runjags.sim <- function(d, mod) {
+  # d: are the simulated data set
+  # mod: is the 'alias' for the model character object
+  
+  if (mod=='siw') model = mtext.hh.siw 
+  if (mod=='iw') model = mtext.hh.iw 
   dat = list(y = d$y , 
              abbrev = as.numeric(d$group) ,
              year= d$x, 
@@ -99,23 +241,25 @@ runjags.sim <- function(d, model) {
              R = diag(3))
   m = jags.model(textConnection(model), dat, n.chains=3, n.adapt=100)
   update(m, 500)
-  #coda.samples(m, c('alpha','lambda','rho23','mu',"sigma.be",'beta','sigma.e'), 3000)
-  coda.samples(m, 'rho23', 3000)
+  coda.samples(m, c('alpha','lambda','rho23','mu',"sigma.be",'beta','sigma.e'), 4000)
+  #coda.samples(m, 'rho23', 3000)
 }
-@
-
-<<simfun, tidy=TRUE,cache=TRUE>>=
-# Simulation analysis
-# y~ N(xb, sigma.e), b~ N(mu, Sigma), sigma.e~ IG(alpha/2, alpha*lambda/2)
-simularhos <- function(r,mod) {
-  # parameter values
+#-----------------------------------------------------------------
+# function to simulated a data set with a similar structure of the 
+# bird data. The only 'free' parameter is the correlation between 
+# slope and quad term. 
+simdat <- function(r) {
+  # r: is the rho23 value
+  
+  # set parameter values: mostly based on the estimations from data
   rho23 <- r
-  s <- diag(c(3, .01, .01)); s[6] <- rho23*.01^2 ; s[8] <- rho23*.01^2
+  s <- diag(c(2, .5, .5)); s[6] <- rho23*.5^2 ; s[8] <- rho23*.5^2
   mu <- rep(0,3)
   alpha <- 2 
   lambda <- 0.1
   G <- 70
-  # simulated data
+  
+  # get simulated data
   beta <- rmnorm(G, varcov=s)
   sigma.e <- 1/sqrt(rgamma(G,shape=alpha/2, rate=alpha*lambda/2))
   simpar <- data.frame(group=1:G,beta, sigma.e)
@@ -126,46 +270,40 @@ simularhos <- function(r,mod) {
     y   <- with(d, b1+b2*x+b3*x^2+eps)
     data.frame(y,x)
   }
-  simdat <- ddply(simpar, .(group), simy_f)
-
-  if (mod=='siw') model = mtext.hh.siw 
-  if (mod=='iw') model = mtext.hh.iw
+  ddply(simpar, .(group), simy_f)
+}  
+#-----------------------------------------------------------------  
+# this function simulate a set of data and fit all models in ms list to it
+simres <- function(r, ms) {  
+  sdat <- simdat(r)
+  fitmod <- function(mod) {
+    res <- runjags.sim(sdat, mod)  
+    prnam <- attributes(res[[1]])$dimnames[[2]]
+    aux1 <- summary(res[, c('alpha','lambda',prnam[grep('mu', prnam)], prnam[grep('sigma.be', prnam)], 'rho23', prnam[grep('beta', prnam)])])$quantile
+    out <- as.data.frame(aux1)
+    colnames(out) <- paste('Q', c(2.5,25,50,75,97.5),sep='')
+    s <- grep('sigma.be', prnam)[c(4,6,7)]
+    aux2 <- gelman.diag(res[, prnam[-s] ])
+    out$gd=aux2$mpsrf    
+    out$param <- rownames(out)
+    out$model <- mod
+    return(out)
+  }
+  ldply(ms, fitmod)
+}  
   
-  res <- runjags.sim(simdat,model)  
-  aux <- summary(res[, 'rho23'])$quantile
-  out <- as.data.frame(t(aux))
-  colnames(out) <- paste('Q', c(2.5,25,50,75,97.5),sep='')
-  return(out)
-}
-@
-
-
-<<simula, cache=TRUE, dependson=c('runjag','simfun','models')>>=
-library(plyr)
-library(reshape2)
-library(ggplot2)
-library(rjags)
-library(gridExtra)
-
+#-----------------------------------------------------------------
 # 5 values of rho, 2 types of sigma prior, N reps of each
-scenario <- expand.grid(r=c(-.8, -.3, 0, .3, .8)  , mod=c('iw','siw') )
+setwd('~\\GitHub\\mnfb_yearly\\R')
+source('codemodels.R')
 N <- 5
-sim.res <- rdply(.n=N,  mdply(scenario , simularhos)   )
+rhos <- data.frame(r=c(-.8, -.3, 0, .3, .8))
+ptm <- proc.time()
+sim.res <- rdply(.n=N, mdply(rhos, simres, ms=list('iw','siw')) )
+proc.time() - ptm
+
+setwd('~\\GitHub\\mnfb_yearly')
+save(sim.res, file='simulations.Rdata')
 @
 
-
-<<plt, dependson='simula',echo=FALSE>>=
-qplot(data=sim.res, x=.n, y=Q50, ymin=Q2.5, ymax=Q97.5,geom='pointrange', facets=mod~r) + coord_flip()
-@
-
-
-<<restriction, echo=FALSE,eval=FALSE>>=
-# restrictions in sigma matrix 
-restric <- function(r) {
-  s <- diag( c(3.5,.01,.01)  ); s[6] <- r*.01^2; s[8] <- r*.01^2
-  prod(eigen(s)$values)
-}
-ys <- sapply(seq(-1,1,.01), restric)
-qplot(x=seq(-1,1,.01), y=ys, geom='line')
-@
 \end{document}

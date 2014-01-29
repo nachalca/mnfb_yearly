@@ -1,0 +1,44 @@
+
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx, color}
+
+
+\title{ Covariance matrix prior distribution \\ on hierarchical Linear models }
+\author{Ignacio Alvarez \and Jarad Niemi}
+\date{}
+
+\begin{document}
+\maketitle 
+\thispagestyle{empty}
+
+\begin{abstract}
+Covariance matrix estimation is a common and usually difficult task in statistics. We present a comparative study for some covariance matrix prior choices on the context of Bayesian hierarchical linear models. In Bayesian analysis an inverse Wishart distribution is the natural choice for a covariance matrix prior because its conjugacy on normal model and simplicity, is usually available in Bayesian statistical software. However inverse Wishart distribution presents some undesirable properties from a modeling point of view. It can be too restrictive because assume the same amount of prior information about every variance parameters and, more important, it shows a prior relationship between the variances and correlations.
+
+Two alternatives distributions has been proposed. The scaled inverse Wishart distribution, which give more flexibility on the variance priors conserving the conjugacy property but does not eliminate the prior relationship between variances and correlations. Secondly, it is possible to fit separate priors for individual correlations and standard deviations. This strategy eliminates any prior relationship within the covariance matrix parameters, but it is not conjugate and therefore computationally slow. 
+
+The objective of this study is to understand the impact of these prior choices on the covariance matrix posterior.
+
+We applied a hierarchical model with the different covariance priors using a forest bird monitoring program data provided for the Natural Resources Research Institute as an example. Data consist in the yearly bird count for 73 species on three National Forest from 1995 to 2013.
+\end{abstract}
+
+\end{document}
+
+
+A basic research goal in Ecology consist on understanding the distribution and abundance of the animal population. Natural Resources Research Institute (University of Minnesota Duluth) carry out a monitoring program of bird populations across Great Lakes area with the objective of ``sustain forest resources and bird diversity in western Great Lakes forests''. In this work we use the yearly bird count for 73 species on three National Forest from 1995 to 2013.
+
+To get trend estimates for each specie we set up a bayesian hierarchical linear model. The goal of the research is to study the covariance matrix prior effect on the estimated species trend. Most common choices for this prior are the Inverse Wishart ($IW$), Scale Inverse Wishart ($SIW$) and Separation Strategy ($SS$). Although all of these are well known $IW$ is usually the only one available in statistical software.
+
+
+
+This conference is on Applied Statistics in Agriculture, so you should try to tailor it a bit to agriculture.
+
+Rather than beginning with the forest bird monitoring program,I would begin with covariance matrix estimation. You could mention that the inverse Wishart distribution is the natural conjugate prior for a covariance matrix in a Bayesian analysis. We demonstrate the proper inverse Wishart distribution has an undesirable a prior relationship between the variances and correlations. Then mention that the scaled-inverse Wishart is still conjugate, thus computationally appealing, and reduces the relationship but does not eliminate it. An alternative prior is constructed by separately modeling the variances and correlations, but is not conjugate and therefore computationally slow. The objective of this study is to understand the impact on the covariance matrix posterior using a forest bird monitoring program as an example. (It would be nice to have some results, but we have what we have. It does make me think you should do some simulation studies to see what kind of impact the priors have.)
+
+No need to include references on the abstract.
+Yes, you should include me as an author.
+
+These priors are definitely not well known. Another novelty to this analysis, that probably doesn't need to be in this abstract, is the hierarchical modeling of bird trends. I would focus on covariance matrix estimation.
+
+Proper names should be capitalized, but other words should not. So inverse is not capitalized, but Bayesian is. 
