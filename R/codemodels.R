@@ -427,18 +427,62 @@ alpha  ~ dunif(0, 1000)
 lambda ~ dunif(0, 1000)
 }
 "
+# -------------------------------------------
+# Simple modesl for simulations .... 
+# no I am using stan !!! 
 
+simple.iw = "
+data {
+  int <lower=0> N;
+  int ns;
+  matrix[2,2] R;
+  vector[2] y[N];
+}
+parameters {
+  vector[2] mu;
+  cov_matrix[2] Sigma;
+}
+model {
+  mu[1] ~ normal(0, 100);
+  mu[2] ~ normal(0, 100);
+  Sigma ~ inv_wishart(3, R);
+  for (n in 1:N)
+    y[n] ~ multi_normal(mu, Sigma);
+}
+"
 
+simple.siw = "
+data {
+  int <lower=0> N;
+  int ns;
+  matrix[2,2] R;
+  vector[2] y[N];
+}
+parameters {
+  vector[2] mu;
+  cov_matrix[2] Q;
+  vector[2] delta;
 
-
-
-
-
-
-
-
-
-
+}
+transformed parameters {
+  cov_matrix[2] Sigma;
+  matrix[2,2] D;
+  vector[2] xi;
+  xi[1] <- log(delta[1]);
+  xi[2] <- log(delta[2]);
+  D <- diag_matrix(delta);
+  Sigma <- D*Q*D; 
+}
+model {
+  Q ~ inv_wishart(3, R);
+  for (i in 1:2) 
+    mu[i] ~ normal(0, 100);
+  for (i in 1:2) 
+    xi[i] ~ normal(0, 100);
+  for (n in 1:N)
+    y[n] ~ multi_normal(mu, Sigma);
+}
+"
 
 
 

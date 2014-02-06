@@ -1,6 +1,85 @@
 # Simulation analysis
-# y~ N(xb, sigma.e), b~ N(mu, Sigma), sigma.e~ IG(alpha/2, alpha*lambda/2)
 
+library(plyr)
+library(reshape2)
+library(ggplot2)
+library(rjags)
+library(gridExtra)
+library(mnormt)
+# install rstan
+# options(repos = c(getOption("repos"), rstan = "http://wiki.rstan-repo.googlecode.com/git/"))
+# install.packages('rstan', type = 'source')
+library(rstan)
+set_cppo(mode = "fast")
+
+# Simple scenario: Z = (Z1,Z2) ~ N(0, S) 
+# mu1=mu2=0, sig1=sig2=sigma and cor(Z1,Z2)=rho. 
+simdat <- function(n,r,s) {
+  # r: is the rho23 value
+  # s: is the value of the variance
+  sigma <- diag(c(s,s)); sigma[2] <- r*s ; sigma[3] <- r*s
+  mu <- rep(0,2)
+  data.frame(rmnorm(n, mean=mu, varcov=sigma))
+}  
+
+runstan.sim <- function(d, mod) {
+  # d: are the simulated data set
+  # mod: stan object with an empty comiled model
+  if (mod=='siw') model = res.siw 
+  if (mod=='iw')  model  = res.iw 
+  dat = list(y = d , 
+             N = nrow(d), 
+             ns = ncol(d),
+             R = diag( ncol(d)) )
+  stan(fit=model, data = dat, iter = 1200, chains = 3, warmup=200)
+  #stan(fit=model, data = dat,pars=pr,iter = 100, chains = 1, warmup=0)
+}
+# this function simulate a set of data and fit all models in ms list to it
+simres <- function(n,r,s, ms) {  
+  sdat <- simdat(n,r,s)
+  llply(ms, function(x) runstan.sim(sdat, x))
+}  
+
+# testing the simulations and fitting
+zsim <- simdat(100, .8, 50)
+qplot(data=zsim, x=X1,y=X2, size=I(.5)) + geom_density2d()
+
+# run a stan model with very few iter for compiling c code 
+dsim = list(y = zsim, N = nrow(zsim), ns = ncol(zsim), R = diag( ncol(zsim)) )
+res.iw  <- stan(model_code=simple.iw, data  = dsim, iter = 10, chains = 1, warmup=0)
+res.siw <- stan(model_code=simple.siw, data = dsim, iter = 10, chains = 1, warmup=0)
+
+# grid values for simulating parameters
+#N <- 5
+prm <- expand.grid(r=c(-.8, -.3, 0, .3, .8), s=c(.1, 1, 50))
+
+#prm <- expand.grid(r=c(.8), s=c(.1, 1))
+
+ptm <- proc.time()
+res <-  mlply(prm, simres, n=200,ms=list('iw','siw')) 
+proc.time() - ptm
+
+aux <- 
+# save the results
+res.sim <- unlist(res)
+setwd('~\\GitHub\\mnfb_yearly')
+save(res.sim, file='simulations.Rdata')
+
+
+
+
+
+
+
+
+
+
+
+
+
+#===============================================================
+#===============================================================
+# y~ N(xb, sigma.e), b~ N(mu, Sigma), sigma.e~ IG(alpha/2, alpha*lambda/2)
 library(plyr)
 library(reshape2)
 library(ggplot2)
@@ -14,7 +93,7 @@ runjags.sim <- function(d, mod) {
   # mod: is the 'alias' for the model character object
   
   if (mod=='siw') model = mtext.hh.siw 
-  if (mod=='iw') model = mtext.hh.iw 
+  if (mod=='iw') model = simple.mod 
   dat = list(y = d$y , 
              abbrev = as.numeric(d$group) ,
              year= d$x, 
@@ -88,15 +167,19 @@ proc.time() - ptm
 setwd('~\\GitHub\\mnfb_yearly')
 save(sim.res, file='simulations.Rdata')
 
-###########################
-
+#--------------------------------
+# to work with one example .... 
 sdat <- simdat(-.8)
-res <- runjags.sim(sdat, 'siw')
+res <- runjags.sim(sdat, 'iw')
 prnam <- attributes(res[[1]])$dimnames[[2]]
+
 s <- grep('sigma.be', prnam)[-c(1,5,9)]
 aux2 <- gelman.diag(res[, prnam[-s] ])
-plot(res[, 'sigma.be[3,3]'])
-
+plot(res[, 'sigma.be[3,3]']
+  
+     
+     
+     
 
 
 
