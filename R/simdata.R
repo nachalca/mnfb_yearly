@@ -15,8 +15,8 @@ simdat <- function(n,r,s) {
   data.frame(rmnorm(n, mean=mu, varcov=sigma))
 }  
 
-#prm <- expand.grid(r= c(0,seq(-.95, .95, .1)), s=c(.1, 1,25,50,100), n=c(50,200,500))
+prm <- expand.grid(r= c(0,seq(-.95, .95, .1)), s=c(.1, 1,25,50,100), n=c(50,200,500))
 
-prm <- expand.grid(r= c(.1,.5), s=1, n=c(50))
+#prm <- expand.grid(r= c(.1,.5), s=1, n=c(50))
 simdata <-  mdply(prm, simdat)
 save(simdata, file='simdata.Rdata')
