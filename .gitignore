@@ -18,9 +18,16 @@ $RECYCLE.BIN/
 
 ### LaTeX
 *concordance.tex
-*.synctex.gz
-*.log
+.synctex.gz
+.log
+.aux
+.dvi
+.ps
+.bbl
+.blg
+.pdf
 
 ## R files
 *.Rhistory
 .Rproj.user
+.Rdata
