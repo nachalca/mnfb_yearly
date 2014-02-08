@@ -431,27 +431,29 @@ lambda ~ dunif(0, 1000)
 # Simple modesl for simulations .... 
 # no I am using stan !!! 
 
-simple.iw = "
+sim.iw = "
 data {
   int <lower=0> N;
-  int ns;
   matrix[2,2] R;
   vector[2] y[N];
 }
 parameters {
   vector[2] mu;
+  matrix[2,2] Tau;
+}
+transformed parameters {
   cov_matrix[2] Sigma;
+  Sigma <- inverse(Tau);
 }
 model {
   mu[1] ~ normal(0, 100);
   mu[2] ~ normal(0, 100);
-  Sigma ~ inv_wishart(3, R);
+  Tau ~ wishart(3, R);
   for (n in 1:N)
-    y[n] ~ multi_normal(mu, Sigma);
+    y[n] ~ multi_normal_prec(mu, Tau);
 }
 "
-
-simple.siw = "
+sim.siw = "
 data {
   int <lower=0> N;
   int ns;
@@ -482,11 +484,8 @@ model {
   for (n in 1:N)
     y[n] ~ multi_normal(mu, Sigma);
 }
-"
-
-
-
-
+"# ---------------------------
+# Simple models for simulation for jags
 
 
 
