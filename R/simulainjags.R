@@ -16,34 +16,59 @@ model {
   Sigma  <- inverse(Tau)
   for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
   df     <- 3  
+  # parameters of interest 
+  s1 <- sqrt(Sigma[1,1])
+  s2 <- sqrt(Sigma[2,2])
+  rho <- Sigma[1,2]/(s1*s2)
 }
 "
-# function to run the jags models with simulated data
-runjags.sim <- function(d, mod) {
+# functions to run the jags models with simulated data
+runjags.sim <- function(d, mod, prs) {
   dat = list(y = d[,c('X1','X2')] , N = nrow(d), R = diag( ncol(d[,c('X1','X2')])) )
-  m = jags.model(textConnection(mod), dat, n.chains=3, n.adapt=50)
-  update(m, 100)
-  coda.samples(m,c('mu', 'Sigma'), 200)
+  m = jags.model(textConnection(mod), dat, n.chains=3, n.adapt=500)
+  update(m, 1000)
+  coda.samples(m, prs, 2000)
 }
 
-# get the simulated data
-load('../data/simdata.Rdata')
-
-simres <- function(n,r,s, ms) {
+simres <- function(n,r,s, ms,prs) {
   # ms argument is the name of the model as character
   sdat <- simdata[r==r & s==s & n==n, ]
-  runjags.sim(sdat, mod=get(ms) )
+  if (ms=='iw') mod <- sim.jg.iw
+  runjags.sim(sdat, mod, prs)
 }  
-# testing  <- simres(r=-.85 , s=1 , n=50, ms=sim.jg.iw )
 
-prm <- expand.grid(r=c(-85, .85), s=1,n=50, ms='sim.jg.iw')
-testing<-  mlply(prm, simres) 
-save(testing, file='testing.Rdata')
+# summarize models results
+getresults <- function(reslist, prs) {
+  #res <- unlist(reslist)
+  qff <- function(x) {
+    q <- summary(x[,prs])$quantile
+    g <- gelman.diag(x[, prs])$psrf[,2]
+    out <- data.frame(q,g)
+    colnames(out) <- c(paste('Q', c(2.5,25,50,75,97.5),sep=''),'gd.upp')
+    return(out)
+  }
+  ldply(reslist,qff )
+}
 
+# get the simulated data, and the grid for running models
+load('../data/simdata.Rdata')
+#load('data\\simdata.Rdata')
 
-#ptm <- proc.time()
-#res <-  mlply(prm, simres, n=200,ms=list('iw','siw')) 
-#proc.time() - ptm
+# testing ...
+#testing  <- simres(r=-.85 , s=1 , n=50, ms='iw', prs=pars)
+#prm <- expand.grid(n=50,r=c(-85, .85), s=1, ms='iw')
+#testing<-  mlply(prm, simres) 
+#save(testing, file='testing.Rdata')
+#resutest <- getresults(testing, prs=pars)
+
+# for real ...
+prm <- expand.grid(n=unique(simdata$n),r=unique(simdata$r), s=unique(simdata$s), ms='iw')
+pars <- c('mu[1]','mu[2]', 's1','s2','rho','Sigma[1,1]','Sigma[2,2]','Sigma[1,2]')
+
+ptm <- proc.time()
+models.iw <-  mlply(prm, simres) 
+res.iw <- getresults(testing, prs=pars)
+time.iw <- proc.time() - ptm
 
 
 
