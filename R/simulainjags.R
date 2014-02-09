@@ -4,7 +4,6 @@ library(plyr)
 library(reshape2)
 library(ggplot2)
 library(rjags)
-library(gridExtra)
 library(mnormt)
 
 # IW model
@@ -22,13 +21,13 @@ model {
 # function to run the jags models with simulated data
 runjags.sim <- function(d, mod) {
   dat = list(y = d[,c('X1','X2')] , N = nrow(d), R = diag( ncol(d[,c('X1','X2')])) )
-  m = jags.model(textConnection(mod), dat, n.chains=3, n.adapt=500)
-  update(m, 1000)
-  coda.samples(m, 2000)
+  m = jags.model(textConnection(mod), dat, n.chains=3, n.adapt=50)
+  update(m, 100)
+  coda.samples(m,c('mu', 'Sigma'), 200)
 }
 
 # get the simulated data
-load('data\\simdata.Rdata')
+load('../data/simdata.Rdata')
 
 simres <- function(n,r,s, ms) {  
   sdat <- simdata[r==r & s==s & n==n, ]
@@ -37,12 +36,11 @@ simres <- function(n,r,s, ms) {
 
 testing <- simres(r=-.85 , s=1 , n=50, ms=list(iw=sim.jg.iw) )
 
+#ptm <- proc.time()
+#res <-  mlply(prm, simres, n=200,ms=list('iw','siw')) 
+#proc.time() - ptm
 
-ptm <- proc.time()
-res <-  mlply(prm, simres, n=200,ms=list('iw','siw')) 
-proc.time() - ptm
-
-
+save(testing, file='testing.Rdata')
 
 
 
