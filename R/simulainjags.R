@@ -29,18 +29,23 @@ runjags.sim <- function(d, mod) {
 # get the simulated data
 load('../data/simdata.Rdata')
 
-simres <- function(n,r,s, ms) {  
+simres <- function(n,r,s, ms) {
+  # ms argument is the name of the model as character
   sdat <- simdata[r==r & s==s & n==n, ]
-  llply(ms, function(x) runjags.sim(sdat, mod=x))
+  runjags.sim(sdat, mod=get(ms) )
 }  
+# testing  <- simres(r=-.85 , s=1 , n=50, ms=sim.jg.iw )
 
-testing <- simres(r=-.85 , s=1 , n=50, ms=list(iw=sim.jg.iw) )
+prm <- expand.grid(r=c(-85, .85), s=1,n=50, ms='sim.jg.iw')
+testing<-  mlply(prm, simres) 
+save(testing, file='testing.Rdata')
+
 
 #ptm <- proc.time()
 #res <-  mlply(prm, simres, n=200,ms=list('iw','siw')) 
 #proc.time() - ptm
 
-save(testing, file='testing.Rdata')
+
 
 
 
