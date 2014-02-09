@@ -66,12 +66,13 @@ prm <- expand.grid(n=unique(simdata$n),r=unique(simdata$r), s=unique(simdata$s),
 pars <- c('mu[1]','mu[2]', 's1','s2','rho','Sigma[1,1]','Sigma[2,2]','Sigma[1,2]')
 
 ptm <- proc.time()
-models.iw <-  mlply(prm, simres) 
+models.iw <-  mlply(prm, simres, prs=pars) 
 res.iw <- getresults(testing, prs=pars)
 time.iw <- proc.time() - ptm
 
 
-
+# save in data folder
+save(models.iw, res.iw, time.iw, file='../data/iw.simres.Rdata')
 
 
 

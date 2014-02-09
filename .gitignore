@@ -31,3 +31,4 @@ $RECYCLE.BIN/
 *.Rhistory
 .Rproj.user
 .Rdata
+.Rout
