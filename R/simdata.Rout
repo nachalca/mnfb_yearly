@@ -1,0 +1,47 @@
+
+R version 3.0.1 (2013-05-16) -- "Good Sport"
+Copyright (C) 2013 The R Foundation for Statistical Computing
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> # Program to create the simulated data set
+> 
+> library(plyr)
+> library(gridExtra)
+Loading required package: grid
+> library(mnormt)
+> set.seed(1234)
+> # Simple scenario: Z = (Z1,Z2) ~ N(0, S) 
+> # mu1=mu2=0, sig1=sig2=sigma and cor(Z1,Z2)=rho. 
+> simdat <- function(n,r,s) {
++   # r: is the rho23 value
++   # s: is the value of the variance
++   sigma <- diag(c(s,s)); sigma[2] <- r*s ; sigma[3] <- r*s
++   mu <- rep(0,2)
++   data.frame(rmnorm(n, mean=mu, varcov=sigma))
++ }  
+> 
+> prm <- expand.grid(r= c(0,seq(-.95, .95, .1)), s=c(.1, 1,25,50,100), n=c(50,200,500))
+> 
+> #prm <- expand.grid(r= c(.1,.5), s=1, n=c(50))
+> simdata <-  mdply(prm, simdat)
+> # Run from R folder 
+> save(simdata, file='../data/simdata.Rdata')
+> 
+> proc.time()
+   user  system elapsed 
+  1.270   0.066   1.971 
