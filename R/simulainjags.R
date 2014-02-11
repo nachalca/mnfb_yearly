@@ -9,17 +9,17 @@ library(mnormt)
 # IW model
 sim.jg.iw = "
 model {
-  for (i in 1:N) { y[i,1:2] ~ dmnorm(mu , Tau) }
-  
-  # Priors.  
-  Tau   ~ dwish(R, df)
-  Sigma  <- inverse(Tau)
-  for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
-  df     <- 3  
-  # parameters of interest 
-  s1 <- sqrt(Sigma[1,1])
-  s2 <- sqrt(Sigma[2,2])
-  rho <- Sigma[1,2]/(s1*s2)
+for (i in 1:N) { y[i,1:2] ~ dmnorm(mu , Tau) }
+
+# Priors.  
+Tau   ~ dwish(R, df)
+Sigma  <- inverse(Tau)
+for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
+df     <- 3  
+# parameters of interest 
+s1 <- sqrt(Sigma[1,1])
+s2 <- sqrt(Sigma[2,2])
+rho <- Sigma[1,2]/(s1*s2)
 }
 "
 # functions to run the jags models with simulated data
@@ -27,14 +27,15 @@ runjags.sim <- function(d, mod, prs) {
   dat = list(y = d[,c('X1','X2')] , N = nrow(d), R = diag( ncol(d[,c('X1','X2')])) )
   m = jags.model(textConnection(mod), dat, n.chains=3, n.adapt=500)
   update(m, 1000)
-  coda.samples(m, prs, 2000)
+  coda.samples(m, prs, 3000)
 }
 
-simres <- function(n,r,s, ms,prs) {
+simres <- function(n,r,s, ms,...) {
   # ms argument is the name of the model as character
-  sdat <- simdata[r==r & s==s & n==n, ]
+  sdat <- with(simdata, simdata[r1==r & s==s & n==n, ])
   if (ms=='iw') mod <- sim.jg.iw
-  runjags.sim(sdat, mod, prs)
+  #runjags.sim(sdat, mod,...)
+  dim(sdat)
 }  
 
 # summarize models results
@@ -43,8 +44,8 @@ getresults <- function(reslist, prs) {
   qff <- function(x) {
     q <- summary(x[,prs])$quantile
     g <- gelman.diag(x[, prs])$psrf[,2]
-    out <- data.frame(q,g)
-    colnames(out) <- c(paste('Q', c(2.5,25,50,75,97.5),sep=''),'gd.upp')
+    out <- data.frame(prs,q,g)
+    colnames(out) <- c('param',paste('Q', c(2.5,25,50,75,97.5),sep=''),'gd.upp')
     return(out)
   }
   ldply(reslist,qff )
@@ -56,25 +57,41 @@ load('../data/simdata.Rdata')
 
 # testing ...
 #testing  <- simres(r=-.85 , s=1 , n=50, ms='iw', prs=pars)
-#prm <- expand.grid(n=50,r=c(-85, .85), s=1, ms='iw')
+#prm <- expand.grid(n=50,r=r1, s=1, ms='iw')
 #testing<-  mlply(prm, simres) 
 #save(testing, file='testing.Rdata')
 #resutest <- getresults(testing, prs=pars)
+# more testing 
+#simdata$r1 <- round(simdata$r, 2)
+#r1 <- round(c(-seq(.05,1,.2),0,seq(.05,1,.2)),2)
+#prm.t <- expand.grid(ns=unique(simdata$n),rs=r1, ss=unique(simdata$s))
+#simres.test <- function(ns,rs,ss) {
+# ms argument is the name of the model as character
+#  sdat <- with(simdata, simdata[r1==rs & s==ss & n==ns,])
+#  dim(sdat)
+#}  
+#aux <- mdply(prm.t, simres.test)
+#head(aux)
+
+
 
 # for real ...
-prm <- expand.grid(n=unique(simdata$n),r=unique(simdata$r), s=unique(simdata$s), ms='iw')
-pars <- c('mu[1]','mu[2]', 's1','s2','rho','Sigma[1,1]','Sigma[2,2]','Sigma[1,2]')
+simdata$r1 <- round(simdata$r, 2)
+rx <- round(c(-seq(.05,1,.2),0,seq(.05,1,.2)),2)
 
+d <- subset(simdata, r1 %in% rx & n==50 & s %in% c(1,100) )
+d <- subset(simdata, r1 ==.05 & n==50 & s %in% c(1,100) )
+
+
+pars <- c('mu[1]','mu[2]', 's1','s2','rho','Sigma[1,1]','Sigma[2,2]','Sigma[1,2]')
 ptm <- proc.time()
-models.iw <-  mlply(prm, simres, prs=pars) 
-res.iw <- getresults(testing, prs=pars)
+#models.iw <-  mlply(prm, simres, prs=pars) 
+
+models.iw <-  dlply(d,.(n,r,s), runjags.sim, prs=pars, mod=sim.jg.iw) 
+
+res.iw <- getresults(models.iw, prs=pars)
 time.iw <- proc.time() - ptm
 
 
 # save in data folder
 save(models.iw, res.iw, time.iw, file='../data/iw.simres.Rdata')
-
-
-
-
-
