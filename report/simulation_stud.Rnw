@@ -6,67 +6,30 @@
 
 We simulate data from this model 
 \begin{eqnarray}
-\nonumber Y_s \sim N(X_s\beta_s,\sigma_s^2) \\
-\nonumber \beta_s \sim N(\mu, \Sigma) \\
-\sigma^2_s\sim IG(\alpha/2, \alpha\lambda/2)
+\nonumber Y_s \sim \sim N(\mu, \Sigma) \\
 \label{s_mod}
 \end{eqnarray}
 
-We use 70 groups in the simulation, so $s=1,\ldots,70$, the explicative variable mimic the centered ''year'' we've used in the real data, {\tt x=-10:10}, in all cases $X_s\beta_s = \beta_{1s} + x\beta_{2s} + x^2\beta_{3s}$. 
-
-We need to set values for $\mu$, $\Sigma$, $\alpha$ and $\lambda$, we've set those values with similar values to those find in bird forest data. We start focusing on one single parameter $\rho_{23}$, the correlation between $\beta_{s2}$ and $\beta_{s3}$, so we repeat the simulation exercise for $\rho_{23} = (-.8, -.3, 0, .3, .8)$. 
-
-The rest parameter are set as $\mu = (0,0,0)$, $\alpha=2$, $\lambda=.1$ and 
-
+The rest parameter are set as $\mu = (0,0)$, and 
 \[
-\Sigma = (\begin{array}{ccc} 2 & 0 & 0\\ 
-                              0 & 0.5 & \rho_{23}0.5^2\\ 
-                              0 & \rho_{23}0.5^2 & 0.5
+\Sigma = (\begin{array}{ccc} s  & \pho s^2 \\ 
+                            \rho s^2 & s
               \end{array})
 \]
-The structure for $\Sigma$ is actually more extreme in bird data, where the variances for the 2nd and 3rd coefficient are even lower. The problem is the covarince between coef 2 and 3 get too close to cero and is not posible for the models distinguish from it. 
 
-Once we have data simulated from the model (\ref{s_mod}) we estimate a bayesian model on those data. To do this, we neeed to specify priors distributions for the parameters we've fixed, we used
-$ \lambda_s\sim unif(0,1000)$ and $\alpha_s \sim unif(0,1000)$ 
+\section{IW prior Simulation Results}
 
-\begin{table}[hbpt]
-\begin{center}
-\caption{Priors for $\mu$ and $\Sigma$}
-\begin{tabular}{l|l} \hline
-IW & SIW \\
-    & $\xi_i=Unif(0,100)$ \\ \hline
-$\mu_i \sim N(0, 1000)$ & $\mu_i = \xi_i\mu_i^*$ \\ 
-    & $\mu_i^*\sim N(0, 1000)$ \\ \hline  
-$\Sigma \sim IW(4, I_3)$  & $Q\sim IW(4, I_3)$ \\
-    &  $\sigma_i^2 = \xi_i^2Q_{ii}$ \\ 
-    &  $\sigma_{ij}=\xi_i\xi_jQ_{ij}$ \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-Finally, for each value of $\rho_{23}$ we simulate 5 data sets (25 data sets in total) and for each data set we fit both models, susing IW and SIW priors.  
-
-\newpage 
-
-\section{Simulation Results}
-
-<<getsim, message=FALSE, warning=FALSE,echo=FALSE>>=
+<<getsim, message=FALSE, warning=FALSE,echo=FALSE, cache=TRUE>>=
 load('..\\data\\iw.simres.Rdata')
 library(plyr)
 library(reshape2)
 library(ggplot2)
 library(rjags)
-
-pr <- attributes(models.iw[[1]][[1]])$dimnames[[2]]
-pars <- c('mu[1]','mu[2]', 's1','s2','rho','Sigma[1,1]','Sigma[2,2]','Sigma[1,2]')
-res.iw <- data.frame(param=rep(pars, 165), res.iw)
-
-
 @
 
 \begin{figure}[h]
 <<diag, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-qplot(data=res.iw ,x=1:1320,ymin=1,ymax=gd.upp,geom='linerange',size=I(1),color=param) + geom_hline(yintercept=1.1, colour='red') 
+qplot(data=res.iw ,x=1:2200,ymin=1,ymax=gd.upp,geom='linerange',size=I(1),color=param) + geom_hline(yintercept=1.1, colour='red') 
 #+ facet_wrap(facets=r~model, scale='free_y', ncol=2)
 @
 \caption{ upper limit of gelman diag  \label{gd}}
@@ -75,50 +38,58 @@ qplot(data=res.iw ,x=1:1320,ymin=1,ymax=gd.upp,geom='linerange',size=I(1),color=
 
 \begin{figure}[h]
 <<cirho, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-d <- subset(res.iw, param=='s1')
+d <- subset(res.iw, param=='rho' & r %in% c(-.85, -.05, .05, .85))
+d$sx <- sqrt(d$s) + runif(nrow(d),-.5,0)
 
-qplot(data=d, x=s, y=Q50) +facet_wrap(facets=~n)
-
-qplot(data=d, x=r, y=Q50, ymin=Q2.5,ymax=Q97.5, geom='pointrange') +facet_wrap(facets=n~s)
-
+qplot(data=d, x=sx, y=Q50,color=factor(s),size=I(3))+geom_pointrange(aes(ymin=Q2.5,ymax=Q97.5) ) + facet_wrap(facets=~r,scales='free_y') + geom_line(data=d,aes(y=r), color=I('red'))
 @
-\caption{Credible intervals for $\rho_{23}$.   \label{rhoplt}}
-\end{figure}
-
-
-\begin{figure}
-<<cimu, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-ind <- with(sim.res, grep('mu',param)  )
-#  with(sim.res, c(agrep('mu',param),agrep('sigma.be',param),grep('alpha',param),grep('lambda',param)) )
-d <- sim.res[ind, ]
-d$ns <- d$.n + runif(dim(d)[1], -.4,.4)
-
-qplot(data=d, x=ns, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange'),color=param,facets=r~model) + coord_flip()
-@
-\caption{Credible interval for $\mu$, this results are not changing with the covariance matrix distribution and most of the cases are arround the true value \label{mus}}
+\caption{Credible intervals for $\rho$.   \label{rhoplt}}
 \end{figure}
 
 \begin{figure}
-<<cisig, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-ind <- sim.res$param %in% c(paste('sigma.be',c('[1,1]','[2,2]','[3,3]'),sep='') ) 
-#, 'rho12','rho13', 'rho23')  
-d <- sim.res[ind, ]
-d$rs <- d$r + runif(dim(d)[1], -.1,.1)
+<<cisig1, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+d <- subset(res.iw, param =='s1' & r %in% c(-.85, -.05, .05, .85))
+d$rx <- d$r + runif(nrow(d), -.05,0.05)
 
-qplot(data=d, x=rs, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange'),color=model) +  facet_wrap(facets=~param, scale='free_y') 
+qplot(data=d, x=rx, y=Q50,size=I(3),color=factor(r))+geom_pointrange(aes(ymin=Q2.5,ymax=Q97.5) ) + facet_wrap(facets=~s,scales='free_y') + geom_line(data=d,aes(y=sqrt(s)), color=I('red'))
 @
-\caption{ Credible intervals for $\Sigma$ variance parameters. The true values for the parameter were 2, 0.5 , 0.5 respectivelly. There is a problem with the 3rd variance in the SIW model is much higer than it should be, this is one of the parameters with bad gelman diagnostic statistic so I hope that is the problem. \label{var}}
+\caption{ Credible intervals for $\sigma_{11}$ \label{var}}
 \end{figure}
 
 \begin{figure}
-<<cilamal, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-ind <- with(sim.res, c(grep('alpha',param),grep('lambda',param)) )                                                   
-d <- sim.res[ind, ]
-d$rs <- d$r + runif(dim(d)[1], -.1,.1)
+<<cisig2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+d <- subset(res.iw, param =='s2' & r %in% c(-.85, -.05, .05, .85))
+d$rx <- d$r + runif(nrow(d), -.05,0.05)
 
-qplot(data=d, x=rs, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange') ) + facet_wrap(facets=param~model, ncol=2, scale='free_y')
+qplot(data=d, x=rx, y=Q50,size=I(3),color=factor(r))+geom_pointrange(aes(ymin=Q2.5,ymax=Q97.5) ) + facet_wrap(facets=~s,scales='free_y') + geom_line(data=d,aes(y=sqrt(s)), color=I('red'))
 @
-\caption{Credible intervals for $\alpha$ and $\lambda$. There seems to be problems in both parameters, for $\alpha$ both models tend to get higher values than the true, actually $\alpha=2$ does not lies in any of the credible intervals in the plot. For $\lambda$ it seem that SIW model is doing a better job.  \label{lamal}}
+\caption{ Credible intervals for $\sigma_{22}$ \label{var}}
 \end{figure}
+
+
+
+% \begin{figure}
+% <<cimu, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+% ind <- with(sim.res, grep('mu',param)  )
+% #  with(sim.res, c(agrep('mu',param),agrep('sigma.be',param),grep('alpha',param),grep('lambda',param)) )
+% d <- sim.res[ind, ]
+% d$ns <- d$.n + runif(dim(d)[1], -.4,.4)
+% 
+% qplot(data=d, x=ns, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange'),color=param,facets=r~model) + coord_flip()
+% @
+% \caption{Credible interval for $\mu$, this results are not changing with the covariance matrix distribution and most of the cases are arround the true value \label{mus}}
+% \end{figure}
+% 
+% 
+% \begin{figure}
+% <<cilamal, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+% ind <- with(sim.res, c(grep('alpha',param),grep('lambda',param)) )                                                   
+% d <- sim.res[ind, ]
+% d$rs <- d$r + runif(dim(d)[1], -.1,.1)
+% 
+% qplot(data=d, x=rs, y=Q50, ymin=Q2.5,ymax=Q97.5,geom=c('pointrange') ) + facet_wrap(facets=param~model, ncol=2, scale='free_y')
+% @
+% \caption{Credible intervals for $\alpha$ and $\lambda$. There seems to be problems in both parameters, for $\alpha$ both models tend to get higher values than the true, actually $\alpha=2$ does not lies in any of the credible intervals in the plot. For $\lambda$ it seem that SIW model is doing a better job.  \label{lamal}}
+% \end{figure}
 
 \end{document}

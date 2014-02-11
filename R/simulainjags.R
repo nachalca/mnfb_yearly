@@ -29,15 +29,6 @@ runjags.sim <- function(d, mod, prs) {
   update(m, 1000)
   coda.samples(m, prs, 3000)
 }
-
-simres <- function(n,r,s, ms,...) {
-  # ms argument is the name of the model as character
-  sdat <- with(simdata, simdata[r1==r & s==s & n==n, ])
-  if (ms=='iw') mod <- sim.jg.iw
-  #runjags.sim(sdat, mod,...)
-  dim(sdat)
-}  
-
 # summarize models results
 getresults <- function(reslist, prs) {
   #res <- unlist(reslist)
@@ -69,29 +60,22 @@ load('../data/simdata.Rdata')
 # ms argument is the name of the model as character
 #  sdat <- with(simdata, simdata[r1==rs & s==ss & n==ns,])
 #  dim(sdat)
-#}  
+#}
+# simres <- function(n,r,s, ms,...) {
+#   # ms argument is the name of the model as character
+#   sdat <- with(simdata, simdata[r1==r & s==s & n==n, ])
+#   if (ms=='iw') mod <- sim.jg.iw
+#   #runjags.sim(sdat, mod,...)
+#   dim(sdat)
+# }  
 #aux <- mdply(prm.t, simres.test)
 #head(aux)
 
-
-
 # for real ...
-simdata$r1 <- round(simdata$r, 2)
-rx <- round(c(-seq(.05,1,.2),0,seq(.05,1,.2)),2)
-
-d <- subset(simdata, r1 %in% rx & n==50 & s %in% c(1,100) )
-d <- subset(simdata, r1 ==.05 & n==50 & s %in% c(1,100) )
-
-
 pars <- c('mu[1]','mu[2]', 's1','s2','rho','Sigma[1,1]','Sigma[2,2]','Sigma[1,2]')
 ptm <- proc.time()
-#models.iw <-  mlply(prm, simres, prs=pars) 
-
-models.iw <-  dlply(d,.(n,r,s), runjags.sim, prs=pars, mod=sim.jg.iw) 
-
+models.iw <-  dlply(simdata,.(sim,r,s), runjags.sim, prs=pars, mod=sim.jg.iw) 
 res.iw <- getresults(models.iw, prs=pars)
 time.iw <- proc.time() - ptm
-
-
 # save in data folder
 save(models.iw, res.iw, time.iw, file='../data/iw.simres.Rdata')
