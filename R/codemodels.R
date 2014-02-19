@@ -429,7 +429,7 @@ lambda ~ dunif(0, 1000)
 "
 # -------------------------------------------
 # Simple modesl for simulations .... 
-# no I am using stan !!! 
+# now I am using stan !!! 
 
 sim.iw = "
 data {
@@ -439,53 +439,132 @@ data {
 }
 parameters {
   vector[2] mu;
-  matrix[2,2] Tau;
+  cov_matrix[2] Sigma;
 }
 transformed parameters {
-  cov_matrix[2] Sigma;
-  Sigma <- inverse(Tau);
+  real s1;
+  real s2;
+  real rho;
+  s1 <- sqrt(Sigma[1,1]);
+  s2 <- sqrt(Sigma[2,2]);
+  rho <- Sigma[1,2]/(s1*s2);
 }
 model {
   mu[1] ~ normal(0, 100);
   mu[2] ~ normal(0, 100);
-  Tau ~ wishart(3, R);
+  Sigma ~ inv_wishart(3, R);
   for (n in 1:N)
-    y[n] ~ multi_normal_prec(mu, Tau);
+    y[n] ~ multi_normal(mu, Sigma);
 }
 "
 sim.siw = "
 data {
   int <lower=0> N;
-  int ns;
   matrix[2,2] R;
   vector[2] y[N];
 }
 parameters {
   vector[2] mu;
   cov_matrix[2] Q;
-  vector[2] delta;
+  vector[2] xi;
 
 }
 transformed parameters {
   cov_matrix[2] Sigma;
   matrix[2,2] D;
-  vector[2] xi;
-  xi[1] <- log(delta[1]);
-  xi[2] <- log(delta[2]);
+  vector[2] delta;
+  real s1;
+  real s2;
+  real rho;
+  delta[1] <- exp( xi[1] );
+  delta[2] <- exp( xi[2] );
   D <- diag_matrix(delta);
   Sigma <- D*Q*D; 
+  s1 <- sqrt(Sigma[1,1]);
+  s2 <- sqrt(Sigma[2,2]);
+  rho <- Sigma[1,2]/(s1*s2);
 }
 model {
   Q ~ inv_wishart(3, R);
-  for (i in 1:2) 
-    mu[i] ~ normal(0, 100);
-  for (i in 1:2) 
-    xi[i] ~ normal(0, 100);
+  mu[1] ~ normal(0, 100);
+  mu[2] ~ normal(0, 100);
+  xi[1] ~ normal(0, 100);
+  xi[2] ~ normal(0, 100);
   for (n in 1:N)
     y[n] ~ multi_normal(mu, Sigma);
 }
-"# ---------------------------
-# Simple models for simulation for jags
+"
+sim.ss = "
+data {
+  int <lower=0> N;
+  matrix[2,2] R;
+  vector[2] y[N];
+}
+parameters {
+  vector[2] mu;
+  corr_matrix[2] Q;
+  vector[2] xi;
+}
+transformed parameters {
+  cov_matrix[2] Sigma;
+  matrix[2,2] D;
+  vector[2] delta;
+  real s1;
+  real s2;
+  real rho;
+  delta[1] <- exp( xi[1] );
+  delta[2] <- exp( xi[2] );
+  D <- diag_matrix(delta);
+  Sigma <- D*Q*D; 
+  s1 <- sqrt(Sigma[1,1]);
+  s2 <- sqrt(Sigma[2,2]);
+  rho <- Sigma[1,2]/(s1*s2);
+}
+model {
+  Q ~ lkj_corr(2);
+  mu[1] ~ normal(0, 100);
+  mu[2] ~ normal(0, 100);
+  xi[1] ~ normal(0, 100);
+  xi[2] ~ normal(0, 100);
+  for (n in 1:N)
+    y[n] ~ multi_normal(mu, Sigma);
+}
+"
+sim.ht = "
+data {
+  int <lower=0> N;
+  matrix[2,2] R;
+  vector[2] y[N];
+}
+parameters {
+  vector[2] mu;
+  cov_matrix[2] Sigma;
+  vector[2] delta;
+
+}
+transformed parameters {
+  matrix[2,2] D;
+  vector[2] xi;
+  real s1;
+  real s2;
+  real rho;
+  xi[1] <- 1/delta[1];
+  xi[2] <- 1/delta[2];
+  D <- diag_matrix(xi);
+  s1 <- sqrt(Sigma[1,1]);
+  s2 <- sqrt(Sigma[2,2]);
+  rho <- Sigma[1,2]/(s1*s2);
+}
+model {
+  Sigma ~ inv_wishart(4, 4*D);
+  mu[1] ~ normal(0, 100);
+  mu[2] ~ normal(0, 100);
+  delta[1] ~ inv_gamma(0.5, 0.001);
+  delta[2] ~ inv_gamma(0.5, 0.001);
+  for (n in 1:N)
+    y[n] ~ multi_normal(mu, Sigma);
+}
+"
 
 
 

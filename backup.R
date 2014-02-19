@@ -52,16 +52,28 @@ printresult <- function(xx) {
 #prm <- expand.grid(r=c(-.8, -.3, 0, .3, .8), s=c(.1, 1, 50))
 #prm <- expand.grid(r=c(.8), s=c(.1, 1))
 
-# simdata <- subset(simdata, sim==1 & r==.85 & s==.1 & ns==50 )                       
-                       
+simdata <- subset(simdata, sim==1 & r==.99 & s==.1 & ns==10 )                       
+
 ptm <- proc.time()
-mod_sim <-  dlply(simdata, .(ms,sim,r,s),runstan.sim) 
-res_sim <- ldply(mod_sim, printresult)                       
-time <- proc.time() - ptm
+mod_iw <-  dlply(simdata[simdata$ms=='iw', ], .(sim,r,s,ns),runstan.sim)                        
+time.iw <- proc.time() - ptm
+save(mod_iw,time.iw, file='../data/simula_iw.Rdata')
 
+ptm <- proc.time()
+mod_siw <-  dlply(simdata[simdata$ms=='siw', ], .(sim,r,s,ns),runstan.sim)                        
+time.siw <- proc.time() - ptm
+save(mod_siw,time.siw, file='../data/simula_siw.Rdata')
+
+ptm <- proc.time()
+mod_ss <-  dlply(simdata[simdata$ms=='ss', ], .(sim,r,s,ns),runstan.sim)                        
+time.ss <- proc.time() - ptm
+save(mod_ss,time.ss, file='../data/simula_ss.Rdata')
+
+ptm <- proc.time()
+mod_ht <-  dlply(simdata[simdata$ms=='ht', ], .(sim,r,s,ns),runstan.sim)                        
+time.ht <- proc.time() - ptm
+save(mod_ht,time.ht, file='../data/simula_ht.Rdata')
+
+#res_sim <- ldply(mod_sim, printresult)
 # save the results
-save(mod_sim,res_sim,time, m_iw,m_siw,m_ss,m_ht, file='../data/simulations.Rdata')
-
-
-
-
+#save(mod_sim,res_sim,time, m_iw,m_siw,m_ss,m_ht, file='../data/simulations.Rdata')
