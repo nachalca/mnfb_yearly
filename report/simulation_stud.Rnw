@@ -25,26 +25,52 @@ library(plyr)
 library(reshape2)
 library(ggplot2)
 library(rjags)
+
+# ddply(subset(res_size10[[1]]), .(prior,r,param),function(x) mean(x$Rhat, na.rm=T))
 @
 
 \begin{figure}[h]
 <<diag, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-qplot(data=res.iw ,x=1:2200,ymin=1,ymax=gd.upp,geom='linerange',size=I(1),color=param) + geom_hline(yintercept=1.1, colour='red') 
+qplot(data=res_size10[[1]] ,x=param ,ymin=1,ymax=Rhat,geom='linerange',size=I(1))+facet_wrap(facets=~prior,scale='free_y') + geom_hline(yintercept=1.1, colour='red') 
 #+ facet_wrap(facets=r~model, scale='free_y', ncol=2)
 @
 \caption{ upper limit of gelman diag  \label{gd}}
 \end{figure}
 
+<<diag2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+subset(res_size10[[1]], Rhat>2, c(1:7,16) )
+@
+
 
 \begin{figure}[h]
 <<cirho, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-d <- subset(res.iw, param=='rho' & r %in% c(-.85, -.05, .05, .85))
-d$sx <- sqrt(d$s) + runif(nrow(d),-.5,0)
+d <- subset(res_size10[[1]], param=='rho')
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=prior~s) + geom_abline(1, color=I('red'))
 
-qplot(data=d, x=sx, y=Q50,color=factor(s),size=I(3))+geom_pointrange(aes(ymin=Q2.5,ymax=Q97.5) ) + facet_wrap(facets=~r,scales='free_y') + geom_line(data=d,aes(y=r), color=I('red'))
+#qplot(data=subset(d,prior=='iw'),x=rx, y=X50. )+facet_wrap(facets=~s) + geom_abline(1,color=I('red')) + geom_pointrange(aes(ymin=X2.5.,ymax=X97.5.) )  
+#qplot(data=d,x=rx, y=X50.,color=prior)+facet_wrap(facets=~s) + geom_abline(1,color=I('red')) + geom_pointrange(aes(ymin=X2.5.,ymax=X97.5.) )  
 @
 \caption{Credible intervals for $\rho$.   \label{rhoplt}}
 \end{figure}
+
+<<rho2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+# list names, sim.r.s.ns 
+
+nms <- data.frame(nam=names(res_size10[[4]]),with(res_size10[[1]], expand.grid(unique(ns),unique(s),unique(r),unique(sim) )) )
+colnames(nms)[-1] <- c('ns','s','r','sim')
+
+out <- NULL
+for (i in 1:100) {
+  x <- res_size10[[4]][[i]]
+  true.r <- with(nms, nms[nam==names(res_size10[[3]])[i],])$r
+  rs <- extract(x, pars='rho', permuted = TRUE,inc_warmup=FALSE)$rho
+  df <- data.frame(r=true.r, per=sum(rs <= true.r)/length(rs), prob=sum( (rs<=true.r+.1) & (rs >= true.r-.1) )   /length(rs) )
+  out <- rbind(out,df)
+}
+@
+
+
 
 \begin{figure}
 <<cisig1, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=

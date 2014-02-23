@@ -479,7 +479,54 @@ transformed parameters {
   delta[1] <- exp( xi[1] );
   delta[2] <- exp( xi[2] );
   D <- diag_matrix(delta);
-  Sigma <- D*Q*D; 
+  Sigma <- D*Q*D;
+  s1 <- sqrt(Sigma[1,1]);
+  s2 <- sqrt(Sigma[2,2]);
+  rho <- Sigma[1,2]/(s1*s2);
+}
+model {
+  matrix[2,2] L;
+  matrix[2,2] A;
+  Q ~ inv_wishart(3, R);
+  L <- cholesky_decompose(Q);
+  A <- D*L;
+  mu[1] ~ normal(0, 100);
+  mu[2] ~ normal(0, 100);
+  xi[1] ~ normal(0, 100);
+  xi[2] ~ normal(0, 100);
+ for (n in 1:N)
+   y[n] ~ multi_normal_cholesky(mu, A);
+}
+"
+
+
+sim.ss = "
+data {
+  int <lower=0> N;
+  matrix[2,2] R;
+  vector[2] y[N];
+}
+parameters {
+  vector[2] mu;
+  corr_matrix[2] Q;
+  vector[2] xi;
+}
+transformed parameters {
+  corr_matrix[2] Q1;
+  cov_matrix[2] Sigma;
+  matrix[2,2] D;
+  vector[2] delta;
+  real s1;
+  real s2;
+  real rho;
+  Q1[1,1] <- 1;
+  Q1[2,2] <- 1;
+  Q1[2,1] <- Q[2,1]/sqrt(Q[1,1]*Q[2,2]); 
+  Q1[1,2] <- Q1[2,1];
+  delta[1] <- exp( xi[1] );
+  delta[2] <- exp( xi[2] );
+  D <- diag_matrix(delta);
+  Sigma <- D*Q1*D; 
   s1 <- sqrt(Sigma[1,1]);
   s2 <- sqrt(Sigma[2,2]);
   rho <- Sigma[1,2]/(s1*s2);
@@ -494,42 +541,7 @@ model {
     y[n] ~ multi_normal(mu, Sigma);
 }
 "
-sim.ss = "
-data {
-  int <lower=0> N;
-  matrix[2,2] R;
-  vector[2] y[N];
-}
-parameters {
-  vector[2] mu;
-  corr_matrix[2] Q;
-  vector[2] xi;
-}
-transformed parameters {
-  cov_matrix[2] Sigma;
-  matrix[2,2] D;
-  vector[2] delta;
-  real s1;
-  real s2;
-  real rho;
-  delta[1] <- exp( xi[1] );
-  delta[2] <- exp( xi[2] );
-  D <- diag_matrix(delta);
-  Sigma <- D*Q*D; 
-  s1 <- sqrt(Sigma[1,1]);
-  s2 <- sqrt(Sigma[2,2]);
-  rho <- Sigma[1,2]/(s1*s2);
-}
-model {
-  Q ~ lkj_corr(2);
-  mu[1] ~ normal(0, 100);
-  mu[2] ~ normal(0, 100);
-  xi[1] ~ normal(0, 100);
-  xi[2] ~ normal(0, 100);
-  for (n in 1:N)
-    y[n] ~ multi_normal(mu, Sigma);
-}
-"
+
 sim.ht = "
 data {
   int <lower=0> N;
@@ -556,13 +568,17 @@ transformed parameters {
   rho <- Sigma[1,2]/(s1*s2);
 }
 model {
+  matrix[2,2] L;
+  matrix[2,2] A;
   Sigma ~ inv_wishart(4, 4*D);
+  L <- cholesky_decompose(Sigma);
+  A <- D*L;
   mu[1] ~ normal(0, 100);
   mu[2] ~ normal(0, 100);
   delta[1] ~ inv_gamma(0.5, 0.001);
   delta[2] ~ inv_gamma(0.5, 0.001);
   for (n in 1:N)
-    y[n] ~ multi_normal(mu, Sigma);
+    y[n] ~ multi_normal_cholesky(mu, A);
 }
 "
 

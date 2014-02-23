@@ -14,7 +14,7 @@ simdat <- function(ns,r,s=1) {
   data.frame(rmnorm(ns, mean=mu, varcov=sigma))
 }  
 
-prm <- expand.grid(r= c(0,.25,.5,.99), ns=c(10,100,1000))
+prm <- expand.grid(r= c(0,.25,.5,.75,.99), ns=c(10,50,250))
 
 #prm <- expand.grid(r= c(.1,.5), s=1, n=c(50))
 simdata <-  rdply(5,mdply(prm, simdat))
@@ -32,4 +32,4 @@ xx <- alply(simdata[,1:4], .margins=2, unique)
 prod(laply(xx, dim)[,1])
 
 # Run from R folder 
-save(simdata, file='../data/simdata.Rdata')
+save(simdata, file='data/simdata.Rdata')
