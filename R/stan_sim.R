@@ -69,12 +69,12 @@ list(res.df,time,mod_iw,mod_siw,mod_ss,mod_ht)
 
 # Run simulations 
 res_size10 <- simula(size=10)
-save(res_size10, file='data/simulations10.Rdata')
+save(res_size10, file='../data/simulations10.Rdata')
 
 res_size50 <- simula(size=50)
-save(res_size50, file='data/simulations50.Rdata')
+save(res_size50, file='../data/simulations50.Rdata')
 
 res_size250 <- simula(size=250)
-save(res_size250, file='data/simulations250.Rdata')
+save(res_size250, file='../data/simulations250.Rdata')
 
 
