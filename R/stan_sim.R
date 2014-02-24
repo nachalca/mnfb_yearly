@@ -40,7 +40,7 @@ printresult <- function(xx) {
   data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
 }
 simula <- function(size) {
-  simdata <- subset(simdata.all, r==.75 & sim==1 & s==1 & ns==size)                       
+  simdata <- subset(simdata.all, ns==size)                       
   ptm <- proc.time()
   mod_iw <-  dlply(simdata[simdata$ms=='iw', ], .(sim,r,s,ns),runstan.sim)                        
   time.iw <- proc.time() - ptm
