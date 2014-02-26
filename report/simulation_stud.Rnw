@@ -17,80 +17,75 @@ The rest parameter are set as $\mu = (0,0)$, and
               \end{array})
 \]
 
-\section{IW prior Simulation Results}
+\section{Prior Simulation Results}
 
 <<getsim, message=FALSE, warning=FALSE,echo=FALSE, cache=TRUE>>=
-load('..\\data\\iw.simres.Rdata')
+res <- read.table('data/reduced_res.csv', header=T)
+per <- read.table('data/percentile.csv', header=T)
 library(plyr)
 library(reshape2)
 library(ggplot2)
-library(rjags)
-
-# ddply(subset(res_size10[[1]]), .(prior,r,param),function(x) mean(x$Rhat, na.rm=T))
 @
 
 \begin{figure}[h]
 <<diag, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-qplot(data=res_size10[[1]] ,x=param ,ymin=1,ymax=Rhat,geom='linerange',size=I(1))+facet_wrap(facets=~prior,scale='free_y') + geom_hline(yintercept=1.1, colour='red') 
+qplot(data=res,x=param ,ymin=1,ymax=Rhat,geom='linerange',size=I(1))+facet_wrap(facets=s~prior,scale='free_y') + geom_hline(yintercept=1.1, colour='red') 
 #+ facet_wrap(facets=r~model, scale='free_y', ncol=2)
 @
 \caption{ upper limit of gelman diag  \label{gd}}
 \end{figure}
 
 <<diag2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-subset(res_size10[[1]], Rhat>2, c(1:7,16) )
+subset(res, Rhat>1.1, c(1:7,16) )
 @
 
+\pagebreak
 
 \begin{figure}[h]
-<<cirho, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-d <- subset(res_size10[[1]], param=='rho')
+<<rhoiw, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+d <- subset(res, param=='rho' & prior=='iw')
 d$rx <- d$r + runif(nrow(d),-.05,.05)
-qplot(data=d ,x=r, y=mean,facets=prior~s) + geom_abline(1, color=I('red'))
-
-#qplot(data=subset(d,prior=='iw'),x=rx, y=X50. )+facet_wrap(facets=~s) + geom_abline(1,color=I('red')) + geom_pointrange(aes(ymin=X2.5.,ymax=X97.5.) )  
-#qplot(data=d,x=rx, y=X50.,color=prior)+facet_wrap(facets=~s) + geom_abline(1,color=I('red')) + geom_pointrange(aes(ymin=X2.5.,ymax=X97.5.) )  
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
 @
-\caption{Credible intervals for $\rho$.   \label{rhoplt}}
+\caption{Posterior mean against true value of $\rho$, under IW prior. \label{rhoiw}}
 \end{figure}
+
+\begin{figure}[h]
+<<rhosiw, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+d <- subset(res, param=='rho' & prior=='siw')
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+@
+\caption{Posterior mean against true value of $\rho$, under SIW prior. \label{rhoiw}}
+\end{figure}
+
+\begin{figure}[h]
+<<rhoss, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+d <- subset(res, param=='rho' & prior=='ss')
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+@
+\caption{Posterior mean against true value of $\rho$, under SS prior. \label{rhoiw}}
+\end{figure}
+
+\begin{figure}[h]
+<<rhoht, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
+d <- subset(res, param=='rho' & prior=='ht')
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+@
+\caption{Posterior mean against true value of $\rho$, under HT prior. \label{rhoiw}}
+\end{figure}
+
 
 <<rho2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
 # list names, sim.r.s.ns 
-
-nms <- data.frame(nam=names(res_size10[[4]]),with(res_size10[[1]], expand.grid(unique(ns),unique(s),unique(r),unique(sim) )) )
-colnames(nms)[-1] <- c('ns','s','r','sim')
-
-out <- NULL
-for (i in 1:100) {
-  x <- res_size10[[4]][[i]]
-  true.r <- with(nms, nms[nam==names(res_size10[[3]])[i],])$r
-  rs <- extract(x, pars='rho', permuted = TRUE,inc_warmup=FALSE)$rho
-  df <- data.frame(r=true.r, per=sum(rs <= true.r)/length(rs), prob=sum( (rs<=true.r+.1) & (rs >= true.r-.1) )   /length(rs) )
-  out <- rbind(out,df)
-}
+qplot(data=per, x=factor(ns), y=prob, geom='boxplot', fill=prior)
+qplot(data=subset(per,ns==50) , x=prior, y=per, geom=c('point','boxplot'), fill=prior, facets=s~r)
+qplot(data=subset(per,ns==50), x=prior, y=prob, geom=c('point','boxplot'), fill=prior, facets=s~r)
 @
 
 
-
-\begin{figure}
-<<cisig1, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-d <- subset(res.iw, param =='s1' & r %in% c(-.85, -.05, .05, .85))
-d$rx <- d$r + runif(nrow(d), -.05,0.05)
-
-qplot(data=d, x=rx, y=Q50,size=I(3),color=factor(r))+geom_pointrange(aes(ymin=Q2.5,ymax=Q97.5) ) + facet_wrap(facets=~s,scales='free_y') + geom_line(data=d,aes(y=sqrt(s)), color=I('red'))
-@
-\caption{ Credible intervals for $\sigma_{11}$ \label{var}}
-\end{figure}
-
-\begin{figure}
-<<cisig2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-d <- subset(res.iw, param =='s2' & r %in% c(-.85, -.05, .05, .85))
-d$rx <- d$r + runif(nrow(d), -.05,0.05)
-
-qplot(data=d, x=rx, y=Q50,size=I(3),color=factor(r))+geom_pointrange(aes(ymin=Q2.5,ymax=Q97.5) ) + facet_wrap(facets=~s,scales='free_y') + geom_line(data=d,aes(y=sqrt(s)), color=I('red'))
-@
-\caption{ Credible intervals for $\sigma_{22}$ \label{var}}
-\end{figure}
 
 
 
