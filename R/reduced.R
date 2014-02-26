@@ -1,4 +1,9 @@
 # program to save a reduced piece of output to copy from home folder
+library(plyr)
+library(reshape2)
+library(rstan)
+set_cppo(mode = "fast")
+
 load('../data/simulations10.Rdata')
 load('../data/simulations50.Rdata')
 load('../data/simulations250.Rdata')
