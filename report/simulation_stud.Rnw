@@ -17,14 +17,15 @@ The rest parameter are set as $\mu = (0,0)$, and
               \end{array} \right)
 \]
 
-\section{Prior Simulation Results}
+\section{Simulation Results}
 
-<<getsim, message=FALSE, warning=FALSE,include=FALSE, cache=TRUE>>=
-res <- read.table('U:\\mnfb_yearly\\data\\reduced_res.csv', header=T)
-per <- read.table('U:\\mnfb_yearly\\data\\percentile.csv', header=T)
+
+<<getsim, message=FALSE, warning=FALSE,include=FALSE>>=
+res <- read.table('../data/reduced_res.csv', header=T)
+per <- read.table('../data/percentile.csv', header=T)
+library(ggplot2)
 library(plyr)
 library(reshape2)
-library(ggplot2)
 @
 
 \begin{figure}[h]
@@ -77,14 +78,22 @@ qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
 \caption{Posterior mean against true value of $\rho$, under HT prior. \label{rhoiw}}
 \end{figure}
 
-\begin{figure}[h]
-<<rho2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
-# list names, sim.r.s.ns 
-qplot(data=per, x=factor(ns), y=prob, geom='boxplot', fill=prior)
-qplot(data=subset(per,ns==50) , x=prior, y=per, geom=c('point','boxplot'), fill=prior, facets=s~r)
-#qplot(data=subset(per,ns==50), x=prior, y=prob, geom=c('point','boxplot'), fill=prior, facets=s~r)
+<<rho2, eval=FALSE>>=
+
+# probability arround true rho and percentile for tru rho in posterior 
+qplot(data=per, x=factor(ns), y=prob, geom='boxplot', fill=prior, main='Probability arround true value pm 0.1') + facet_wrap(facets=~s)
+
+qplot(data=subset(per,r==.99), x=factor(ns), y=per, geom='boxplot', fill=prior, main='True value percentile') + facet_wrap(facets=~s)
+
+qplot(data=subset(per,prior=='ss') ,x=r, y=per, facets=s~ns)
+
+# bias and ecm
+res$ecm <-  with(res, (mean-r)^2 + sd^2  )
+res$bias <- with(res, (mean-r) )
+qplot(data=subset(res,param=='rho'), x=r, y=ecm,color=prior) + facet_wrap(facets=ns~s, scale='free_y')
+qplot(data=subset(res,param=='rho'), x=r, y=bias,color=prior) + facet_wrap(facets=ns~s, scale='free_y')
 @
-\end{figure}
+
 
 
 % \begin{figure}
