@@ -12,16 +12,16 @@ We simulate data from this model
 
 The rest parameter are set as $\mu = (0,0)$, and 
 \[
-\Sigma = (\begin{array}{ccc} s  & \pho s^2 \\ 
+\Sigma = \left( \begin{array}{ccc} s  & \rho s^2 \\ 
                             \rho s^2 & s
-              \end{array})
+              \end{array} \right)
 \]
 
 \section{Prior Simulation Results}
 
-<<getsim, message=FALSE, warning=FALSE,echo=FALSE, cache=TRUE>>=
-res <- read.table('data/reduced_res.csv', header=T)
-per <- read.table('data/percentile.csv', header=T)
+<<getsim, message=FALSE, warning=FALSE,include=FALSE, cache=TRUE>>=
+res <- read.table('U:\\mnfb_yearly\\data\\reduced_res.csv', header=T)
+per <- read.table('U:\\mnfb_yearly\\data\\percentile.csv', header=T)
 library(plyr)
 library(reshape2)
 library(ggplot2)
@@ -77,16 +77,14 @@ qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
 \caption{Posterior mean against true value of $\rho$, under HT prior. \label{rhoiw}}
 \end{figure}
 
-
+\begin{figure}[h]
 <<rho2, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
 # list names, sim.r.s.ns 
 qplot(data=per, x=factor(ns), y=prob, geom='boxplot', fill=prior)
 qplot(data=subset(per,ns==50) , x=prior, y=per, geom=c('point','boxplot'), fill=prior, facets=s~r)
-qplot(data=subset(per,ns==50), x=prior, y=prob, geom=c('point','boxplot'), fill=prior, facets=s~r)
+#qplot(data=subset(per,ns==50), x=prior, y=prob, geom=c('point','boxplot'), fill=prior, facets=s~r)
 @
-
-
-
+\end{figure}
 
 
 % \begin{figure}
