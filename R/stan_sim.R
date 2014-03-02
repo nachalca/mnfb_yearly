@@ -21,13 +21,13 @@ m_ht  <- stan_model(model_code=sim.ht)
 save(m_iw, m_siw, m_ss, m_ht, file='../data/models_cpp.Rdata')
 
 # functions to run stan model
-runstan.sim <- function(d, it = 1200, ch = 3, w=200, prm) {
+runstan.sim <- function(d, it = 1200, ch = 3, w=200, prm=NULL) {
   if (d$ms[1]=='iw')  mod<- m_iw
   if (d$ms[1]=='siw') mod<- m_siw
   if (d$ms[1]=='ss')  mod<- m_ss
   if (d$ms[1]=='ht')  mod<- m_ht
-  K <- ncol(d[,-c(1:5)]
-  dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(k), k=K)
+  K <- ncol(d[,-c(1:5)])
+  dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(K), k=K)
   sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
 }
 printresult <- function(xx) {
@@ -35,8 +35,8 @@ printresult <- function(xx) {
   data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
 }
 simula <- function(size, data) {
-  prms <- c('mu[1]', 'mu[2]', 's1', 's2', 'rho')
-  simdata <- subset(data, sim==1 & r=.99 & s==0.1 & ns==size)                       
+  prms <- c('mu', 's1', 's2', 'rho')
+  simdata <- subset(data, sim==1 & r==.99 & s==0.1 & ns==size)                       
   ptm <- proc.time()
   mod_iw <-  dlply(simdata[simdata$ms=='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
   time.iw <- proc.time() - ptm
