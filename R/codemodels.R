@@ -528,7 +528,8 @@ transformed parameters {
   for (i in 1:k) 
     delta1[i] <- 1/sqrt(Q[i,i]);
   D1 <- diag_matrix(delta1);  
-  
+  Q1 <- D1*Q*D1;  
+
   for (i in 1:k) 
     delta[i] <- exp( xi[i] );
   D <- diag_matrix(delta);
