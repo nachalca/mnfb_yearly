@@ -84,7 +84,7 @@ ms=c('iw', 'siw', 'ss', 'ht')
 # Run simulations for 10 dimension case
 data10 <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
 
-res_size10 <- simula(data=data10)
+res_size10 <- simula(size=10, data=data10)
 save(res_size10, file='../data/sims_n10_d10.Rdata')
 
 #res_size50 <- simula(size=50, data=data10)
