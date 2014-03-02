@@ -12,12 +12,6 @@ library(mnormt)
 library(rstan)
 set_cppo(mode = "fast")
 
-# Get simulated data and expanded to include prior type
-# load('data/simdata.Rdata')
-load('../data/simdata.Rdata')
-ms=c('iw', 'siw', 'ss', 'ht')
-simdata.all <- data.frame( ms=rep(ms, each=nrow(simdata)),rbind(simdata,simdata,simdata,simdata) )
-
 # Compile the model objects 
 source('codemodels.R')
 m_iw  <- stan_model(model_code=sim.iw)
@@ -27,34 +21,36 @@ m_ht  <- stan_model(model_code=sim.ht)
 save(m_iw, m_siw, m_ss, m_ht, file='../data/models_cpp.Rdata')
 
 # functions to run stan model
-runstan.sim <- function(d, it = 1200, ch = 3, w=200) {
+runstan.sim <- function(d, it = 1200, ch = 3, w=200, prm) {
   if (d$ms[1]=='iw')  mod<- m_iw
   if (d$ms[1]=='siw') mod<- m_siw
   if (d$ms[1]=='ss')  mod<- m_ss
   if (d$ms[1]=='ht')  mod<- m_ht
-  dat = list(y = d[,c('X1','X2')] , N = nrow(d), R = diag( ncol(d[,c('X1','X2')])) )
-  sampling(object=mod, data = dat, iter = it, chains = ch, warmup=w)
+  k <- ncol(d[,-c(1:5)]
+  dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(k), K=k)
+  sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
 }
 printresult <- function(xx) {
   x <- data.frame(summary(xx)$summary)
   data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
 }
-simula <- function(size) {
-  simdata <- subset(simdata.all, ns==size)                       
+simula <- function(size, data) {
+  prms <- c('mu[1]', 'mu[2]', 's1', 's2', 'rho')
+  simdata <- subset(data, sim==1 & r=.99 & s==0.1 & ns==size)                       
   ptm <- proc.time()
-  mod_iw <-  dlply(simdata[simdata$ms=='iw', ], .(sim,r,s,ns),runstan.sim)                        
+  mod_iw <-  dlply(simdata[simdata$ms=='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
   time.iw <- proc.time() - ptm
   #save(mod_iw,time.iw, file='../data/simula_iw.Rdata')
   ptm <- proc.time()
-  mod_siw <-  dlply(simdata[simdata$ms=='siw', ], .(sim,r,s,ns),runstan.sim)                        
+  mod_siw <-  dlply(simdata[simdata$ms=='siw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
   time.siw <- proc.time() - ptm
   #save(mod_siw,time.siw, file='../data/simula_siw.Rdata')
   ptm <- proc.time()
-  mod_ss <-  dlply(simdata[simdata$ms=='ss', ], .(sim,r,s,ns),runstan.sim,it=2000)                        
+  mod_ss <-  dlply(simdata[simdata$ms=='ss', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
   time.ss <- proc.time() - ptm
   #save(mod_ss,time.ss, file='../data/simula_ss.Rdata')
   ptm <- proc.time()
-  mod_ht <-  dlply(simdata[simdata$ms=='ht', ], .(sim,r,s,ns),runstan.sim,it=2000)                        
+  mod_ht <-  dlply(simdata[simdata$ms=='ht', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
   time.ht <- proc.time() - ptm
   #save(mod_ht,time.ht, file='../data/simula_ht.Rdata')
 
@@ -67,14 +63,46 @@ simula <- function(size) {
 list(res.df,time,mod_iw,mod_siw,mod_ss,mod_ht)
 }
 
-# Run simulations 
-res_size10 <- simula(size=10)
-save(res_size10, file='../data/simulations10.Rdata')
+# Get simulated data and expanded to include prior type
+# load('data/simdata.Rdata')
+load('../data/simdata.Rdata')
+ms=c('iw', 'siw', 'ss', 'ht')
 
-res_size50 <- simula(size=50)
-save(res_size50, file='../data/simulations50.Rdata')
+# Run simulations for Bivariate case
+#data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
 
-res_size250 <- simula(size=250)
-save(res_size250, file='../data/simulations250.Rdata')
+#res_size10 <- simula(size=10, data=data2)
+#save(res_size10, file='../data/sims_n10_d2.Rdata')
 
+#res_size50 <- simula(size=50, data=data2)
+#save(res_size50, file='../data/sims_n50_d2.Rdata')
 
+#res_size250 <- simula(size=250, data=data2)
+#save(res_size250, file='../data/sims_n250_d2.Rdata')
+#remove(data2)
+
+# Run simulations for 10 dimension case
+data10 <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
+
+res_size10 <- simula(data=data10)
+save(res_size10, file='../data/sims_n10_d10.Rdata')
+
+#res_size50 <- simula(size=50, data=data10)
+#save(res_size50, file='../data/sims_n50_d10.Rdata')
+
+#res_size250 <- simula(size=250, data=data10)
+#save(res_size250, file='../data/sims_n250_d10.Rdata')
+#remove(data10)
+
+# Run simulations for 10 dimension case
+#data100 <- data.frame( ms=rep(ms, each=nrow(simdata.100)),rbind(simdata.100,simdata.100,simdata.100,simdata.100) )
+
+#res_size10 <- simula(size=10, data=data100)
+#save(res_size10, file='../data/sims_n10_d100.Rdata')
+
+#res_size50 <- simula(size=50, data=data100)
+#save(res_size50, file='../data/sims_n50_d100.Rdata')
+
+#res_size250 <- simula(size=250, data=data100)
+#save(res_size250, file='../data/sims_n250_d100.Rdata')
+#remove(data100)

@@ -434,12 +434,12 @@ lambda ~ dunif(0, 1000)
 sim.iw = "
 data {
   int <lower=0> N;
-  matrix[2,2] R;
-  vector[2] y[N];
+  matrix[k,k] R;
+  vector[k] y[N];
 }
 parameters {
-  vector[2] mu;
-  cov_matrix[2] Sigma;
+  vector[k] mu;
+  cov_matrix[k] Sigma;
 }
 transformed parameters {
   real s1;
@@ -452,7 +452,7 @@ transformed parameters {
 model {
   mu[1] ~ normal(0, 100);
   mu[2] ~ normal(0, 100);
-  Sigma ~ inv_wishart(3, R);
+  Sigma ~ inv_wishart(k+1, R);
   for (n in 1:N)
     y[n] ~ multi_normal(mu, Sigma);
 }
@@ -460,24 +460,24 @@ model {
 sim.siw = "
 data {
   int <lower=0> N;
-  matrix[2,2] R;
-  vector[2] y[N];
+  matrix[k,k] R;
+  vector[k] y[N];
 }
 parameters {
-  vector[2] mu;
-  cov_matrix[2] Q;
-  vector[2] xi;
+  vector[k] mu;
+  cov_matrix[k] Q;
+  vector[k] xi;
 
 }
 transformed parameters {
-  cov_matrix[2] Sigma;
-  matrix[2,2] D;
-  vector[2] delta;
+  cov_matrix[k] Sigma;
+  matrix[k,k] D;
+  vector[k] delta;
   real s1;
   real s2;
   real rho;
-  delta[1] <- exp( xi[1] );
-  delta[2] <- exp( xi[2] );
+  for (i in 1:k) 
+    delta[i] <- exp( xi[i] );
   D <- diag_matrix(delta);
   Sigma <- D*Q*D;
   s1 <- sqrt(Sigma[1,1]);
@@ -485,15 +485,15 @@ transformed parameters {
   rho <- Sigma[1,2]/(s1*s2);
 }
 model {
-  matrix[2,2] L;
-  matrix[2,2] A;
-  Q ~ inv_wishart(3, R);
+  matrix[k,k] L;
+  matrix[k,k] A;
+  Q ~ inv_wishart(k+1, R);
   L <- cholesky_decompose(Q);
   A <- D*L;
-  mu[1] ~ normal(0, 100);
-  mu[2] ~ normal(0, 100);
-  xi[1] ~ normal(0, 100);
-  xi[2] ~ normal(0, 100);
+  for ( i in 1:k)
+    mu[i] ~ normal(0, 100);
+  for ( i in 1:k)
+    xi[i] ~ normal(0, 100);
  for (n in 1:N)
    y[n] ~ multi_normal_cholesky(mu, A);
 }
@@ -503,28 +503,31 @@ model {
 sim.ss = "
 data {
   int <lower=0> N;
-  matrix[2,2] R;
-  vector[2] y[N];
+  matrix[k,k] R;
+  vector[k] y[N];
 }
 parameters {
-  vector[2] mu;
-  corr_matrix[2] Q;
-  vector[2] xi;
+  vector[k] mu;
+  corr_matrix[k] Q;
+  vector[k] xi;
 }
 transformed parameters {
-  corr_matrix[2] Q1;
-  cov_matrix[2] Sigma;
-  matrix[2,2] D;
-  vector[2] delta;
+  corr_matrix[k] Q1; 
+  cov_matrix[k] Sigma;
+  matrix[k,k] D;
+  vector[k] delta;
+  matrix[k,k] D1;
+  vector[k] delta1;
   real s1;
   real s2;
   real rho;
-  Q1[1,1] <- 1;
-  Q1[2,2] <- 1;
-  Q1[2,1] <- Q[2,1]/sqrt(Q[1,1]*Q[2,2]); 
-  Q1[1,2] <- Q1[2,1];
-  delta[1] <- exp( xi[1] );
-  delta[2] <- exp( xi[2] );
+
+  for (i in 1:k) 
+    delta1[i] <- 1/sqrt(Q[i,i]);
+  D1 <- diag_matrix(delta1);  
+  
+  for (i in 1:k) 
+    delta[i] <- exp( xi[i] );
   D <- diag_matrix(delta);
   Sigma <- D*Q1*D; 
   s1 <- sqrt(Sigma[1,1]);
@@ -532,13 +535,13 @@ transformed parameters {
   rho <- Sigma[1,2]/(s1*s2);
 }
 model {
-  Q ~ inv_wishart(3, R);
-  mu[1] ~ normal(0, 100);
-  mu[2] ~ normal(0, 100);
-  xi[1] ~ normal(0, 100);
-  xi[2] ~ normal(0, 100);
-  for (n in 1:N)
-    y[n] ~ multi_normal(mu, Sigma);
+  Q ~ inv_wishart(k+1, R);
+  for ( i in 1:k)
+    mu[i] ~ normal(0, 100);
+  for ( i in 1:k)
+    xi[i] ~ normal(0, 100);
+ for (n in 1:N)
+   y[n] ~ multi_normal(mu, Sigma);
 }
 "
 
@@ -555,28 +558,28 @@ parameters {
 
 }
 transformed parameters {
-  matrix[2,2] D;
-  vector[2] xi;
+  matrix[k,k] D;
+  vector[k] xi;
   real s1;
   real s2;
   real rho;
-  xi[1] <- 1/delta[1];
-  xi[2] <- 1/delta[2];
+  for (i in 1:k)
+    xi[i] <- 1/delta[i];
   D <- diag_matrix(xi);
   s1 <- sqrt(Sigma[1,1]);
   s2 <- sqrt(Sigma[2,2]);
   rho <- Sigma[1,2]/(s1*s2);
 }
 model {
-  matrix[2,2] L;
-  matrix[2,2] A;
-  Sigma ~ inv_wishart(4, 4*D);
+  matrix[k,k] L;
+  matrix[k,k] A;
+  Sigma ~ inv_wishart(k+1, (k+1)*D);
   L <- cholesky_decompose(Sigma);
   A <- D*L;
-  mu[1] ~ normal(0, 100);
-  mu[2] ~ normal(0, 100);
-  delta[1] ~ inv_gamma(0.5, 0.001);
-  delta[2] ~ inv_gamma(0.5, 0.001);
+  for (i in 1:k)
+    mu[i] ~ normal(0, 100);
+  for (i in 1:k)
+    delta[i] ~ inv_gamma(0.5, 0.001);
   for (n in 1:N)
     y[n] ~ multi_normal_cholesky(mu, A);
 }

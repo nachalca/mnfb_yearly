@@ -4,32 +4,40 @@
 library(plyr)
 library(mnormt)
 set.seed(1234)
-# Simple scenario: Z = (Z1,Z2) ~ N(0, S) 
-# mu1=mu2=0, sig1=sig2=sigma and cor(Z1,Z2)=rho. 
-simdat <- function(ns,r,s=1) {
-  # r: is the rho23 value
-  # s: is the value of the variance
-  sigma <- diag(c(s,s)); sigma[2] <- r*s ; sigma[3] <- r*s
-  mu <- rep(0,2)
+# Simple scenario: Z = (Z1,Z2) ~ N(0, S) mu1=mu2=0, sig1=sig2=sigma and cor(Z1,Z2)=rho. 
+# More dimensions: k-vector normally distributed with zero mean, equal variance and equal 
+# correlation for each pair of vars.
+
+# We first simulate with Variance = 1 and then re-scale to obtain other data sets. 
+simdat <- function(ns,r,dim) {
+  # r: is the common rho value for all dimensions
+  sigma <- diag(dim); l <- lower.tri(sigma); u <- upper.tri(sigma)
+  sigma[l] <- r; sigma[u]<- r
+  mu <- rep(0,dim)
   data.frame(rmnorm(ns, mean=mu, varcov=sigma))
 }  
 
+# Simulate 5 data sets for each combination of r,size keeping separate the dimension
 prm <- expand.grid(r= c(0,.25,.5,.75,.99), ns=c(10,50,250))
+s2 <-  rdply(5,mdply(prm, simdat, dim=2))
+colnames(s2)[1] <- 'sim'
 
-#prm <- expand.grid(r= c(.1,.5), s=1, n=c(50))
-simdata <-  rdply(5,mdply(prm, simdat))
-colnames(simdata)[1] <- 'sim'
+s10 <-  rdply(5,mdply(prm, simdat, dim=10))
+colnames(s10)[1] <- 'sim'
 
-s=list(.1,1,10,100) 
+s100 <-  rdply(5,mdply(prm, simdat, dim=100))
+colnames(s100)[1] <- 'sim'
 
-aux <- ldply(s, function(sx) {
-  data.frame(simdata[,1:3],s=sx,X1=simdata$X1*sx,X2=simdata$X2*sx)
-      }
-)
-simdata <- aux
+# rescale each data set
+ss <- data.frame(s=c(.1,1,100))
+rescale    <- function(sx, dx) data.frame(dx[,1:3],dx[,-c(1:3)]*sqrt(sx) )
+simdata.2    <- mdply(ss, rescale, dx=s2)
+simdata.10   <- mdply(ss, rescale, dx=s10)
+simdata.100  <- mdply(ss, rescale, dx=s100)
+  
 # number of data set: 
-xx <- alply(simdata[,1:4], .margins=2, unique)
-prod(laply(xx, dim)[,1])
+#xx <- alply(simdata[,1:4], .margins=2, unique)
+#prod(laply(xx, dim)[,1])
 
 # Run from R folder 
-save(simdata, file='data/simdata.Rdata')
+save(simdata.2, simdata.10, simdata.100, file='../data/simdata.Rdata')
