@@ -434,6 +434,7 @@ lambda ~ dunif(0, 1000)
 sim.iw = "
 data {
   int <lower=0> N;
+  int <lower=0> k;  
   matrix[k,k] R;
   vector[k] y[N];
 }
@@ -460,6 +461,7 @@ model {
 sim.siw = "
 data {
   int <lower=0> N;
+  int <lower=0> k;
   matrix[k,k] R;
   vector[k] y[N];
 }
@@ -503,6 +505,7 @@ model {
 sim.ss = "
 data {
   int <lower=0> N;
+  int <lower=0> k;
   matrix[k,k] R;
   vector[k] y[N];
 }
@@ -547,6 +550,7 @@ model {
 
 sim.ht = "
 data {
+  int <lower=0> k;
   int <lower=0> N;
   matrix[2,2] R;
   vector[2] y[N];
