@@ -553,13 +553,13 @@ sim.ht = "
 data {
   int <lower=0> k;
   int <lower=0> N;
-  matrix[2,2] R;
-  vector[2] y[N];
+  matrix[k,k] R;
+  vector[k] y[N];
 }
 parameters {
-  vector[2] mu;
-  cov_matrix[2] Sigma;
-  vector[2] delta;
+  vector[k] mu;
+  cov_matrix[k] Sigma;
+  vector[k] delta;
 
 }
 transformed parameters {
