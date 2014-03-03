@@ -6,427 +6,427 @@
 #--------------------------------------------------------
 # 1) Different beta, different sigma (Separate regresions)
 
-mtext.dd.quad = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
-eta.e[j]    <- 1/(sigma.e[j]^2)
-sigma.e[j] ~ dunif(0, 1000)      
-}
-
-# predictives 
-for (i in 1:ns) { 
-ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
-e[i]  <-  beta[1, abbvrev.end[i]]
-s[i] <-  beta[2, abbvrev.end[i]]*end
-q[i] <-  beta[3, abbvrev.end[i]]*end^2
-rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-}
-}
-"
-mtext.dd.lin = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-}
-
-# Priors.  
-for (j in 1:ns) {
-for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
-eta.e[j]    <- 1/(sigma.e[j]^2)
-sigma.e[j] ~ dunif(0, 1000)      
-}
-}
-"
-#--------------------------------------------------------
-
-#--------------------------------------------------------
-#2) Different betas, same sigma (one big regression)
-mtext.ds.quad = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
-}
-eta.e   <- 1/(sigma.e^2)
-sigma.e ~  dunif(0, 1000)      
-
-
-# predictives 
-for (i in 1:ns) { 
-ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e)
-e[i]  <-  beta[1, abbvrev.end[i]]
-s[i] <-  beta[2, abbvrev.end[i]]*end
-q[i] <-  beta[3, abbvrev.end[i]]*end^2
-rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-}
-}
-"
-mtext.ds.lin = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i] , eta.e  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-}
-
-# Priors.  
-for (j in 1:ns) {
-for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
-}
-eta.e   <- 1/(sigma.e^2)
-sigma.e ~ dunif(0, 1000)      
-}
-"
-#--------------------------------------------------------
-
-#--------------------------------------------------------
-# 3)  DIfferents Betas, Hirerarchical Sigma 
-mtext.dh.quad = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
-# use scale chi param
-eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
-sigma.e[j] <- 1/sqrt(eta.e[j])
-}
-
-# hyperpriors
-alpha  ~ dunif(0,1000)
-lambda ~ dunif(0,1000)
-
-# predictives 
-for (i in 1:ns) { 
-ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
-e[i]  <-  beta[1, abbvrev.end[i]]
-s[i] <-  beta[2, abbvrev.end[i]]*end
-q[i] <-  beta[3, abbvrev.end[i]]*end^2
-rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-}
-}
-"
-mtext.dh.lin = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-}
-
-# Priors.  
-for (j in 1:ns) {
-for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
-# use scale chi param
-eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
-sigma.e[j] <- 1/sqrt(eta.e[j])
-}
-
-# hyperpriors
-alpha  ~ dunif(0,1000)
-lambda ~ dunif(0,1000)
-}
-"
-#--------------------------------------------------------
-
-#--------------------------------------------------------
-# 4) Hirerachical Beta, Same sigma (lmer random regression)
-mtext.hs.lin = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i] , eta.e )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1:2,j]  ~ dmnorm(mu,prec.be )
-}
-sigma.e   ~ dunif(0,1000)       
-eta.e     <- 1/(sigma.e)^2
-
-# hyperpriors
-prec.be   ~ dwish(R, df)
-sigma.be  <- inverse(prec.be)
-for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
-df     <- 3  
-}
-"
-mtext.hs.quad = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e)
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1:3,j]  ~ dmnorm(mu,prec.be )
-}
-sigma.e   ~ dunif(0,1000)       
-eta.e     <- 1/(sigma.e)^2
-
-# hyperpriors
-prec.be   ~ dwish(R, df)
-sigma.be  <- inverse(prec.be)
-for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
-df     <- 4  
-
-#predictives
-for (i in 1:ns) { 
-ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e )
-e[i]  <-  beta[1, abbvrev.end[i]]
-s[i] <-  beta[2, abbvrev.end[i]]*end
-q[i] <-  beta[3, abbvrev.end[i]]*end^2
-rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-}
-}
-"
-
-
-
-#--------------------------------------------------------
-
-
-#--------------------------------------------------------
-#5) Hirerachical Betas, Differents Sigma
-mtext.hd.lin = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1:2,j]  ~ dmnorm(mu,prec.be )
-sigma.e[j]   ~ dunif(0,1000)       
-eta.e[j]     <- 1/sqrt(sigma.e[j])
-}
-
-# hyperpriors
-prec.be   ~ dwish(R, df)
-sigma.be  <- inverse(prec.be)
-for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
-
-df     <- 3  
-}
-"
-
-mtext.hd.quad = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1:3,j]  ~ dmnorm(mu,prec.be )
-sigma.e[j]   ~ dunif(0,1000)       
-eta.e[j]     <- 1/sqrt(sigma.e[j])
-}
-
-# hyperpriors
-prec.be   ~ dwish(R, df)
-sigma.be  <- inverse(prec.be)
-for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
-df     <- 4  
-
-#predictive 
-for (i in 1:ns) { 
-ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
-e[i]  <-  beta[1, abbvrev.end[i]]
-s[i] <-  beta[2, abbvrev.end[i]]*end
-q[i] <-  beta[3, abbvrev.end[i]]*end^2
-rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-}
-}
-"
-#--------------------------------------------------------
-
-
-#--------------------------------------------------------
-# 6) Hirerarchical Sigma, Hirerarchical Beta
-mtext.hh.quad = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1:3,j]   ~ dmnorm(mu,prec.be )
-
-# use scale chi param
-eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
-sigma.e[j] <- 1/sqrt(eta.e[j])
-}
-
-# hyperpriors
-prec.be   ~ dwish(R, df)
-sigma.be  <- inverse(prec.be)
-for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
-
-df     <- 4  
-alpha  ~ dunif(0, 1000)
-lambda ~ dunif(0, 1000)
-
-#predictives 
-for (i in 1:ns) { 
-ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
-e[i]  <-  beta[1, abbvrev.end[i]]
-s[i] <-  beta[2, abbvrev.end[i]]*end
-q[i] <-  beta[3, abbvrev.end[i]]*end^2
-rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
-}
-}
-"
-mtext.hh.lin = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1:2,j]   ~ dmnorm(mu,prec.be )
-# use scale chi param
-eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
-sigma.e[j] <- 1/sqrt(eta.e[j])
-}
-
-# hyperpriors
-prec.be   ~ dwish(R, df)
-sigma.be  <- inverse(prec.be)
-for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
-
-df     <- 4  
-alpha  ~ dunif(0,1000)
-lambda ~ dunif(0,1000)
-}
-"
-#---------------------------------------------------------------
-
-# Models changing covariance prior: IW, SIW, and SS
-# choose hh structure, quadratic and log transform response (ql)
-# we have: hh.iw, hh.siw and hh.ss (actually hh.iw = hh.quad)
-
-# inverse wishart
-mtext.hh.iw <-  "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1:3,j]   ~ dmnorm(mu,prec.be )
-
-# use scale chi param
-eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
-sigma.e[j] <- 1/sqrt(eta.e[j])
-}
-
-# hyperpriors
-prec.be   ~ dwish(R, df)
-sigma.be  <- inverse(prec.be)
-for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
-
-df     <- 4  
-alpha  ~ dunif(0, 1000)
-lambda ~ dunif(0, 1000)
-rho12 <- sigma.be[1,2]/sqrt(sigma.be[1,1]*sigma.be[2,2])
-rho13 <- sigma.be[1,3]/sqrt(sigma.be[1,1]*sigma.be[3,3])
-rho23 <- sigma.be[2,3]/sqrt(sigma.be[2,2]*sigma.be[3,3])
-}
-"
-
-# Scaled Inverse Wishart prior
-mtext.hh.siw = "
-model {
-for (i in 1:n) { 
-y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
-eff[i]  <-  beta[1, abbrev[i]]
-slop[i] <-  beta[2, abbrev[i]]*year[i]
-quad[i] <-  beta[3, abbrev[i]]*year[i]^2
-}
-
-# Priors.  
-for (j in 1:ns) {
-beta[1,j] <- xi[1]*beta.raw[1,j]
-beta[2,j] <- xi[2]*beta.raw[2,j]
-beta[3,j] <- xi[3]*beta.raw[3,j]
-beta.raw[1:3,j]   ~ dmnorm(mu.raw, tau.raw)
-
-# use scale chi param
-eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
-sigma.e[j] <- 1/sqrt(eta.e[j])
-}
-
-# hyperpriors
-tau.raw   ~ dwish(R, df)
-sigma.raw  <- inverse(tau.raw)
-
-for (i in 1:3) { 
-mu.raw[i] ~ dnorm(0,0.001) 
-xi[i] ~ dunif(0,100)
-mu[i] <- xi[i]*mu.raw[i]
-sigma.be[i,i] <- sigma.raw[i,i]*xi[i]^2
-}
-rho12 <- sigma.raw[1,2]/sqrt(sigma.raw[1,1]*sigma.raw[2,2])
-rho13 <- sigma.raw[1,3]/sqrt(sigma.raw[1,1]*sigma.raw[3,3])
-rho23 <- sigma.raw[2,3]/sqrt(sigma.raw[2,2]*sigma.raw[3,3])
-sigma.be[1,2] <- rho12*sqrt(sigma.be[1,1]*sigma.be[2,2])
-sigma.be[1,3] <- rho13*sqrt(sigma.be[1,1]*sigma.be[3,3])
-sigma.be[2,3] <- rho23*sqrt(sigma.be[2,2]*sigma.be[3,3])
-sigma.be[2,1] <- sigma.be[1,2]
-sigma.be[3,1] <- sigma.be[1,3]
-sigma.be[3,2] <- sigma.be[2,3]
-
-df     <- 4  
-alpha  ~ dunif(0, 1000)
-lambda ~ dunif(0, 1000)
-}
-"
+# mtext.dd.quad = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
+# eta.e[j]    <- 1/(sigma.e[j]^2)
+# sigma.e[j] ~ dunif(0, 1000)      
+# }
+# 
+# # predictives 
+# for (i in 1:ns) { 
+# ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+# e[i]  <-  beta[1, abbvrev.end[i]]
+# s[i] <-  beta[2, abbvrev.end[i]]*end
+# q[i] <-  beta[3, abbvrev.end[i]]*end^2
+# rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+# }
+# }
+# "
+# mtext.dd.lin = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
+# eta.e[j]    <- 1/(sigma.e[j]^2)
+# sigma.e[j] ~ dunif(0, 1000)      
+# }
+# }
+# "
+# #--------------------------------------------------------
+# 
+# #--------------------------------------------------------
+# #2) Different betas, same sigma (one big regression)
+# mtext.ds.quad = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
+# }
+# eta.e   <- 1/(sigma.e^2)
+# sigma.e ~  dunif(0, 1000)      
+# 
+# 
+# # predictives 
+# for (i in 1:ns) { 
+# ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e)
+# e[i]  <-  beta[1, abbvrev.end[i]]
+# s[i] <-  beta[2, abbvrev.end[i]]*end
+# q[i] <-  beta[3, abbvrev.end[i]]*end^2
+# rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+# }
+# }
+# "
+# mtext.ds.lin = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i] , eta.e  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
+# }
+# eta.e   <- 1/(sigma.e^2)
+# sigma.e ~ dunif(0, 1000)      
+# }
+# "
+# #--------------------------------------------------------
+# 
+# #--------------------------------------------------------
+# # 3)  DIfferents Betas, Hirerarchical Sigma 
+# mtext.dh.quad = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# for (i in 1:3) { beta[i,j]   ~ dnorm(0, .0001) }
+# # use scale chi param
+# eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+# sigma.e[j] <- 1/sqrt(eta.e[j])
+# }
+# 
+# # hyperpriors
+# alpha  ~ dunif(0,1000)
+# lambda ~ dunif(0,1000)
+# 
+# # predictives 
+# for (i in 1:ns) { 
+# ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+# e[i]  <-  beta[1, abbvrev.end[i]]
+# s[i] <-  beta[2, abbvrev.end[i]]*end
+# q[i] <-  beta[3, abbvrev.end[i]]*end^2
+# rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+# }
+# }
+# "
+# mtext.dh.lin = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# for (i in 1:2) { beta[i,j]   ~ dnorm(0, .0001) }
+# # use scale chi param
+# eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+# sigma.e[j] <- 1/sqrt(eta.e[j])
+# }
+# 
+# # hyperpriors
+# alpha  ~ dunif(0,1000)
+# lambda ~ dunif(0,1000)
+# }
+# "
+# #--------------------------------------------------------
+# 
+# #--------------------------------------------------------
+# # 4) Hirerachical Beta, Same sigma (lmer random regression)
+# mtext.hs.lin = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i] , eta.e )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1:2,j]  ~ dmnorm(mu,prec.be )
+# }
+# sigma.e   ~ dunif(0,1000)       
+# eta.e     <- 1/(sigma.e)^2
+# 
+# # hyperpriors
+# prec.be   ~ dwish(R, df)
+# sigma.be  <- inverse(prec.be)
+# for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
+# df     <- 3  
+# }
+# "
+# mtext.hs.quad = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e)
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1:3,j]  ~ dmnorm(mu,prec.be )
+# }
+# sigma.e   ~ dunif(0,1000)       
+# eta.e     <- 1/(sigma.e)^2
+# 
+# # hyperpriors
+# prec.be   ~ dwish(R, df)
+# sigma.be  <- inverse(prec.be)
+# for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
+# df     <- 4  
+# 
+# #predictives
+# for (i in 1:ns) { 
+# ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e )
+# e[i]  <-  beta[1, abbvrev.end[i]]
+# s[i] <-  beta[2, abbvrev.end[i]]*end
+# q[i] <-  beta[3, abbvrev.end[i]]*end^2
+# rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+# }
+# }
+# "
+# 
+# 
+# 
+# #--------------------------------------------------------
+# 
+# 
+# #--------------------------------------------------------
+# #5) Hirerachical Betas, Differents Sigma
+# mtext.hd.lin = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1:2,j]  ~ dmnorm(mu,prec.be )
+# sigma.e[j]   ~ dunif(0,1000)       
+# eta.e[j]     <- 1/sqrt(sigma.e[j])
+# }
+# 
+# # hyperpriors
+# prec.be   ~ dwish(R, df)
+# sigma.be  <- inverse(prec.be)
+# for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
+# 
+# df     <- 3  
+# }
+# "
+# 
+# mtext.hd.quad = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1:3,j]  ~ dmnorm(mu,prec.be )
+# sigma.e[j]   ~ dunif(0,1000)       
+# eta.e[j]     <- 1/sqrt(sigma.e[j])
+# }
+# 
+# # hyperpriors
+# prec.be   ~ dwish(R, df)
+# sigma.be  <- inverse(prec.be)
+# for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
+# df     <- 4  
+# 
+# #predictive 
+# for (i in 1:ns) { 
+# ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+# e[i]  <-  beta[1, abbvrev.end[i]]
+# s[i] <-  beta[2, abbvrev.end[i]]*end
+# q[i] <-  beta[3, abbvrev.end[i]]*end^2
+# rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+# }
+# }
+# "
+# #--------------------------------------------------------
+# 
+# 
+# #--------------------------------------------------------
+# # 6) Hirerarchical Sigma, Hirerarchical Beta
+# mtext.hh.quad = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1:3,j]   ~ dmnorm(mu,prec.be )
+# 
+# # use scale chi param
+# eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+# sigma.e[j] <- 1/sqrt(eta.e[j])
+# }
+# 
+# # hyperpriors
+# prec.be   ~ dwish(R, df)
+# sigma.be  <- inverse(prec.be)
+# for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
+# 
+# df     <- 4  
+# alpha  ~ dunif(0, 1000)
+# lambda ~ dunif(0, 1000)
+# 
+# #predictives 
+# for (i in 1:ns) { 
+# ynext[i] ~ dnorm(e[i]+s[i]+q[i] , eta.e[abbvrev.end[i]])
+# e[i]  <-  beta[1, abbvrev.end[i]]
+# s[i] <-  beta[2, abbvrev.end[i]]*end
+# q[i] <-  beta[3, abbvrev.end[i]]*end^2
+# rate[i] <- ynext[i]/yend[abbvrev.end[i]] - 1 
+# }
+# }
+# "
+# mtext.hh.lin = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1:2,j]   ~ dmnorm(mu,prec.be )
+# # use scale chi param
+# eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+# sigma.e[j] <- 1/sqrt(eta.e[j])
+# }
+# 
+# # hyperpriors
+# prec.be   ~ dwish(R, df)
+# sigma.be  <- inverse(prec.be)
+# for (i in 1:2) { mu[i] ~ dnorm(0,0.001) }
+# 
+# df     <- 4  
+# alpha  ~ dunif(0,1000)
+# lambda ~ dunif(0,1000)
+# }
+# "
+# #---------------------------------------------------------------
+# 
+# # Models changing covariance prior: IW, SIW, and SS
+# # choose hh structure, quadratic and log transform response (ql)
+# # we have: hh.iw, hh.siw and hh.ss (actually hh.iw = hh.quad)
+# 
+# # inverse wishart
+# mtext.hh.iw <-  "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1:3,j]   ~ dmnorm(mu,prec.be )
+# 
+# # use scale chi param
+# eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+# sigma.e[j] <- 1/sqrt(eta.e[j])
+# }
+# 
+# # hyperpriors
+# prec.be   ~ dwish(R, df)
+# sigma.be  <- inverse(prec.be)
+# for (i in 1:3) { mu[i] ~ dnorm(0,0.001) }
+# 
+# df     <- 4  
+# alpha  ~ dunif(0, 1000)
+# lambda ~ dunif(0, 1000)
+# rho12 <- sigma.be[1,2]/sqrt(sigma.be[1,1]*sigma.be[2,2])
+# rho13 <- sigma.be[1,3]/sqrt(sigma.be[1,1]*sigma.be[3,3])
+# rho23 <- sigma.be[2,3]/sqrt(sigma.be[2,2]*sigma.be[3,3])
+# }
+# "
+# 
+# # Scaled Inverse Wishart prior
+# mtext.hh.siw = "
+# model {
+# for (i in 1:n) { 
+# y[i] ~ dnorm(eff[i]+slop[i]+quad[i] , eta.e[abbrev[i]]  )
+# eff[i]  <-  beta[1, abbrev[i]]
+# slop[i] <-  beta[2, abbrev[i]]*year[i]
+# quad[i] <-  beta[3, abbrev[i]]*year[i]^2
+# }
+# 
+# # Priors.  
+# for (j in 1:ns) {
+# beta[1,j] <- xi[1]*beta.raw[1,j]
+# beta[2,j] <- xi[2]*beta.raw[2,j]
+# beta[3,j] <- xi[3]*beta.raw[3,j]
+# beta.raw[1:3,j]   ~ dmnorm(mu.raw, tau.raw)
+# 
+# # use scale chi param
+# eta.e[j]   ~ dgamma(alpha/2, alpha*lambda/2)
+# sigma.e[j] <- 1/sqrt(eta.e[j])
+# }
+# 
+# # hyperpriors
+# tau.raw   ~ dwish(R, df)
+# sigma.raw  <- inverse(tau.raw)
+# 
+# for (i in 1:3) { 
+# mu.raw[i] ~ dnorm(0,0.001) 
+# xi[i] ~ dunif(0,100)
+# mu[i] <- xi[i]*mu.raw[i]
+# sigma.be[i,i] <- sigma.raw[i,i]*xi[i]^2
+# }
+# rho12 <- sigma.raw[1,2]/sqrt(sigma.raw[1,1]*sigma.raw[2,2])
+# rho13 <- sigma.raw[1,3]/sqrt(sigma.raw[1,1]*sigma.raw[3,3])
+# rho23 <- sigma.raw[2,3]/sqrt(sigma.raw[2,2]*sigma.raw[3,3])
+# sigma.be[1,2] <- rho12*sqrt(sigma.be[1,1]*sigma.be[2,2])
+# sigma.be[1,3] <- rho13*sqrt(sigma.be[1,1]*sigma.be[3,3])
+# sigma.be[2,3] <- rho23*sqrt(sigma.be[2,2]*sigma.be[3,3])
+# sigma.be[2,1] <- sigma.be[1,2]
+# sigma.be[3,1] <- sigma.be[1,3]
+# sigma.be[3,2] <- sigma.be[2,3]
+# 
+# df     <- 4  
+# alpha  ~ dunif(0, 1000)
+# lambda ~ dunif(0, 1000)
+# }
+# "
 # -------------------------------------------
 # Simple modesl for simulations .... 
 # now I am using stan !!! 
@@ -559,37 +559,32 @@ data {
 parameters {
   vector[k] mu;
   cov_matrix[k] Sigma;
-  vector[k] delta;
+  vector<lower=0>[k] delta;
 
 }
 transformed parameters {
   matrix[k,k] D;
-  vector[k] xi;
   real s1;
   real s2;
   real rho;
-  for (i in 1:k)
+  vector<lower=0>[k] xi;
+  for (i in 1:k) 
     xi[i] <- 1/delta[i];
-  D <- diag_matrix(xi);
+  D <- 4*diag_matrix(xi);
   s1 <- sqrt(Sigma[1,1]);
   s2 <- sqrt(Sigma[2,2]);
   rho <- Sigma[1,2]/(s1*s2);
 }
 model {
-  matrix[k,k] L;
-  matrix[k,k] A;
-  Sigma ~ inv_wishart(k+1, (k+1)*D);
-  L <- cholesky_decompose(Sigma);
-  A <- D*L;
+  for (i in 1:k)
+    delta[i] ~ inv_gamma(1, 1);
+  Sigma ~ inv_wishart(k+1, D);
   for (i in 1:k)
     mu[i] ~ normal(0, 100);
-  for (i in 1:k)
-    delta[i] ~ inv_gamma(0.5, 0.001);
   for (n in 1:N)
-    y[n] ~ multi_normal_cholesky(mu, A);
+    y[n] ~ multi_normal(mu, Sigma);
 }
 "
-
 
 
 

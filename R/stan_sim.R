@@ -38,7 +38,7 @@ simula <- function(size, data) {
   prms <- c('mu', 's1', 's2', 'rho')
   simdata <- subset(data, sim==1 & r==.99 & s==0.1 & ns==size)                       
   ptm <- proc.time()
-  mod_iw <-  dlply(simdata[simdata$ms=='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
+  mod_iw <-  dlply(simdata[simdata$ms =='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
   time.iw <- proc.time() - ptm
   #save(mod_iw,time.iw, file='../data/simula_iw.Rdata')
   ptm <- proc.time()
@@ -72,13 +72,13 @@ ms=c('iw', 'siw', 'ss', 'ht')
 data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
 
 res_size10d2 <- simula(size=10, data=data2)
-#save(res_size10d2, file='../data/sims_n10_d2.Rdata')
+save(res_size10d2, file='../data/sims_n10_d2.Rdata')
 
-#res_size50d2 <- simula(size=50, data=data2)
-#save(res_size50d2, file='../data/sims_n50_d2.Rdata')
+res_size50d2 <- simula(size=50, data=data2)
+save(res_size50d2, file='../data/sims_n50_d2.Rdata')
 
-#res_size250d2 <- simula(size=250, data=data2)
-#save(res_size250d2, file='../data/sims_n250_d2.Rdata')
+res_size250d2 <- simula(size=250, data=data2)
+save(res_size250d2, file='../data/sims_n250_d2.Rdata')
 remove(data2)
 
 # Run simulations for 10 dimension case
@@ -87,11 +87,11 @@ data10 <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata
 res_size10d10 <- simula(size=10, data=data10)
 save(res_size10d10, file='../data/sims_n10_d10.Rdata')
 
-#res_size50d10 <- simula(size=50, data=data10)
-#save(res_size50d10, file='../data/sims_n50_d10.Rdata')
+res_size50d10 <- simula(size=50, data=data10)
+save(res_size50d10, file='../data/sims_n50_d10.Rdata')
 
-#res_size250d10 <- simula(size=250, data=data10)
-#save(res_size250d10, file='../data/sims_n250_d10.Rdata')
+res_size250d10 <- simula(size=250, data=data10)
+save(res_size250d10, file='../data/sims_n250_d10.Rdata')
 remove(data10)
 
 # Run simulations for 10 dimension case
