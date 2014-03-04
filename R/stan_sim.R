@@ -36,7 +36,7 @@ printresult <- function(xx) {
 }
 simula <- function(size, data) {
   prms <- c('mu', 's1', 's2', 'rho')
-  simdata <- subset(data, sim==1 & r==.99 & s==.1 & ns==size)                       
+  simdata <- subset(data, ns==size)                       
   ptm <- proc.time()
   mod_iw <-  dlply(simdata[simdata$ms =='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
   time.iw <- proc.time() - ptm
@@ -81,8 +81,12 @@ res_size250d2 <- simula(size=250, data=data2)
 save(res_size250d2, file='../data/sims_n250_d2.Rdata')
 remove(data2)
 
-# Run simulations for 10 dimension case
-data10 <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
+# Run simulations for 10 dimension case: takes too long, so reduce the simulations
+# only size: 10 and 50
+# only rho: 0, .99
+# only s: .1, 1, 100
+d <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
+data10 <- subset(d, s %in% c(.1,1,100) & r %in% c(0,.99))
 
 res_size10d10 <- simula(size=10, data=data10)
 save(res_size10d10, file='../data/sims_n10_d10.Rdata')
@@ -90,16 +94,9 @@ save(res_size10d10, file='../data/sims_n10_d10.Rdata')
 res_size50d10 <- simula(size=50, data=data10)
 save(res_size50d10, file='../data/sims_n50_d10.Rdata')
 
-res_size250d10 <- simula(size=250, data=data10)
-save(res_size250d10, file='../data/sims_n250_d10.Rdata')
+#res_size250d10 <- simula(size=250, data=data10)
+#save(res_size250d10, file='../data/sims_n250_d10.Rdata')
 remove(data10)
-
-
-# checking times .. 
-time <- rbind(res_size10d2[[2]],res_size50d2[[2]],res_size250d2[[2]],res_size10d10[[2]],res_size50d10[[2]],res_size250d10[[2]])
-colnames(time) <- ms
-df <- data.frame(n=rep(c(10,50,250),2), dim=rep(c(2,10),each=3), time)
-write.csv(df, file='timetable.csv', row.names=FALSE)
 
 
 # Run simulations for 10 dimension case
