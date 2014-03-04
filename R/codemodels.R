@@ -1,3 +1,169 @@
+# Simple modesl for simulations .... 
+# now I am using stan !!! 
+
+sim.iw = "
+data {
+int <lower=0> N;
+int <lower=0> k;  
+matrix[k,k] R;
+vector[k] y[N];
+}
+parameters {
+vector[k] mu;
+cov_matrix[k] Sigma;
+}
+transformed parameters {
+real s1;
+real s2;
+real rho;
+s1 <- sqrt(Sigma[1,1]);
+s2 <- sqrt(Sigma[2,2]);
+rho <- Sigma[1,2]/(s1*s2);
+}
+model {
+mu[1] ~ normal(0, 100);
+mu[2] ~ normal(0, 100);
+Sigma ~ inv_wishart(k+1, R);
+for (n in 1:N)
+y[n] ~ multi_normal(mu, Sigma);
+}
+"
+# the actual covariance matrix in siw model would be Sigma=D*Q*D
+sim.siw = "
+data {
+int <lower=0> N;
+int <lower=0> k;
+matrix[k,k] R;
+vector[k] y[N];
+}
+parameters {
+vector[k] mu;
+cov_matrix[k] Q;
+vector[k] xi;
+
+}
+transformed parameters {
+matrix[k,k] D;
+vector[k] delta;
+real s1;
+real s2;
+real rho;
+for (i in 1:k) 
+delta[i] <- exp( xi[i] );
+D <- diag_matrix(delta);
+s1 <- sqrt( Q[1,1]*delta[1]*delta[1]);
+s2 <- sqrt(Q[2,2]*delta[2]*delta[2]);
+rho <-  (Q[1,2]*delta[2]*delta[1]) /(s1*s2);
+}
+model {
+matrix[k,k] L;
+matrix[k,k] A;
+Q ~ inv_wishart(k+1, R);
+L <- cholesky_decompose(Q);
+A <- D*L;
+for ( i in 1:k)
+mu[i] ~ normal(0, 100);
+for ( i in 1:k)
+xi[i] ~ normal(0, 100);
+for (n in 1:N)
+y[n] ~ multi_normal_cholesky(mu, A);
+}
+"
+
+sim.ss = "
+data {
+int <lower=0> N;
+int <lower=0> k;
+matrix[k,k] R;
+vector[k] y[N];
+}
+parameters {
+vector[k] mu;
+corr_matrix[k] Q1;
+vector[k] xi;
+}
+transformed parameters {
+matrix[k,k] L;
+corr_matrix[k] Q; 
+cov_matrix[k] Sigma;
+vector<lower=0>[k] delta;
+vector<lower=0>[k] delta1;
+real s1;
+real s2;
+real rho;
+
+// Q is the correlation matrix prior, start with a Q1 ~ IW() and its transformed into
+// a correlation matrix with D1*Q1*D1, wehre D1<-diag(delta1), is done with for loops
+for (i in 1:k) 
+delta1[i] <- 1/sqrt(Q1[i,i]);
+
+for (n in 1:k) 
+     for (m in 1:n) 
+        Q[m,n] <- delta1[m] * delta1[n] * Q1[m,n]; 
+   for (n in 1:k) 
+     for (m in (n+1):k) 
+        Q[m,n] <- Q[n,m];
+
+// compute covariance matrix as: Sigma = D*Q*D, where D = diag(delta) 
+for (i in 1:k) 
+      delta[i] <- exp( xi[i] );
+for (n in 1:k) 
+     for (m in 1:n) 
+        Sigma[m,n] <- delta[m] * delta[n] * Q[m,n]; 
+   for (n in 1:k) 
+     for (m in (n+1):k) 
+        Sigma[m,n] <- Sigma[n,m];
+s1 <- sqrt( Sigma[1,1]);
+s2 <- sqrt(Sigma[2,2]) ;
+rho <-  Sigma[1,2] /(s1*s2);
+}
+model {
+Q1 ~ inv_wishart(k+1, R);
+for ( i in 1:k)
+    mu[i] ~ normal(0, 100);
+for ( i in 1:k)
+    xi[i] ~ normal(0, 100);
+for (n in 1:N)
+    y[n] ~ multi_normal(mu, Sigma);
+}
+"
+
+sim.ht = "
+data {
+int <lower=0> k;
+int <lower=0> N;
+matrix[k,k] R;
+vector[k] y[N];
+}
+parameters {
+vector[k] mu;
+cov_matrix[k] Sigma;
+vector<lower=0>[k] delta;
+
+}
+transformed parameters {
+matrix[k,k] D;
+real s1;
+real s2;
+real rho;
+vector<lower=0>[k] xi;
+for (i in 1:k) 
+xi[i] <- 1/delta[i];
+D <- 4*diag_matrix(xi);
+s1 <- sqrt(Sigma[1,1]);
+s2 <- sqrt(Sigma[2,2]);
+rho <- Sigma[1,2]/(s1*s2);
+}
+model {
+for (i in 1:k)
+delta[i] ~ inv_gamma(0.5, 0.001);
+Sigma ~ inv_wishart(k+1, D);
+for (i in 1:k)
+mu[i] ~ normal(0, 100);
+for (n in 1:N)
+y[n] ~ multi_normal(mu, Sigma);
+}
+"
 
 # Code with all the models considered, there are 6 cells: 
 #  Sigma:  Diff  Hier  Same
@@ -428,163 +594,6 @@
 # }
 # "
 # -------------------------------------------
-# Simple modesl for simulations .... 
-# now I am using stan !!! 
-
-sim.iw = "
-data {
-  int <lower=0> N;
-  int <lower=0> k;  
-  matrix[k,k] R;
-  vector[k] y[N];
-}
-parameters {
-  vector[k] mu;
-  cov_matrix[k] Sigma;
-}
-transformed parameters {
-  real s1;
-  real s2;
-  real rho;
-  s1 <- sqrt(Sigma[1,1]);
-  s2 <- sqrt(Sigma[2,2]);
-  rho <- Sigma[1,2]/(s1*s2);
-}
-model {
-  mu[1] ~ normal(0, 100);
-  mu[2] ~ normal(0, 100);
-  Sigma ~ inv_wishart(k+1, R);
-  for (n in 1:N)
-    y[n] ~ multi_normal(mu, Sigma);
-}
-"
-sim.siw = "
-data {
-  int <lower=0> N;
-  int <lower=0> k;
-  matrix[k,k] R;
-  vector[k] y[N];
-}
-parameters {
-  vector[k] mu;
-  cov_matrix[k] Q;
-  vector[k] xi;
-
-}
-transformed parameters {
-  cov_matrix[k] Sigma;
-  matrix[k,k] D;
-  vector[k] delta;
-  real s1;
-  real s2;
-  real rho;
-  for (i in 1:k) 
-    delta[i] <- exp( xi[i] );
-  D <- diag_matrix(delta);
-  Sigma <- D*Q*D;
-  s1 <- sqrt(Sigma[1,1]);
-  s2 <- sqrt(Sigma[2,2]);
-  rho <- Sigma[1,2]/(s1*s2);
-}
-model {
-  matrix[k,k] L;
-  matrix[k,k] A;
-  Q ~ inv_wishart(k+1, R);
-  L <- cholesky_decompose(Q);
-  A <- D*L;
-  for ( i in 1:k)
-    mu[i] ~ normal(0, 100);
-  for ( i in 1:k)
-    xi[i] ~ normal(0, 100);
- for (n in 1:N)
-   y[n] ~ multi_normal_cholesky(mu, A);
-}
-"
-
-
-sim.ss = "
-data {
-  int <lower=0> N;
-  int <lower=0> k;
-  matrix[k,k] R;
-  vector[k] y[N];
-}
-parameters {
-  vector[k] mu;
-  corr_matrix[k] Q;
-  vector[k] xi;
-}
-transformed parameters {
-  corr_matrix[k] Q1; 
-  cov_matrix[k] Sigma;
-  matrix[k,k] D;
-  vector[k] delta;
-  matrix[k,k] D1;
-  vector[k] delta1;
-  real s1;
-  real s2;
-  real rho;
-
-  for (i in 1:k) 
-    delta1[i] <- 1/sqrt(Q[i,i]);
-  D1 <- diag_matrix(delta1);  
-  Q1 <- D1*Q*D1;  
-
-  for (i in 1:k) 
-    delta[i] <- exp( xi[i] );
-  D <- diag_matrix(delta);
-  Sigma <- D*Q1*D; 
-  s1 <- sqrt(Sigma[1,1]);
-  s2 <- sqrt(Sigma[2,2]);
-  rho <- Sigma[1,2]/(s1*s2);
-}
-model {
-  Q ~ inv_wishart(k+1, R);
-  for ( i in 1:k)
-    mu[i] ~ normal(0, 100);
-  for ( i in 1:k)
-    xi[i] ~ normal(0, 100);
- for (n in 1:N)
-   y[n] ~ multi_normal(mu, Sigma);
-}
-"
-
-sim.ht = "
-data {
-  int <lower=0> k;
-  int <lower=0> N;
-  matrix[k,k] R;
-  vector[k] y[N];
-}
-parameters {
-  vector[k] mu;
-  cov_matrix[k] Sigma;
-  vector<lower=0>[k] delta;
-
-}
-transformed parameters {
-  matrix[k,k] D;
-  real s1;
-  real s2;
-  real rho;
-  vector<lower=0>[k] xi;
-  for (i in 1:k) 
-    xi[i] <- 1/delta[i];
-  D <- 4*diag_matrix(xi);
-  s1 <- sqrt(Sigma[1,1]);
-  s2 <- sqrt(Sigma[2,2]);
-  rho <- Sigma[1,2]/(s1*s2);
-}
-model {
-  for (i in 1:k)
-    delta[i] ~ inv_gamma(1, 1);
-  Sigma ~ inv_wishart(k+1, D);
-  for (i in 1:k)
-    mu[i] ~ normal(0, 100);
-  for (n in 1:N)
-    y[n] ~ multi_normal(mu, Sigma);
-}
-"
 
 
 
