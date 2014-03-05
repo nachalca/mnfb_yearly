@@ -4,8 +4,7 @@ library(reshape2)
 library(rstan)
 set_cppo(mode = "fast")
 
-d <- dir()
-d <- d[grep('sims_', d)]
+d <- list.files('../data', 'sims_')
 for ( i in 1:length(d) ) load(d[i])
 
 x <- rbind(res_size10d2[[1]],res_size50d2[[1]],res_size250d2[[1]],res_size10d10[[1]],res_size50d10[[1]],res_size250d10[[1]])
