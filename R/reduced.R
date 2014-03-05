@@ -7,17 +7,16 @@ set_cppo(mode = "fast")
 d <- list.files('../data', 'sims_')
 for ( i in 1:length(d) ) load(paste('../data/', d[i],sep=''))
 
-x <- rbind(res_size10d2[[1]],res_size50d2[[1]],res_size250d2[[1]],res_size10d10[[1]],res_size50d10[[1]],res_size250d10[[1]])
-reduced.res  <- data.frame(dim=rep(c(2,10),each=60),subset(x, param %in% c('mu[1]', 'mu[2]', 's1', 's2', 'rho') ) )
-
+x <- rbind(res_size10d2[[1]],res_size50d2[[1]],res_size250d2[[1]], res_size10d10[[1]],res_size50d10[[1]])
+reduced.res  <- data.frame(dim=c(rep(2,1500*3),rep(60,600*2)),subset(x, param %in% c('mu[1]', 'mu[2]', 's1', 's2', 'rho') ) )
 write.table(reduced.res, file='../data/reduced_res.csv', row.names=FALSE)
 
 
 # checking times ..
 ms=c('iw', 'siw', 'ss', 'ht')
-time <- rbind(res_size10d2[[2]],res_size50d2[[2]],res_size250d2[[2]],res_size10d10[[2]],res_size50d10[[2]],res_size250d10[[2]])
+time <- rbind(res_size10d2[[2]],res_size50d2[[2]],res_size250d2[[2]],res_size10d10[[2]],res_size50d10[[2]])
 colnames(time) <- ms
-df <- data.frame(n=rep(c(10,50,250),2), dim=rep(c(2,10),each=3), time)
+df <- data.frame(n=c(10,50,250,10,50), dim=c(2,2,2,10,10), time)
 write.csv(df, file='../data/timetable.csv', row.names=FALSE)
 
 # Run the IW model with scaled data on worst scenario
