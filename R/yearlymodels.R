@@ -1,7 +1,7 @@
 # Modelling the yearly average of all species. 
 # Data are created on mnfb repository, with the yearly_data.R code. 
 
-bird.yeartotal <- read.csv('~\\GitHub\\mnfb\\data\\bird_yeartotal.csv')
+bird.yeartotal <- read.csv('data/bird_yeartotal.csv')
 
 # compute average using the count.add (this step should be on yearly_data.R)
 bird.yeartotal$ave.add <- with(bird.yeartotal, count.add/samples)
@@ -14,13 +14,9 @@ setwd('~\\GitHub\\mnfb_yearly')
 library(xtable)
 library(plyr)
 library(reshape2)
-library(lme4)
-library(shiny)
 library(ggplot2)
 library(GGally)
-library(rjags)
-library(gridExtra)
-library(VisCov)
+library(rstan)
 #-------------------------------------------------
 # 0) data description
 tab_f <- function(x,sp) {
@@ -37,6 +33,7 @@ tab <- ddply(bird.yeartotal, .(year,forestN), tab_f, sp=spn)
 # pull out year 2007 to compare with the online report
 aux <- reshape(subset(tab, year==2007) , direction='wide', timevar='forestN', idvar='abbrev',drop='year')
 aux <- aux[order(aux[,2],decreasing=T),]
+mostab07 <- aux
 colnames(aux) <- c('Specie',levels(bird.yeartotal$forestN) )
 tab = xtable(aux, caption='Total counts on 2007 for the 10 more abundant species')
 print(tab, file="highcounts.tex", include.rownames=FALSE, caption.placement='top')
@@ -49,7 +46,71 @@ pdf('figs/rawtrend.pdf')
 qplot(data=totales,x=year,xlab='Year',ylab='Bird Count',y=count,shape=forestN,color=forestN, size=I(3))+geom_line()
 dev.off()
 #===============================================================
-# 1) Run 6 'cells' of models, calling file codemodels.R to run them and save results. 
+#1) Species correlation 
+# use the 10 most abundant species on 2007, use only superior forest data
+
+spcorr.dt <- subset(bird.yeartotal, abbrev %in% mostab07$abbrev & forestN=='Superior', select=c(1:4,11:14)) 
+
+fn <- function(sp1, sp2, d) {
+  d <- d[order(d$year), ]
+  sp1 <- as.character(sp1); sp2 <- as.character(sp2)
+  x <- with(d, ave.add[abbrev==sp1])
+  y <- with(d, ave.add[abbrev==sp2])
+  df <- data.frame(sp1,sp2, year=unique(d$year), x, y)
+  colnames(df) <- c( 'sp1', 'sp2','year','av1','av2')
+  return(df)
+}
+
+# plot species trends and compute sample correlation and sd for each pair
+
+sppairs <- expand.grid(sp1=unique(spcorr.dt$abbrev),sp2=unique(spcorr.dt$abbrev) )
+x <- matrix(1:100, ncol=10)
+sppairs <- sppairs[ x[lower.tri(x)],]
+
+allpairs <- mdply(sppairs,  fn, d=spcorr.dt)
+sample.corr <- ddply(allpairs, .(sp1,sp2),summarise, sd1=sd(av1),sd2=sd(av2),r=cor(av1,av2) ) 
+qplot(data=sample.corr, x=sd1, y=r,size=sd2 )
+
+load('data/models_cpp.Rdata')
+runstan <- function(d, it = 1200, ch = 3, w=200, prm=NULL, ms) {
+  if (ms=='iw')  mod<- m_iw
+  if (ms=='siw') mod<- m_siw
+  if (ms=='ss')  mod<- m_ss
+  if (ms=='ht')  mod<- m_ht
+  K <- ncol(d[,-c(1:3)])
+  dat = list(y = d[,-c(1:3)] , N = nrow(d), R = diag(K), k=K)
+  sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
+}
+
+pars <- c('mu', 's1', 's2', 'rho')
+
+mod.iw <- dlply(allpairs, .(sp1,sp2), runstan, ms='iw', prm=pars)
+mod.siw <- dlply(allpairs, .(sp1,sp2), runstan, ms='siw', prm=pars)
+mod.ss <- dlply(allpairs, .(sp1,sp2), runstan, ms='ss', prm=pars)
+mod.ht <- dlply(allpairs, .(sp1,sp2), runstan, ms='ht', prm=pars)
+
+
+printresult <- function(xx) {
+  x <- data.frame(summary(xx)$summary)
+  data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
+}
+res.spcorr <- rbind( data.frame(prior='iw',ldply(mod.iw, printresult)),
+                 data.frame(prior='siw',ldply(mod.siw, printresult)),
+                 data.frame(prior='ss',ldply(mod.ss, printresult)),
+                 data.frame(prior='ht',ldply(mod.ht, printresult)) )
+
+
+d <- subset(res.spcorr, param=='rho')
+d$pair<-with(d, paste(as.character(sp1), as.character(sp2),sep='.') )
+
+or <- subset(res.spcorr, param=='s1' & prior=='iw', select=X50.)$X50.
+d$pair <- reorder(d$pair, rep( d$X50.[d$prior=='ss'], 4))
+
+qplot(data=d,y=pair,x=X50., color=prior)
+
+
+#===============================================================
+# 2) Run 6 'cells' of models, calling file codemodels.R to run them and save results. 
 # mod.dd:     dif beta, dif sigma 
 # mod.ds:     dif beta, same sigma
 # mod.hs:     hier beta, same sigma
