@@ -41,7 +41,7 @@ for (j in 3:6) {
   df <- rbind(df1,df2,df3)
   out <- rbind(out,df)
 }
-
+write.csv(out, file='../data/moreres.csv', row.names=FALSE)
 
 # Run the IW model with scaled data on worst scenario
 # load('../data/models_cpp.Rdata')
