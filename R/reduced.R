@@ -24,20 +24,24 @@ moreres <- function(x,nms) {
   true.r <- nms[i,'r']
   i <<- i+1
   rs <- extract(x, pars='rho', permuted = TRUE, inc_warmup=FALSE)$rho
-  data.frame(per=sum(rs <= true.r)/length(rs), 
-             prob=sum( (rs<=true.r+.1) & (rs >= true.r-.1) )/length(rs) )
-             mae <- mean( abs(rs-true.r) )
+  data.frame(per = sum(rs <= true.r)/length(rs), 
+             prob= sum( (rs<=true.r+.1) & (rs >= true.r-.1) )/length(rs), 
+             mae = mean( abs(rs-true.r)) )
 }
 
 pr <- c('iw', 'siw', 'ss', 'ht')
 out <- NULL
 for (j in 3:6) {
-  nms1 <- attributes(res_size10[[j]])$split_labels
-  nms2 <- attributes(res_size50[[j]])$split_labels
-  nms3 <- attributes(res_size250[[j]])$split_labels
-  i <- 1;   df1 <- data.frame(prior=pr[j-2], ldply(res_size10[[j]], moreres, nms=nms1) )
-  i <- 1;   df2 <- data.frame(prior=pr[j-2], ldply(res_size50[[j]], moreres, nms=nms2) )
-  i <- 1;   df3 <- data.frame(prior=pr[j-2], ldply(res_size250[[j]], moreres, nms=nms3) )
+  nms1 <- attributes(res_size10d2[[j]])$split_labels
+  nms2 <- attributes(res_size50d2[[j]])$split_labels
+  nms3 <- attributes(res_size250d2[[j]])$split_labels
+  nms4 <- attributes(res_size10d10[[j]])$split_labels
+  nms5 <- attributes(res_size50d10[[j]])$split_labels
+  i <- 1;   df1 <- data.frame(prior=pr[j-2], ldply(res_size10d2[[j]], moreres, nms=nms1) )
+  i <- 1;   df2 <- data.frame(prior=pr[j-2], ldply(res_size50d2[[j]], moreres, nms=nms2) )
+  i <- 1;   df3 <- data.frame(prior=pr[j-2], ldply(res_size250d2[[j]], moreres, nms=nms3) )
+  i <- 1;   df3 <- data.frame(prior=pr[j-2], ldply(res_size10d10[[j]], moreres, nms=nms4) )
+  i <- 1;   df3 <- data.frame(prior=pr[j-2], ldply(res_size50d10[[j]], moreres, nms=nms5) )
   df <- rbind(df1,df2,df3)
   out <- rbind(out,df)
 }
