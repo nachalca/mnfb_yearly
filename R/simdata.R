@@ -28,15 +28,15 @@ colnames(s10)[1] <- 'sim'
 s100 <-  rdply(5,mdply(prm, simdat, dim=100))
 colnames(s100)[1] <- 'sim'
 
-# rescale each data set
-ss <- data.frame(s=c(.1,1,100))
+# rescale each data set, ss represent the new standar deviation
+ss <- data.frame(s=c(.01,.1,1,10,100))
 rescale    <- function(sx, dx) data.frame(dx[,1:3],dx[,-c(1:3)]*sqrt(sx) )
 simdata.2    <- mdply(ss, rescale, dx=s2)
 simdata.10   <- mdply(ss, rescale, dx=s10)
 simdata.100  <- mdply(ss, rescale, dx=s100)
   
 # number of data set: 
-#xx <- alply(simdata[,1:4], .margins=2, unique)
+#xx <- alply(simdata.2[,1:4], .margins=2, unique)
 #prod(laply(xx, dim)[,1])
 
 # Run from R folder 

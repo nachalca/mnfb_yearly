@@ -7,9 +7,10 @@ data {
   int <lower=0> k;  
   matrix[k,k] R;
   vector[k] y[N];
+  vector[k] mu0;
 }
 parameters {
-  vector[k] mu;
+//  vector[k] mu;
   cov_matrix[k] Sigma;
 }
 transformed parameters {
@@ -21,9 +22,9 @@ transformed parameters {
   rho <- Sigma[1,2]/(s1*s2);
 }
 model {
-  for ( i in 1:k)  mu[i] ~ normal(0, 100);
+//  for ( i in 1:k)  mu[i] ~ normal(0, 100);
   Sigma ~ inv_wishart(k+1, R);
-  for (n in 1:N) y[n] ~ multi_normal(mu, Sigma);
+  for (n in 1:N) y[n] ~ multi_normal(mu0, Sigma);
 }
 "
 # the actual covariance matrix in siw model would be Sigma=D*Q*D
@@ -33,9 +34,10 @@ data {
   int <lower=0> k;
   matrix[k,k] R;
   vector[k] y[N];
+  vector[k] mu0;
 }
 parameters {
-  vector[k] mu;
+//  vector[k] mu;
   cov_matrix[k] Q;
   vector[k] xi;
 }
@@ -59,11 +61,11 @@ model {
   L <- cholesky_decompose(Q);
   A <- D*L;
   for ( i in 1:k) {
-    mu[i] ~ normal(0, 100);
+//    mu[i] ~ normal(0, 100);
     xi[i] ~ normal(0, 100);
   }
 
-for (n in 1:N) y[n] ~ multi_normal_cholesky(mu, A);
+for (n in 1:N) y[n] ~ multi_normal_cholesky(mu0, A);
 }
 "
 
@@ -73,9 +75,10 @@ data {
   int <lower=0> k;
   matrix[k,k] R;
   vector[k] y[N];
+  vector[k] mu0;
 }
 parameters {
-  vector[k] mu;
+//  vector[k] mu;
   cov_matrix[k] Q1;
   vector[k] xi;
 }
@@ -124,10 +127,10 @@ transformed parameters {
 model {
   Q1 ~ inv_wishart(k+1, R);
   for ( i in 1:k) {
-      mu[i] ~ normal(0, 100);
+//      mu[i] ~ normal(0, 100);
       xi[i] ~ normal(0, log(100));
   }
-  for (n in 1:N) y[n] ~ multi_normal(mu, Sigma);
+  for (n in 1:N) y[n] ~ multi_normal(mu0, Sigma);
 }
 "
 
@@ -137,9 +140,10 @@ data {
   int <lower=0> N;
   matrix[k,k] R;
   vector[k] y[N];
+  vector[k] mu0;
 }
 parameters {
-  vector[k] mu;
+//  vector[k] mu;
   cov_matrix[k] Sigma;
   vector<lower=0>[k] delta;
 }
@@ -158,12 +162,12 @@ transformed parameters {
 model {
   for (i in 1:k) {
     delta[i] ~ inv_gamma(0.5, 0.001);
-    mu[i] ~ normal(0, 100);
+ //   mu[i] ~ normal(0, 100);
   }
 
   Sigma ~ inv_wishart(k+1, D);
 
-  for (n in 1:N)  y[n] ~ multi_normal(mu, Sigma);
+  for (n in 1:N)  y[n] ~ multi_normal(mu0, Sigma);
 }
 "
 

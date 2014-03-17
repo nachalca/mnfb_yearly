@@ -35,7 +35,7 @@ printresult <- function(xx) {
   data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
 }
 simula <- function(size, data) {
-  prms <- c('mu', 's1', 's2', 'rho')
+  prms <- c('s1', 's2', 'rho')
   simdata <- subset(data, ns==size)                       
   ptm <- proc.time()
   mod_iw <-  dlply(simdata[simdata$ms =='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
@@ -60,13 +60,15 @@ simula <- function(size, data) {
                      data.frame(prior='siw',ldply(mod_siw, printresult)),
                      data.frame(prior='ss',ldply(mod_ss, printresult)),
                      data.frame(prior='ht',ldply(mod_ht, printresult)) )
-list(res.df,time,mod_iw,mod_siw,mod_ss,mod_ht)
+  out <- list(res.df,time,mod_iw,mod_siw,mod_ht,mod_ss)
+  names(out) <- c('res', 'times', 'iw', 'siw', 'ht', 'ss')
+  return(out)
 }
 
 # Get simulated data and expanded to include prior type
 # load('data/simdata.Rdata')
 load('../data/simdata.Rdata')
-ms=c('iw', 'siw', 'ss', 'ht')
+ms=c('iw', 'siw', 'ht', 'ss')
 
 # Run simulations for Bivariate case
 data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
