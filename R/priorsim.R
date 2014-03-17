@@ -1,5 +1,4 @@
 # Prior Simulation from all 4 models
-
 library(rstan)
 library(plyr)
 library(reshape2)
@@ -21,7 +20,8 @@ parameters {
 }
 transformed parameters {
   matrix[k,k] D;
-  corr_matrix[k] Q; 
+  matrix[k,k] D1;
+  matrix[k,k] Q; 
   cov_matrix[k] Sig_ss;
   vector<lower=0>[k] delta1;
   vector<lower=0>[k] xi;
@@ -53,15 +53,19 @@ transformed parameters {
 // ################  SS strategy ####################
 // Q is the correlation matrix prior, start with a Q1 ~ IW() and its transformed into
 // a correlation matrix with D1*Q1*D1, wehre D1<-diag(delta1), is done with for loops
-  for (i in 1:k) delta1[i] <- 1/sqrt(Q1[i,i]);
-  for (n in 1:k) {
-    for (m in 1:n) {
-      Q[m,n] <- delta1[m] * delta1[n] * Q1[m,n]; 
-    }
+  for (i in 1:k) {
+    delta1[i] <- 1/sqrt(Q1[i,i]);
   }
-  for (n in 1:k) 
-    for (m in (n+1):k) 
-      Q[m,n] <- Q[n,m];
+//  for (n in 1:k) {
+//    for (m in 1:(n-1) ) {
+//      Q[m,n] <- delta1[m] * delta1[n] * Q1[m,n]; 
+//    }
+//  }
+//  for (n in 1:k) 
+//    for (m in (n+1):k) 
+//      Q[m,n] <- Q[n,m];
+    D1 <- diag_matrix(delta1);
+    Q <- D1 * Q1 * D1;
 // compute covariance matrix as: Sigma = D*Q*D, where D = diag(delta) 
     for (n in 1:k) {
       for (m in 1:n) {
@@ -98,29 +102,34 @@ model {
 
 
 m_prior <- stan_model(model_code=priorcode)
-dat = list( R = diag(2), k=2)
-pr <- paste( rep(c('s1', 's2', 'rho'),4), rep(c('iw','siw','ss','ht'),each=3),sep='_' )
-res.prior <- sampling(object=m_prior, data = dat, pars=pr)
 
-print(res.prior)
+simula.prs <- function(k, obj, it) {
+  dat = list( R = diag(k), k=k)
+  pr <- paste( rep(c('s1', 's2', 'rho'),4), rep(c('iw','siw','ss','ht'),each=3),sep='_' )
+  res.prior <- sampling(object=obj, data = dat, pars=pr, iter=it, warmup=40)
+  prior.sim <- extract(res.prior, permute=FALSE)
+  d <- prior.sim
+  dim(d) <- c( prod(dim(prior.sim)[1:2])  ,  dim(prior.sim)[3])  
+  colnames(d) <- attributes(prior.sim)$dimnames$parameters
+  data.frame(d)
+}
 
-prior.sim <- extract(res.prior, permute=FALSE)
-d <- prior.sim
-dim(d) <- c(4000,13)
-colnames(d) <- attributes(prior.sim)$dimnames$parameters
-d <- data.frame(d)
-#colnames(d) <- gsub("\\.",replacement='', colnames(d))
-write.csv(d, file='data/priorsim.Rdata',row.names=FALSE)
-d <- read.csv('data/priorsim.Rdata', header=T)
+x <- simula.prs(k=100, obj=m_prior, it=200 ) 
 
-qplot(data=d, x=log(s1_ht), y=rho_ht)
-qplot(data=d, rho_iw, geom='density')
+res <- mdply( data.frame(k=c(2,10)), simula.prs, obj=m_prior, it=2400 ) 
 
-dm <- cbind(melt(d[,c(1,4,7,10)]),melt(d[,c(2,5,8,11)]),melt(d[,c(3,6,9,12)]) )
-dm$prior<- rep(c('iw','siw', 'ss', 'ht'), each=4000 )
-colnames(dm) <- c('x1', 's1', 'x2', 's2', 'x3', 'rho', 'prior')
+write.csv(res, file='data/priorsim.Rdata',row.names=FALSE)
+res <- read.csv('data/priorsim.Rdata', header=T)
+
+#qplot(data=d, x=log(s1_ht), y=rho_ht)
+#qplot(data=d, rho_iw, geom='density')
+dm <- cbind(melt(res[,c(1,grep('s1', colnames(res))) ], id.vars='k'),melt(res[,c(1,grep('rho', colnames(res))) ], id.vars='k') )
+dm$p<- factor(rep(c('iw','siw', 'ss', 'ht'), each= dim(dm)[1]/4))
+dm$prior <- factor( dm$p , levels=levels(dm$p)[c(2,3,1,4)] )
+colnames(dm) <- c('dim','x1','s1','dim2','x2','rho','p','prior')
+
 pdf('report/figs/priorsim2d.pdf')
-qplot(data=dm, y=log(s1), x=rho,size=I(1))+geom_smooth(se=FALSE, size=I(1.5), color=I('red')) + facet_wrap(facets=~prior, scale='free_y')
+qplot(data=dm, y=s1, x=rho,size=I(.5))+geom_smooth(se=FALSE, size=I(1.5), color=I('red')) + facet_wrap(facets=dim~prior, ncol=4, scale='free_y')
 dev.off()        
 
 qplot(data=dm, x=log(s1), geom='histogram')+facet_wrap(facets=~prior)

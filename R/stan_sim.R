@@ -27,7 +27,7 @@ runstan.sim <- function(d, it = 1200, ch = 3, w=200, prm=NULL) {
   if (d$ms[1]=='ss')  mod<- m_ss
   if (d$ms[1]=='ht')  mod<- m_ht
   K <- ncol(d[,-c(1:5)])
-  dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(K), k=K)
+  dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(K), k=K, mu0 = rep(0,k))
   sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
 }
 printresult <- function(xx) {

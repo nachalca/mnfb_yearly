@@ -1,4 +1,108 @@
-# Modelling the yearly average of all species. 
+# RESULTS 
+
+# PART I: Simulations results, plots and tables
+res  <- read.table('data/reduced_res.csv', header=T)
+time <- read.csv('data/timetable.csv', header=T)
+scIW <- read.csv('data/res_scIW.csv', header=T)
+more <- read.csv('data/moreres.csv', header=T)
+library(ggplot2)
+library(plyr)
+library(reshape2)
+library(rstan)
+
+# dim variable in res has an error: change 60 for 10 to fix it. 
+res$dim[res$dim==60] <- 10
+
+# Gelman diag plot 
+pdf('report/figs/gelmandiagd2.pdf')
+qplot(data=subset(res,dim==2),x=param ,ymin=1,ymax=Rhat,geom='linerange',size=I(1))+facet_wrap(facets=s~prior,scale='free_y') + geom_hline(yintercept=1.1, colour='red') 
+dev.off()
+
+pdf('report/figs/gelmandiagd10.pdf')
+qplot(data=subset(res,dim==10),x=param ,ymin=1,ymax=Rhat,geom='linerange',size=I(1))+facet_wrap(facets=s~prior,scale='free_y') + geom_hline(yintercept=1.1, colour='red') 
+dev.off()
+
+# Plots for rhos estimated vs true, 1 plot per prior
+pdf('report/figs/fig_iwrho_d2.pdf')
+d <- subset(res, param=='rho' & prior=='iw' & dim==2)
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+dev.off()
+
+pdf('report/figs/fig_siwrho_d2.pdf')
+d <- subset(res, param=='rho' & prior=='siw' & dim==10)
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+dev.off()
+
+pdf('report/figs/fig_ssrho_d2.pdf')
+d <- subset(res, param=='rho' & prior=='ss' & dim==2)
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+dev.off()
+
+pdf('report/figs/fig_htrho_d2.pdf')
+d <- subset(res, param=='rho' & prior=='ht' & dim==10)
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+dev.off()
+
+pdf('report/figs/fig_noiw_d2.pdf')
+d <- subset(res, param=='rho' & prior!='iw' & dim==2)
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=rx, y=mean,color=prior,facets=ns~s) + geom_abline(1)
+dev.off()
+
+pdf('report/figs/fig_iwrho_d10.pdf')
+d <- subset(res, param=='rho' & prior=='iw' & dim==10)
+qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
+dev.off()
+
+pdf('report/figs/fig_noiw_d10.pdf')
+d <- subset(res, param=='rho' & prior!='iw' & dim==10)
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+qplot(data=d ,x=rx, y=mean,color=prior,facets=ns~s) + geom_abline(1)
+dev.off()
+
+pdf('report/figs/scIW.pdf')
+d <- subset(scIW, param=='rho')
+qplot(data=d ,x=r, y=mean,facets=dim~ns) + geom_abline(1, color=I('red'))
+dev.off()
+
+
+y <- melt(time, id.vars=c('n','dim'))
+colnames(y)[-2] <- c('ns', 'prior', 'time')
+
+timetab <- xtable(cbind(time[,1:2], round(time[,-c(1,2)]/3600, 3)), caption='Time in hours for each prior on all models') 
+print(timetab,file= 'report/timetab.tex', caption.placement='top', include.rownames=FALSE)
+
+x <- ddply(res, .(dim,prior,ns), summarise, samples = mean(n_eff))
+samptab <- xtable(dcast(x, dim~prior), caption='Effective sample size')
+print(samptab,file= 'report/samptab.tex', caption.placement='top', include.rownames=FALSE)
+
+z <- merge(x,y)
+z$ratio <- z$samples/z$time
+z$ratio.rn <- round(z$samples/z$time,3)
+xt <- xtable(dcast(z, dim+ns~prior, value.var='ratio.rn'), caption='Samples over time ratio')
+print(xt,file= 'report/time_ratio.tex', caption.placement='top', include.rownames=FALSE)
+
+
+qplot(data=z, x=ns, y=ratio, color=prior,size=I(4)) + facet_wrap(facets=dim~., scale='free')
+
+# mae
+qplot(data=subset(more,ns==10), x=r, y=mae, geom=c('point', 'smooth'),method='lm',facets=prior~s)
+
+
+more.m <- ddply(more, .(prior,dim,s,r,ns), summarise, mae=mean(mae))
+
+mae.df <- dcast(subset(more.m, r%in% c(0,0.25,.99) ),dim+ns+prior ~ s+r )
+mae.df <- cbind(mae.df[,1:3],round(mae.df[,-c(1:3)], 3) )
+x <- xtable(mae.df)
+print(x, include.rownames=FALSE)
+
+# ================================================
+# ================================================
+# PART II: Real data exapmple, modelling yearly average of bird count species. 
 # Data are created on mnfb repository, with the yearly_data.R code. 
 
 bird.yeartotal <- read.csv('data/bird_yeartotal.csv')
@@ -8,7 +112,7 @@ bird.yeartotal$ave.add <- with(bird.yeartotal, count.add/samples)
 
 # create a centered year variable
 bird.yeartotal$yearc <- bird.yeartotal$year-2000
-setwd('~\\GitHub\\mnfb_yearly')
+#setwd('~\\GitHub\\mnfb_yearly')
 
 # libraries 
 library(xtable)
@@ -48,9 +152,9 @@ dev.off()
 #===============================================================
 #1) Species correlation 
 # use the 10 most abundant species on 2007, use only superior forest data
-
 spcorr.dt <- subset(bird.yeartotal, abbrev %in% mostab07$abbrev & forestN=='Superior', select=c(1:4,11:14)) 
 
+# create a data set for estimating all pairwise correlation with bivariate models
 fn <- function(sp1, sp2, d) {
   d <- d[order(d$year), ]
   sp1 <- as.character(sp1); sp2 <- as.character(sp2)
@@ -60,54 +164,70 @@ fn <- function(sp1, sp2, d) {
   colnames(df) <- c( 'sp1', 'sp2','year','av1','av2')
   return(df)
 }
-
 # plot species trends and compute sample correlation and sd for each pair
-
 sppairs <- expand.grid(sp1=unique(spcorr.dt$abbrev),sp2=unique(spcorr.dt$abbrev) )
 x <- matrix(1:100, ncol=10)
 sppairs <- sppairs[ x[lower.tri(x)],]
-
 allpairs <- mdply(sppairs,  fn, d=spcorr.dt)
 sample.corr <- ddply(allpairs, .(sp1,sp2),summarise, sd1=sd(av1),sd2=sd(av2),r=cor(av1,av2) ) 
 qplot(data=sample.corr, x=sd1, y=r,size=sd2 )
 
+# create data set for estimating correlation on 10 data set. 
+all10 <- dcast(spcorr.dt[,c('year','abbrev', 'ave.add')], year~abbrev)
+colnames(all10)[-1] <- paste('av',colnames(all10)[-1], sep='.' )
+
+# Run the models
 load('data/models_cpp.Rdata')
-runstan <- function(d, it = 1200, ch = 3, w=200, prm=NULL, ms) {
+runstan <- function(d,dim,it = 1200, ch=3, w=200, prm=NULL, ms) {
   if (ms=='iw')  mod<- m_iw
   if (ms=='siw') mod<- m_siw
   if (ms=='ss')  mod<- m_ss
   if (ms=='ht')  mod<- m_ht
-  K <- ncol(d[,-c(1:3)])
-  dat = list(y = d[,-c(1:3)] , N = nrow(d), R = diag(K), k=K)
+  K <- dim
+  dat = list(y = d[,grep('av', colnames(d))] , N = nrow(d), R = diag(K), k=K)
   sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
 }
 
 pars <- c('mu', 's1', 's2', 'rho')
-
-mod.iw <- dlply(allpairs, .(sp1,sp2), runstan, ms='iw', prm=pars)
-mod.siw <- dlply(allpairs, .(sp1,sp2), runstan, ms='siw', prm=pars)
-mod.ss <- dlply(allpairs, .(sp1,sp2), runstan, ms='ss', prm=pars)
-mod.ht <- dlply(allpairs, .(sp1,sp2), runstan, ms='ht', prm=pars)
-
+ms <- c('iw', 'siw', 'ht', 'ss') 
+res.2d <- list()
+res.10d <- list()
+for (i in 1:4) {
+  m <- ms[i]
+  res.2d[[i]] <- dlply(allpairs, .(sp1,sp2), runstan, dim=2,  ms=m, prm=pars, it=100, w=20)
+  res.10d[[i]] <- runstan(d=all10, dim=10, ms=m, prm=c('mu', 'Sigma'), it=100, w=20)
+}
+names(res.10d) <- ms
+names(res.2d) <- ms
 
 printresult <- function(xx) {
   x <- data.frame(summary(xx)$summary)
   data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
 }
-res.spcorr <- rbind( data.frame(prior='iw',ldply(mod.iw, printresult)),
-                 data.frame(prior='siw',ldply(mod.siw, printresult)),
-                 data.frame(prior='ss',ldply(mod.ss, printresult)),
-                 data.frame(prior='ht',ldply(mod.ht, printresult)) )
+x2d <- rbind(ldply(res.2d$iw, printresult),ldply(res.2d$siw, printresult),ldply(res.2d$ht, printresult),ldply(res.2d$ss, printresult) )
+x2d$prior <- rep(ms, each=270)
 
+
+printresults.10d <- function(res) {
+  x <- extract(res, pars='Sigma', permuted=FALSE )
+  adply(x, .margins=c(1:2), function(xx) {
+                      rm <- cov2cor(matrix(xx, ncol=10))
+                      df <- data.frame( t(as.numeric(rm[lower.tri(rm)])) ) 
+                      par = outer(1:10, 1:10, paste, sep='.')[lower.tri(rm)]
+                      colnames(df) <- paste('rho',par,sep='')
+                      return(df)  
+                      }
+  )
+}
+aux <- ldply(res.10d, printresults.10d)
 
 d <- subset(res.spcorr, param=='rho')
 d$pair<-with(d, paste(as.character(sp1), as.character(sp2),sep='.') )
-
 or <- subset(res.spcorr, param=='s1' & prior=='iw', select=X50.)$X50.
 d$pair <- reorder(d$pair, rep( d$X50.[d$prior=='ss'], 4))
-
+pdf(file='report/figs/paircor.pdf')
 qplot(data=d,y=pair,x=X50., color=prior)
-
+dev.off()
 
 #===============================================================
 # 2) Run 6 'cells' of models, calling file codemodels.R to run them and save results. 
