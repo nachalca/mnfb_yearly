@@ -30,7 +30,7 @@ colnames(s100)[1] <- 'sim'
 
 # rescale each data set, ss represent the new standar deviation
 ss <- data.frame(s=c(.01,.1,1,10,100))
-rescale    <- function(sx, dx) data.frame(dx[,1:3],dx[,-c(1:3)]*sqrt(sx) )
+rescale    <- function(sx, dx) data.frame(dx[,1:3],dx[,-c(1:3)]*sx)
 simdata.2    <- mdply(ss, rescale, dx=s2)
 simdata.10   <- mdply(ss, rescale, dx=s10)
 simdata.100  <- mdply(ss, rescale, dx=s100)
