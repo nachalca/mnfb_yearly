@@ -4,51 +4,50 @@ library(reshape2)
 library(rstan)
 set_cppo(mode = "fast")
 
-d <- list.files('../data', 'sims_')
-for ( i in 1:length(d) ) load(paste('../data/', d[i],sep=''))
-
-x <- rbind(res_size10d2[[1]],res_size50d2[[1]],res_size250d2[[1]], res_size10d10[[1]],res_size50d10[[1]])
-reduced.res  <- data.frame(dim=c(rep(2,1500*3),rep(60,600*2)),subset(x, param %in% c('mu[1]', 'mu[2]', 's1', 's2', 'rho') ) )
-write.table(reduced.res, file='../data/reduced_res.csv', row.names=FALSE)
-
-# checking times ..
-ms=c('iw', 'siw', 'ss', 'ht')
-time <- rbind(res_size10d2[[2]],res_size50d2[[2]],res_size250d2[[2]],res_size10d10[[2]],res_size50d10[[2]])
-colnames(time) <- ms
-df <- data.frame(n=c(10,50,250,10,50), dim=c(2,2,2,10,10), time)
-write.csv(df, file='../data/timetable.csv', row.names=FALSE)
-
-# compute the percentile that true value represent in posterior distribution
-# and also the probabilty arround the true value
-moreres <- function(x,nms) {
-  true.r <- nms[i,'r']
-  i <<- i+1
-  rs <- extract(x, pars='rho', permuted = TRUE, inc_warmup=FALSE)$rho
-  data.frame(per = sum(rs <= true.r)/length(rs), 
-             prob= sum( (rs<=true.r+.1) & (rs >= true.r-.1) )/length(rs), 
-             mae = mean( abs(rs-true.r)) )
-}
-
-pr <- c('iw', 'siw', 'ss', 'ht')
-out <- NULL
-for (j in 3:6) {
-   nms1 <- attributes(res_size10d2[[j]])$split_labels
-   nms2 <- attributes(res_size50d2[[j]])$split_labels
-   nms3 <- attributes(res_size250d2[[j]])$split_labels
-   nms4 <- attributes(res_size10d10[[j]])$split_labels
-   nms5 <- attributes(res_size50d10[[j]])$split_labels
-    i <- 1;   df1 <- data.frame(prior=pr[j-2],dim=2, ldply(res_size10d2[[j]], moreres, nms=nms1) )
-   i <- 1;   df2 <- data.frame(prior=pr[j-2],dim=2 ,ldply(res_size50d2[[j]], moreres, nms=nms2) )
-   i <- 1;   df3 <- data.frame(prior=pr[j-2],dim=2 ,ldply(res_size250d2[[j]], moreres, nms=nms3) )
-   i <- 1;   df4 <- data.frame(prior=pr[j-2],dim=10, ldply(res_size10d10[[j]], moreres, nms=nms4) )
-   i <- 1;   df5 <- data.frame(prior=pr[j-2],dim=10, ldply(res_size50d10[[j]], moreres, nms=nms5) )
-   df <- rbind(df1,df2,df3,df4,df5)
-   out <- rbind(out,df)
-}
-
-
-
-write.csv(out, file='../data/moreres.csv', row.names=FALSE)
+# d <- list.files('../data', 'sims_')
+# for ( i in 1:length(d) ) load(paste('../data/', d[i],sep=''))
+# 
+# x <- rbind(res_size10d2[[1]],res_size50d2[[1]],res_size250d2[[1]], res_size10d10[[1]],res_size50d10[[1]])
+# n1 <- dim(res_size10d2[[1]])[1]
+# n2 <- dim(res_size10d10[[1]])[1]
+# reduced.res  <- data.frame(dim=c(rep(2,n3*3),rep(10,n2*2)),x)
+# write.table(reduced.res, file='../data/reduced_res.csv', row.names=FALSE)
+# 
+# # checking times ..
+# ms=c('iw', 'siw', 'ss', 'ht')
+# time <- rbind(res_size10d2[[2]],res_size50d2[[2]],res_size250d2[[2]],res_size10d10[[2]],res_size50d10[[2]])
+# colnames(time) <- ms
+# df <- data.frame(n=c(10,50,250,10,50), dim=c(2,2,2,10,10), time)
+# write.csv(df, file='../data/timetable.csv', row.names=FALSE)
+# 
+# # compute the percentile that true value represent in posterior distribution
+# # and also the probabilty arround the true value
+# moreres <- function(x,nms) {
+#   true.r <- nms[i,'r']
+#   i <<- i+1
+#   rs <- extract(x, pars='rho', permuted = TRUE, inc_warmup=FALSE)$rho
+#   data.frame(per = sum(rs <= true.r)/length(rs), 
+#              prob= sum( (rs<=true.r+.1) & (rs >= true.r-.1) )/length(rs), 
+#              mae = mean( abs(rs-true.r)) )
+# }
+# 
+# pr <- c('iw', 'siw', 'ss', 'ht')
+# out <- NULL
+# for (j in 3:6) {
+#    nms1 <- attributes(res_size10d2[[j]])$split_labels
+#    nms2 <- attributes(res_size50d2[[j]])$split_labels
+#    nms3 <- attributes(res_size250d2[[j]])$split_labels
+#    nms4 <- attributes(res_size10d10[[j]])$split_labels
+#    nms5 <- attributes(res_size50d10[[j]])$split_labels
+#     i <- 1;   df1 <- data.frame(prior=pr[j-2],dim=2, ldply(res_size10d2[[j]], moreres, nms=nms1) )
+#    i <- 1;   df2 <- data.frame(prior=pr[j-2],dim=2 ,ldply(res_size50d2[[j]], moreres, nms=nms2) )
+#    i <- 1;   df3 <- data.frame(prior=pr[j-2],dim=2 ,ldply(res_size250d2[[j]], moreres, nms=nms3) )
+#    i <- 1;   df4 <- data.frame(prior=pr[j-2],dim=10, ldply(res_size10d10[[j]], moreres, nms=nms4) )
+#    i <- 1;   df5 <- data.frame(prior=pr[j-2],dim=10, ldply(res_size50d10[[j]], moreres, nms=nms5) )
+#    df <- rbind(df1,df2,df3,df4,df5)
+#    out <- rbind(out,df)
+# }
+# write.csv(out, file='../data/moreres.csv', row.names=FALSE)
 
 Run the IW model with scaled data on worst scenario
 load('../data/models_cpp.Rdata')
