@@ -49,7 +49,7 @@ for (j in 3:6) {
 }
 write.csv(out, file='../data/moreres.csv', row.names=FALSE)
 
-Run the IW model with scaled data on worst scenario
+#Run the IW model with scaled data on worst scenario
 load('data/models_cpp.Rdata')
 load('data/simdata.Rdata')
 prms <- c('s1', 's2', 'rho')
