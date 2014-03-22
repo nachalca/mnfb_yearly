@@ -10,7 +10,7 @@ for ( i in 1:length(d) ) load(paste('../data/', d[i],sep=''))
 x <- rbind(res_size10d2[[1]],res_size50d2[[1]],res_size250d2[[1]], res_size10d10[[1]],res_size50d10[[1]])
 n1 <- dim(res_size10d2[[1]])[1]
 n2 <- dim(res_size10d10[[1]])[1]
-reduced.res  <- data.frame(dim=c(rep(2,n3*3),rep(10,n2*2)),x)
+reduced.res  <- data.frame(dim=c(rep(2,n1*3),rep(10,n2*2)),x)
 write.table(reduced.res, file='../data/reduced_res.csv', row.names=FALSE)
 
 # checking times ..
