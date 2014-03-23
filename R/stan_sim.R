@@ -21,18 +21,33 @@ m_ht  <- stan_model(model_code=sim.ht)
 save(m_iw, m_siw, m_ss, m_ht, file='../data/models_cpp.Rdata')
 
 # functions to run stan model
-runstan.sim <- function(d, it = 3000, ch = 3, w=500, prm=NULL) {
+runstan.sim <- function(d, it = 1500, ch = 3, w=500, prm=NULL) {
   if (d$ms[1]=='iw')  mod<- m_iw
   if (d$ms[1]=='siw') mod<- m_siw
   if (d$ms[1]=='ss')  mod<- m_ss
   if (d$ms[1]=='ht')  mod<- m_ht
   K <- ncol(d[,-c(1:5)])
   dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(K), k=K, mu0 = rep(0,K))
-  sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
+  out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
+  x  <- printresult(out)
+  gd <- max(x$Rhat); j <- 1;
+  it <- 1500
+  
+  while (gd > 1.1 & j < 6) {
+    it <- it + 1500
+    out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
+    x  <- printresult(out)
+    gd <- max(x$Rhat)
+    j <- j + 1
+  }
+  return(out)
 }
 printresult <- function(xx) {
   x <- data.frame(summary(xx)$summary)
   data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
+}
+getiter <- function(xx) {
+  attributes(xx)$stan_args[[2]]$iter
 }
 simula <- function(size, data) {
   prms <- c('s1', 's2', 'rho')
@@ -60,8 +75,14 @@ simula <- function(size, data) {
                      data.frame(prior='siw',ldply(mod_siw, printresult)),
                      data.frame(prior='ss',ldply(mod_ss, printresult)),
                      data.frame(prior='ht',ldply(mod_ht, printresult)) )
-  out <- list(res.df,time,mod_iw,mod_siw,mod_ht,mod_ss)
-  names(out) <- c('res', 'times', 'iw', 'siw', 'ht', 'ss')
+  
+  diag.df <- rbind( data.frame(prior='iw',ldply(mod_iw, getiter)),
+                   data.frame(prior='siw',ldply(mod_siw, getiter)),
+                   data.frame(prior='ss',ldply(mod_ss, getiter)),
+                   data.frame(prior='ht',ldply(mod_ht, getiter)) )
+  
+  out <- list(res.df,time,mod_iw,mod_siw,mod_ht,mod_ss,diag.df)
+  names(out) <- c('res', 'times', 'iw', 'siw', 'ht', 'ss','diag')
   return(out)
 }
 
