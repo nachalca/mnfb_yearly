@@ -21,7 +21,7 @@ m_ht  <- stan_model(model_code=sim.ht)
 save(m_iw, m_siw, m_ss, m_ht, file='../data/models_cpp.Rdata')
 
 # functions to run stan model
-runstan.sim <- function(d, it = 1200, ch = 3, w=200, prm=NULL) {
+runstan.sim <- function(d, it = 3000, ch = 3, w=500, prm=NULL) {
   if (d$ms[1]=='iw')  mod<- m_iw
   if (d$ms[1]=='siw') mod<- m_siw
   if (d$ms[1]=='ss')  mod<- m_ss
@@ -88,10 +88,10 @@ ms=c('iw', 'siw', 'ht', 'ss')
 d <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
 data10 <- subset(d, s %in% c(.1,1,100) & r %in% c(0,.99))
 
-res_size10d10 <- simula(size=10, data=data10,it = 2500, ch = 3, w=500)
+res_size10d10 <- simula(size=10, data=data10)
 save(res_size10d10, file='../data/sims_n10_d10.Rdata')
 
-res_size50d10 <- simula(size=50, data=data10,it = 2500, ch = 3, w=500)
+res_size50d10 <- simula(size=50, data=data10)
 save(res_size50d10, file='../data/sims_n50_d10.Rdata')
 
 #res_size250d10 <- simula(size=250, data=data10)
