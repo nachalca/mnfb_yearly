@@ -71,29 +71,27 @@ load('../data/simdata.Rdata')
 ms=c('iw', 'siw', 'ht', 'ss')
 
 # Run simulations for Bivariate case
-data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
-
-res_size10d2 <- simula(size=10, data=data2)
-save(res_size10d2, file='../data/sims_n10_d2.Rdata')
-
-res_size50d2 <- simula(size=50, data=data2)
-save(res_size50d2, file='../data/sims_n50_d2.Rdata')
-
-res_size250d2 <- simula(size=250, data=data2)
-save(res_size250d2, file='../data/sims_n250_d2.Rdata')
-remove(data2)
+# data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
+# res_size10d2 <- simula(size=10, data=data2)
+# save(res_size10d2, file='../data/sims_n10_d2.Rdata')
+# res_size50d2 <- simula(size=50, data=data2)
+# save(res_size50d2, file='../data/sims_n50_d2.Rdata')
+# res_size250d2 <- simula(size=250, data=data2)
+# save(res_size250d2, file='../data/sims_n250_d2.Rdata')
+# remove(data2)
 
 # Run simulations for 10 dimension case: takes too long, so reduce the simulations
 # only size: 10 and 50
 # only rho: 0, .99
 # only s: .1, 1, 100
+
 d <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
 data10 <- subset(d, s %in% c(.1,1,100) & r %in% c(0,.99))
 
-res_size10d10 <- simula(size=10, data=data10)
+res_size10d10 <- simula(size=10, data=data10,it = 2500, ch = 3, w=500)
 save(res_size10d10, file='../data/sims_n10_d10.Rdata')
 
-res_size50d10 <- simula(size=50, data=data10)
+res_size50d10 <- simula(size=50, data=data10,it = 2500, ch = 3, w=500)
 save(res_size50d10, file='../data/sims_n50_d10.Rdata')
 
 #res_size250d10 <- simula(size=250, data=data10)
