@@ -31,11 +31,11 @@ runstan.sim <- function(d, it = 1500, ch = 3, w=500, prm=NULL) {
   out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
   x  <- printresult(out)
   gd <- max(x$Rhat); j <- 1;
-  it <- 1500
+  it2 <- 1500
   
   while (gd > 1.1 & j < 6) {
-    it <- it + 1500
-    out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
+    it2 <- it2 + 1500
+    out <- sampling(object=mod, data = dat,pars=prm, iter = it2, chains = ch, warmup=w)
     x  <- printresult(out)
     gd <- max(x$Rhat)
     j <- j + 1
