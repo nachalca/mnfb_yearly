@@ -13,11 +13,7 @@ n2 <- dim(res_size10d10[[1]])[1]
 reduced.res  <- data.frame(dim=c(rep(2,n1*3),rep(10,n2*2)),x)
 write.table(reduced.res, file='../data/reduced_res.csv', row.names=FALSE)
 
-
 diagres <- data.frame(rbind(res_size10d10$diag,res_size50d10$diag))
-n1 <- dim(res_size10d2$diag)[1]
-n2 <- dim(res_size10d10$diag)[1]
-diagres  <- data.frame(x)
 write.table(diagres, file='../data/diag_res.csv', row.names=FALSE)
 
 
