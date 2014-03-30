@@ -17,9 +17,24 @@ transformed parameters {
   real s1;
   real s2;
   real rho;
+  corr_matrix[k] Rho;
+  vector<lower=0>[k] sig;
   s1 <- sqrt(Sigma[1,1]);
   s2 <- sqrt(Sigma[2,2]);
   rho <- Sigma[1,2]/(s1*s2);
+// compute correlation matrix 
+  for (i in 1:k) sig[i] <- 1/sqrt(Sigma[i,i]);
+  for (n in 1:k) {
+    for (m in 1:n) {
+      Rho[m,n] <- sig[m] * sig[n] * Sigma[m,n]; 
+    }
+  }
+  for (n in 1:k) {
+     for (m in (n+1):k) {
+        Rho[m,n] <- Rho[n,m];
+     }
+  } 
+
 }
 model {
 //  for ( i in 1:k)  mu[i] ~ normal(0, 100);
@@ -44,6 +59,9 @@ parameters {
 transformed parameters {
   matrix[k,k] D;
   vector[k] delta;
+  cov_matrix[k] Sigma;
+  corr_matrix[k] Rho;
+  vector<lower=0>[k] sig;
   real s1;
   real s2;
   real rho;
@@ -53,6 +71,29 @@ transformed parameters {
   s1 <- sqrt( Q[1,1]*delta[1]*delta[1]);
   s2 <- sqrt(Q[2,2]*delta[2]*delta[2]);
   rho <-  (Q[1,2]*delta[2]*delta[1]) /(s1*s2);
+ 
+  for (n in 1:k) {
+      for (m in 1:n) {
+        Sigma[m,n] <- delta[m] * delta[n] * Q[m,n]; 
+    }
+  }
+   for (n in 1:k) {
+     for (m in (n+1):k) {
+        Sigma[m,n] <- Sigma[n,m];
+     }
+   }
+// compute correlation matrix 
+  for (i in 1:k) sig[i] <- 1/sqrt(Sigma[i,i]);
+  for (n in 1:k) {
+    for (m in 1:n) {
+      Rho[m,n] <- sig[m] * sig[n] * Sigma[m,n]; 
+    }
+  }
+  for (n in 1:k) {
+     for (m in (n+1):k) {
+        Rho[m,n] <- Rho[n,m];
+     }
+  } 
 }
 model {
   matrix[k,k] L;
@@ -84,27 +125,27 @@ parameters {
 }
 transformed parameters {
   matrix[k,k] L;
-  corr_matrix[k] Q; 
+  corr_matrix[k] Rho; 
   cov_matrix[k] Sigma;
   vector<lower=0>[k] delta;
   vector<lower=0>[k] delta1;
   real s1;
   real s2;
   real rho;
-// Q is the correlation matrix prior, start with a Q1 ~ IW() and its transformed into
+// Rho is the correlation matrix prior, start with a Q1 ~ IW() and its transformed into
 // a correlation matrix with D1*Q1*D1, wehre D1<-diag(delta1), is done with for loops
 
   for (i in 1:k) delta1[i] <- 1/sqrt(Q1[i,i]);
 
   for (n in 1:k) {
     for (m in 1:n) {
-      Q[m,n] <- delta1[m] * delta1[n] * Q1[m,n]; 
+      Rho[m,n] <- delta1[m] * delta1[n] * Q1[m,n]; 
     }
   }
 
   for (n in 1:k) {
      for (m in (n+1):k) {
-        Q[m,n] <- Q[n,m];
+        Rho[m,n] <- Rho[n,m];
      }
   } 
 
@@ -112,7 +153,7 @@ transformed parameters {
   for (i in 1:k)  delta[i] <- exp( xi[i] );
   for (n in 1:k) {
     for (m in 1:n) {
-      Sigma[m,n] <- delta[m] * delta[n] * Q[m,n]; 
+      Sigma[m,n] <- delta[m] * delta[n] * Rho[m,n]; 
     }
   }
    for (n in 1:k) {
@@ -152,12 +193,26 @@ transformed parameters {
   real s1;
   real s2;
   real rho;
+  corr_matrix[k] Rho;
+  vector<lower=0>[k] sig;
   vector<lower=0>[k] xi;
   for (i in 1:k)   xi[i] <- 1/delta[i];
   D <- 4*diag_matrix(xi);
   s1 <- sqrt(Sigma[1,1]);
   s2 <- sqrt(Sigma[2,2]);
   rho <- Sigma[1,2]/(s1*s2);
+// compute correlation matrix 
+  for (i in 1:k) sig[i] <- 1/sqrt(Sigma[i,i]);
+  for (n in 1:k) {
+    for (m in 1:n) {
+      Rho[m,n] <- sig[m] * sig[n] * Sigma[m,n]; 
+    }
+  }
+  for (n in 1:k) {
+     for (m in (n+1):k) {
+        Rho[m,n] <- Rho[n,m];
+     }
+  } 
 }
 model {
   for (i in 1:k) {

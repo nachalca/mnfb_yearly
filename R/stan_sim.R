@@ -21,7 +21,7 @@ m_ht  <- stan_model(model_code=sim.ht)
 save(m_iw, m_siw, m_ss, m_ht, file='../data/models_cpp.Rdata')
 
 # functions to run stan model
-runstan.sim <- function(d, it = 1500, ch = 3, w=500, prm=NULL) {
+runstan.sim <- function(d, it = 1500,ch=3, w=500, prm=NULL) {
   if (d$ms[1]=='iw')  mod<- m_iw
   if (d$ms[1]=='siw') mod<- m_siw
   if (d$ms[1]=='ss')  mod<- m_ss
@@ -30,18 +30,27 @@ runstan.sim <- function(d, it = 1500, ch = 3, w=500, prm=NULL) {
   dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(K), k=K, mu0 = rep(0,K))
   out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
   x  <- printresult(out)
-  gd <- max(x$Rhat); j <- 1;
-  it2 <- 1500
+  gd <- max(x$Rhat, na.rm=T); 
+  #neff <- min(x$n_eff)
+  j <- 1;
+  it2 <- it + 1500
+  w2 <- w + 500
+  neff <- min(x$n_eff[x$param!='lp__'])
   
-  while (gd > 1.1 & j < 6) {
-    it2 <- it2 + 1500
-    out <- sampling(object=mod, data = dat,pars=prm, iter = it2, chains = ch, warmup=w)
+  while ( (gd > 1.1 | neff < 500) & j < 6 ) {
+    out <- sampling(object=mod, data = dat,pars=prm, iter = it2, chains = ch, warmup=w2)
     x  <- printresult(out)
-    gd <- max(x$Rhat)
+    gd <- max(x$Rhat, na.rm=T)
+    neff <- min(x$n_eff[x$param!='lp__'])
+    print(gd)
+    #neff <- min(x$n_eff)
     j <- j + 1
+    it2 <- it2 + 1500
+    w2 <- 1000    
   }
   return(out)
 }
+
 printresult <- function(xx) {
   x <- data.frame(summary(xx)$summary)
   data.frame(param=rownames(x), round(x[,1:8],4),n_eff=round(x$n_eff),Rhat=x[,10])
@@ -50,7 +59,7 @@ getiter <- function(xx) {
   attributes(xx)$stan_args[[2]]$iter
 }
 simula <- function(size, data) {
-  prms <- c('s1', 's2', 'rho')
+  prms <- c('s1', 's2', 'rho', 'R')
   simdata <- subset(data, ns==size)                       
   ptm <- proc.time()
   mod_iw <-  dlply(simdata[simdata$ms =='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
@@ -91,15 +100,18 @@ simula <- function(size, data) {
 load('../data/simdata.Rdata')
 ms=c('iw', 'siw', 'ht', 'ss')
 
-# Run simulations for Bivariate case
-# data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
-# res_size10d2 <- simula(size=10, data=data2)
-# save(res_size10d2, file='../data/sims_n10_d2.Rdata')
-# res_size50d2 <- simula(size=50, data=data2)
-# save(res_size50d2, file='../data/sims_n50_d2.Rdata')
-# res_size250d2 <- simula(size=250, data=data2)
-# save(res_size250d2, file='../data/sims_n250_d2.Rdata')
-# remove(data2)
+#Run simulations for Bivariate case
+data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
+
+res_size10d2 <- simula(size=10, data=data2)
+save(res_size10d2, file='../data/sims_n10_d2.Rdata')
+
+res_size50d2 <- simula(size=50, data=data2)
+save(res_size50d2, file='../data/sims_n50_d2.Rdata')
+
+res_size250d2 <- simula(size=250, data=data2)
+save(res_size250d2, file='../data/sims_n250_d2.Rdata')
+remove(data2)
 
 # Run simulations for 10 dimension case: takes too long, so reduce the simulations
 # only size: 10 and 50
@@ -108,6 +120,10 @@ ms=c('iw', 'siw', 'ht', 'ss')
 
 d <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
 data10 <- subset(d, s %in% c(.1,1,100) & r %in% c(0,.99))
+
+# testing 
+#dd <- subset(data10, sim==1 & r==.99 & s==100 & ns==10 & ms=='ss')
+#ts <- runstan.sim(dd, prm=c('s1', 's2', 'rho'))
 
 res_size10d10 <- simula(size=10, data=data10)
 save(res_size10d10, file='../data/sims_n10_d10.Rdata')
@@ -118,6 +134,8 @@ save(res_size50d10, file='../data/sims_n50_d10.Rdata')
 #res_size250d10 <- simula(size=250, data=data10)
 #save(res_size250d10, file='../data/sims_n250_d10.Rdata')
 remove(data10)
+
+
 
 
 # Run simulations for 10 dimension case

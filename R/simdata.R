@@ -3,7 +3,6 @@
 
 library(plyr)
 library(mnormt)
-set.seed(1234)
 # Simple scenario: Z = (Z1,Z2) ~ N(0, S) mu1=mu2=0, sig1=sig2=sigma and cor(Z1,Z2)=rho. 
 # More dimensions: k-vector normally distributed with zero mean, equal variance and equal 
 # correlation for each pair of vars.
@@ -19,14 +18,13 @@ simdat <- function(ns,r,dim) {
 
 # Simulate 5 data sets for each combination of r,size keeping separate the dimension
 prm <- expand.grid(r= c(0,.25,.5,.75,.99), ns=c(10,50,250))
-s2 <-  rdply(5,mdply(prm, simdat, dim=2))
-colnames(s2)[1] <- 'sim'
 
-s10 <-  rdply(5,mdply(prm, simdat, dim=10))
-colnames(s10)[1] <- 'sim'
-
+set.seed(1234)
 s100 <-  rdply(5,mdply(prm, simdat, dim=100))
 colnames(s100)[1] <- 'sim'
+s2 <- s100[,1:5]
+s10 <- s100[,1:10]
+
 
 # rescale each data set, ss represent the new standar deviation
 ss <- data.frame(s=c(.01,.1,1,10,100))
@@ -41,3 +39,14 @@ simdata.100  <- mdply(ss, rescale, dx=s100)
 
 # Run from R folder 
 save(simdata.2, simdata.10, simdata.100, file='../data/simdata.Rdata')
+
+
+
+
+set.seed(10) 
+rnorm(1)
+rnorm(1)
+set.seed(20); rnorm(1)
+set.seed(20); rnorm(1)
+
+
