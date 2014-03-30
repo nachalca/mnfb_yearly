@@ -59,7 +59,7 @@ getiter <- function(xx) {
   attributes(xx)$stan_args[[2]]$iter
 }
 simula <- function(size, data) {
-  prms <- c('s1', 's2', 'rho', 'R')
+  prms <- c('s1', 's2', 'rho')
   simdata <- subset(data, ns==size)                       
   ptm <- proc.time()
   mod_iw <-  dlply(simdata[simdata$ms =='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
