@@ -12,6 +12,12 @@ library(mnormt)
 library(rstan)
 set_cppo(mode = "fast")
 
+# set up the parallel for plyr functions
+parallel <- require(doMC, quietly=TRUE)
+if(parallel){
+  registerDoMC(4)
+}
+
 # Compile the model objects 
 source('codemodels.R')
 m_iw  <- stan_model(model_code=sim.iw)
@@ -62,19 +68,19 @@ simula <- function(size, data) {
   prms <- c('s1', 's2', 'rho')
   simdata <- subset(data, ns==size)                       
   ptm <- proc.time()
-  mod_iw <-  dlply(simdata[simdata$ms =='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
+  mod_iw <-  dlply(simdata[simdata$ms =='iw', ], .(sim,r,s,ns),runstan.sim, prm=prms, .parallel=parallel)                        
   time.iw <- proc.time() - ptm
   #save(mod_iw,time.iw, file='../data/simula_iw.Rdata')
   ptm <- proc.time()
-  mod_siw <-  dlply(simdata[simdata$ms=='siw', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
+  mod_siw <-  dlply(simdata[simdata$ms=='siw', ], .(sim,r,s,ns),runstan.sim, prm=prms, .parallel=parallel)                        
   time.siw <- proc.time() - ptm
   #save(mod_siw,time.siw, file='../data/simula_siw.Rdata')
   ptm <- proc.time()
-  mod_ss <-  dlply(simdata[simdata$ms=='ss', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
+  mod_ss <-  dlply(simdata[simdata$ms=='ss', ], .(sim,r,s,ns),runstan.sim, prm=prms, .parallel=parallel)                        
   time.ss <- proc.time() - ptm
   #save(mod_ss,time.ss, file='../data/simula_ss.Rdata')
   ptm <- proc.time()
-  mod_ht <-  dlply(simdata[simdata$ms=='ht', ], .(sim,r,s,ns),runstan.sim, prm=prms)                        
+  mod_ht <-  dlply(simdata[simdata$ms=='ht', ], .(sim,r,s,ns),runstan.sim, prm=prms, .parallel=parallel)                        
   time.ht <- proc.time() - ptm
   #save(mod_ht,time.ht, file='../data/simula_ht.Rdata')
 
@@ -95,6 +101,7 @@ simula <- function(size, data) {
   return(out)
 }
 
+
 # Get simulated data and expanded to include prior type
 # load('data/simdata.Rdata')
 load('../data/simdata.Rdata')
@@ -103,15 +110,14 @@ ms=c('iw', 'siw', 'ht', 'ss')
 #Run simulations for Bivariate case
 data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,simdata.2,simdata.2) )
 
-res_size10d2 <- simula(size=10, data=data2)
-save(res_size10d2, file='../data/sims_n10_d2.Rdata')
+#res_size10d2 <- simula(size=10, data=data2)
+#save(res_size10d2, file='../data/sims_n10_d2.Rdata')
+#res_size50d2 <- simula(size=50, data=data2)
+#save(res_size50d2, file='../data/sims_n50_d2.Rdata')
+#res_size250d2 <- simula(size=250, data=data2)
+#save(res_size250d2, file='../data/sims_n250_d2.Rdata')
+#remove(data2)
 
-res_size50d2 <- simula(size=50, data=data2)
-save(res_size50d2, file='../data/sims_n50_d2.Rdata')
-
-res_size250d2 <- simula(size=250, data=data2)
-save(res_size250d2, file='../data/sims_n250_d2.Rdata')
-remove(data2)
 
 # Run simulations for 10 dimension case: takes too long, so reduce the simulations
 # only size: 10 and 50
@@ -120,10 +126,6 @@ remove(data2)
 
 d <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
 data10 <- subset(d, s %in% c(.1,1,100) & r %in% c(0,.99))
-
-# testing 
-#dd <- subset(data10, sim==1 & r==.99 & s==100 & ns==10 & ms=='ss')
-#ts <- runstan.sim(dd, prm=c('s1', 's2', 'rho'))
 
 res_size10d10 <- simula(size=10, data=data10)
 save(res_size10d10, file='../data/sims_n10_d10.Rdata')
@@ -137,7 +139,9 @@ remove(data10)
 
 
 
-
+# testing 
+#dd <- subset(data10, sim==1 & r==.99 & s==100 & ns==10 & ms=='ss')
+#ts <- runstan.sim(dd, prm=c('s1', 's2', 'rho'))
 # Run simulations for 10 dimension case
 #data100 <- data.frame( ms=rep(ms, each=nrow(simdata.100)),rbind(simdata.100,simdata.100,simdata.100,simdata.100) )
 #res_size10 <- simula(size=10, data=data100)
