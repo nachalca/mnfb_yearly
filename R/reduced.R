@@ -1,9 +1,9 @@
 # program to save a reduced piece of output to copy from home folder
-# library(plyr)
-# library(reshape2)
-# library(rstan)
-# set_cppo(mode = "fast")
-# 
+library(plyr)
+library(reshape2)
+library(rstan)
+set_cppo(mode = "fast")
+ 
 # d <- list.files('../data', 'sims_')
 # for ( i in 1:length(d) ) load(paste('../data/', d[i],sep=''))
 # 
@@ -39,7 +39,7 @@ prms <- c('s1', 's2', 'rho')
 # set up the parallel for plyr functions
 parallel <- require(doMC, quietly=TRUE)
 if(parallel){
-  registerDoMC(4)
+  registerDoMC(8)
 }
 
 runstan.sim <- function(d, it = 1200, ch = 3, w=200, prm=NULL) {
