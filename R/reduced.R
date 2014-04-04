@@ -66,8 +66,8 @@ simd2  <- ddply(simd2, .(s,sim,r,ns) , function(xx) scale(xx[,-c(1:4)], center=F
 simd10 <- ddply(simd10, .(s,sim,r,ns) , function(xx) scale(xx[,-c(1:4)], center=FALSE))
 prms <- c('s1','s2','rho')
 
-mod_sciwd2  <-  dlply(simd2, .(s,sim,r,ns), runstan.sim, prm=prms, parallel=parallel)
-mod_sciwd10 <-  dlply(simd10, .(s,sim,r,ns), runstan.sim, prm=prms, parallel=parallel)
+mod_sciwd2  <-  dlply(simd2, .(s,sim,r,ns), runstan.sim, prm=prms, .parallel=parallel)
+mod_sciwd10 <-  dlply(simd10, .(s,sim,r,ns), runstan.sim, prm=prms, .parallel=parallel)
 res.scIW <- rbind( data.frame(dim=2,ldply(mod_sciwd2, printresult)),
                    data.frame(dim=10,ldply(mod_sciwd10, printresult)) )                                               
 
