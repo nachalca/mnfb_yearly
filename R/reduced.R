@@ -31,6 +31,7 @@
 # write.csv(df, file='../data/timetable.csv', row.names=FALSE)
 
 
+
 #Run the IW model with scaled data on worst scenario
 load('data/models_cpp.Rdata')
 load('data/simdata.Rdata')
