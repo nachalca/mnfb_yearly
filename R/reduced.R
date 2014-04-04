@@ -33,8 +33,8 @@
 
 
 #Run the IW model with scaled data on worst scenario
-load('data/models_cpp.Rdata')
-load('data/simdata.Rdata')
+load('../data/models_cpp.Rdata')
+load('../data/simdata.Rdata')
 prms <- c('s1', 's2', 'rho')
 # set up the parallel for plyr functions
 parallel <- require(doMC, quietly=TRUE)
@@ -71,8 +71,8 @@ mod_sciwd10 <-  dlply(simd10, .(s,sim,r,ns), runstan.sim, prm=prms, parallel=par
 res.scIW <- rbind( data.frame(dim=2,ldply(mod_sciwd2, printresult)),
                    data.frame(dim=10,ldply(mod_sciwd10, printresult)) )                                               
 
-save(momd2, momd10, file='data/momentIW.Rdata')
-save(mod_sciwd10, mod_sciwd2, file='data/mod_scIW.Rdata')
-write.csv(res.scIW, file='data/res_scIW.csv', row.names=FALSE)
+save(momd2, momd10, file='../data/momentIW.Rdata')
+save(mod_sciwd10, mod_sciwd2, file='../data/mod_scIW.Rdata')
+write.csv(res.scIW, file='../data/res_scIW.csv', row.names=FALSE)
 
 
