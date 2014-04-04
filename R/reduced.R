@@ -17,7 +17,7 @@ reduced.res  <- data.frame(dim=c(rep(2,n1*3),rep(10,n2*2)),x)
 write.table(reduced.res, file='../data/reduced_res.csv', row.names=FALSE)
 
 # get the number of iterations
-diagres <- rbind(res_size10d2$diag],res_size50d2$diag,res_size250d2_backup$diag, res_size10d10$diag,res_size50d10$diag)
+diagres <- rbind(res_size10d2$diag,res_size50d2$diag,res_size250d2_backup$diag, res_size10d10$diag,res_size50d10$diag)
 diagres <- data.frame(dim=c(rep(2,n1*3),rep(10,n2*2)),diagres)
 write.table(diagres, file='../data/diag_res.csv', row.names=FALSE)
 
