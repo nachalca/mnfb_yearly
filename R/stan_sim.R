@@ -34,7 +34,7 @@ runstan.sim <- function(d, it = 1500,ch=3, w=500, prm=NULL,dfile=NULL) {
   if (d$ms[1]=='ht')  mod<- m_ht
   K <- ncol(d[,-c(1:5)])
   dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(K), k=K, mu0 = rep(0,K))
-  out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w,diagnostic_file=dfile)
+  out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
   x  <- printresult(out)
   gd <- max(x$Rhat, na.rm=T); 
   #neff <- min(x$n_eff)
