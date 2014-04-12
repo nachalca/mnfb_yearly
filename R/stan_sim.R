@@ -15,7 +15,7 @@ set_cppo(mode = "fast")
 # set up the parallel for plyr functions
 parallel <- require(doMC, quietly=TRUE)
 if(parallel){
-  registerDoMC(4)
+  registerDoMC(8)
 }
 
 # Compile the model objects 
@@ -27,14 +27,14 @@ m_ht  <- stan_model(model_code=sim.ht)
 save(m_iw, m_siw, m_ss, m_ht, file='../data/models_cpp.Rdata')
 
 # functions to run stan model
-runstan.sim <- function(d, it = 1500,ch=3, w=500, prm=NULL) {
+runstan.sim <- function(d, it = 1500,ch=3, w=500, prm=NULL,dfile=NULL) {
   if (d$ms[1]=='iw')  mod<- m_iw
   if (d$ms[1]=='siw') mod<- m_siw
   if (d$ms[1]=='ss')  mod<- m_ss
   if (d$ms[1]=='ht')  mod<- m_ht
   K <- ncol(d[,-c(1:5)])
   dat = list(y = d[,-c(1:5)] , N = nrow(d), R = diag(K), k=K, mu0 = rep(0,K))
-  out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w)
+  out <- sampling(object=mod, data = dat,pars=prm, iter = it, chains = ch, warmup=w,diagnostic_file=dfile)
   x  <- printresult(out)
   gd <- max(x$Rhat, na.rm=T); 
   #neff <- min(x$n_eff)
@@ -104,6 +104,7 @@ simula <- function(size, data) {
 
 # Get simulated data and expanded to include prior type
 # load('data/simdata.Rdata')
+
 load('../data/simdata.Rdata')
 ms=c('iw', 'siw', 'ht', 'ss')
 
@@ -122,10 +123,10 @@ data2 <- data.frame( ms=rep(ms, each=nrow(simdata.2)),rbind(simdata.2,simdata.2,
 # Run simulations for 10 dimension case: takes too long, so reduce the simulations
 # only size: 10 and 50
 # only rho: 0, .99
-# only s: .1, 1, 100
+# only s: .01, 1, 100
 
 d <- data.frame( ms=rep(ms, each=nrow(simdata.10)),rbind(simdata.10,simdata.10,simdata.10,simdata.10) )
-data10 <- subset(d, s %in% c(.1,1,100) & r %in% c(0,.99))
+data10 <- subset(d, s %in% c(.01,1,100) & r %in% c(0,.99))
 
 res_size10d10 <- simula(size=10, data=data10)
 save(res_size10d10, file='../data/sims_n10_d10.Rdata')
@@ -140,8 +141,9 @@ remove(data10)
 
 
 # testing 
-#dd <- subset(data10, sim==1 & r==.99 & s==100 & ns==10 & ms=='ss')
-#ts <- runstan.sim(dd, prm=c('s1', 's2', 'rho'))
+#dd <- subset(data2, sim==1 & r==.99 & s==100 & ns==10 & ms=='ss')
+#ts <- runstan.sim(dd, prm=c('s1', 's2', 'rho'), it=500, w=100, dfile='diag')
+#summ <- summary(ts)
 # Run simulations for 10 dimension case
 #data100 <- data.frame( ms=rep(ms, each=nrow(simdata.100)),rbind(simdata.100,simdata.100,simdata.100,simdata.100) )
 #res_size10 <- simula(size=10, data=data100)
