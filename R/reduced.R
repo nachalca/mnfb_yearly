@@ -45,11 +45,11 @@ compucov <- function(res) {
   res_cov
 }
 
-x1 <- data.frame(dim=2, ns = 10, ldply(res_size10d2[3:7], compucov) )
-x2 <- data.frame(dim=2, ns = 50, ldply(res_size50d2[3:7], compucov) )
-x3 <- data.frame(dim=2, ns = 250, ldply(res_size250d2_backup[3:7], compucov) )
-x4 <- data.frame(dim=2, ns = 10, ldply(res_size10d10[3:7], compucov) )
-x5 <- data.frame(dim=2, ns = 50, ldply(res_size50d10[3:7], compucov) )
+x1 <- data.frame(dim=2, ns = 10, ldply(res_size10d2[3:6], compucov) )
+x2 <- data.frame(dim=2, ns = 50, ldply(res_size50d2[3:6], compucov) )
+x3 <- data.frame(dim=2, ns = 250, ldply(res_size250d2_backup[3:6], compucov) )
+x4 <- data.frame(dim=10, ns = 10, ldply(res_size10d10[3:6], compucov) )
+x5 <- data.frame(dim=10, ns = 50, ldply(res_size50d10[3:6], compucov) )
 res.cov12 <- rbind(x1,x2,x3,x4,x5)
 write.csv(res.cov12, file='../data/rescov.csv', row.names=FALSE)
 
