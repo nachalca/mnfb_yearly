@@ -1,21 +1,15 @@
 #############
 ## Windows detritus
 #############
-
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
-
 # Folder config file
 Desktop.ini
-
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
-
 # Mac crap
 .DS_Store
-
-
 ### LaTeX
 *concordance.tex
 .synctex.gz
@@ -25,8 +19,9 @@ $RECYCLE.BIN/
 .ps
 .bbl
 .blg
-.pdf
-
+.nav
+.smn
+.out
 ## R files
 *.Rhistory
 .Rproj.user

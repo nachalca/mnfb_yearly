@@ -14,13 +14,12 @@ simIW <- function(s1=1, s2=1, rho=0) {
 }
 
 rdply(10, simIW)
-sig <- expand.grid(s1=c(0.001,0.01,0.1), rho=c(-.5,0,.5))
-sig$s2  <- sig$s1
+sig <- expand.grid(s1=c(0.001,0.01,0.1),s2=c(0.001,0.01,0.1), rho=0)
 
 sims <- rdply(5000, mdply(sig, simIW) )
 
-qplot(data=sims, x=SD1, geom='density', facets=rho~s1) + scale_x_log10()
-qplot(data=sims, x=cor, geom='density') + facet_grid(facets=rho~s1,scales='free')
+qplot(data=sims, x=SD1, geom='density', facets=s2~s1) + scale_x_log10()
+qplot(data=sims, x=cor, geom='density') + facet_grid(facets=s2~s1,scales='free')
 
 
 

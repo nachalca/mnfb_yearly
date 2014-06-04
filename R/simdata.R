@@ -23,8 +23,11 @@ set.seed(1234)
 s100 <-  rdply(5,mdply(prm, simdat, dim=100))
 colnames(s100)[1] <- 'sim'
 s2 <- s100[,1:5]
-s10 <- s100[,1:10]
+s10 <- s100[,1:13]
 
+# test how close is pearson to the truth
+corrs <- ddply(s2, .(sim,r,ns), summarise, pearson = cor(X1,X2))
+qplot(data=corrs, r,pearson, color=sim, facets=~ns) + geom_abline(1)
 
 # rescale each data set, ss represent the new standar deviation
 ss <- data.frame(s=c(.01,.1,1,10,100))
@@ -39,14 +42,4 @@ simdata.100  <- mdply(ss, rescale, dx=s100)
 
 # Run from R folder 
 save(simdata.2, simdata.10, simdata.100, file='../data/simdata.Rdata')
-
-
-
-
-set.seed(10) 
-rnorm(1)
-rnorm(1)
-set.seed(20); rnorm(1)
-set.seed(20); rnorm(1)
-
 
