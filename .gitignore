@@ -22,6 +22,7 @@ $RECYCLE.BIN/
 .nav
 .smn
 .out
+.pdf
 ## R files
 *.Rhistory
 .Rproj.user
