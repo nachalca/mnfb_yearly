@@ -1,12 +1,19 @@
 % !TEX encoding = UTF-8 Unicode
 \documentclass[a4paper]{article}
 \usepackage{amsmath}
+
 \usepackage{mathtools}
-\usepackage{graphicx, color}
-\graphicspath{{figs/}}
+\usepackage{graphicx}
+\usepackage{color}
 \usepackage{natbib}
 \usepackage{hyperref}
 \usepackage{setspace}
+\usepackage{amsfonts}
+
+\graphicspath{{figs/}}
+
+\newcommand{\nacho}[1]{\textcolor{red}{(Ignacio: #1)}}
+\newcommand{\I}{\mathrm{I}}
 
 %----------------------------------
 %\topmargin      -1.5cm   % read Lamport p.163
@@ -37,8 +44,8 @@
 
 %-------------------------------------
 
-\title{Bayesian Inference for  Covariance Matrix}
-\author{Ignacio Alvarez \and Jarad Niemi}
+\title{Bayesian Inference for a Covariance Matrix}
+\author{Ignacio Alvarez \and Jarad Niemi \nacho{We should probably include Matt on this.}}
 \date{ Spring 2014 }
 
 \begin{document}
@@ -65,9 +72,9 @@ Some alternatives distributions has been proposed. The scaled inverse Wishart di
 
 \section{Introduction} 
 
-The estimation of a covariance matrix appears on multivariate problems and most commonly in the hierarchical model context. The inclusion of random effects in a linear model within Bayesian framework may lead to modeling the covariance matrix for those effects. Also regression models with varying coefficients across groups is one of the most common situation where a prior for a covariance matrix is needed. 
+Estimation of covariance matrices appears in multivariate problems and most commonly in a hierarchical model context. The inclusion of random effects in a linear model within Bayesian framework may lead to modeling the covariance matrix for those effects. Also regression models with varying coefficients across groups is one of the most common situations where a prior for a covariance matrix is needed. 
 
-Bayesian estimation of a covariance matrix is a difficult problem, mainly because the standard approaches of conjugacy or non-informativeness present problems. In particular Jeffrey covariance prior may lead to improper posterior distributions when it is used in hierarchical models.  
+Bayesian estimation of a covariance matrix is a difficult problem, mainly because the standard approaches of conjugacy or non-informativeness present problems. In particular, the  Jeffreys covariance prior may lead to an improper posterior distributions when it is used in hierarchical models \ref{}.  
 
 The natural conjugate prior for the multivariate normal distribution is the inverse Wishart distribution. Conjugacy property has made of this choice the most commonly used approach for covariance matrix. However, this prior presents some problems, It can be too restrictive because assume the same amount of prior information about every variance parameters. More important, it shows a prior relationship between the variances and correlations, these characteristic of the prior can impact on posterior inferences about the covariance matrix. We show in this paper that even for simple models inverse Wishart prior may become an extremely informative prior resulting in biased inference for correlation and variances. In a scenario with small variability, inverse Wishart might severely underestimate the correlation and overestimate variances. 
 
@@ -79,96 +86,85 @@ The objective of this study is to understand the impact of some prior choices on
 The rest of this paper is organized as follows: next section describes the statistical methods and the covariance prior distributions we use. Then we present a simulation study consisting in simulate data from a multivariate normal model and make inference about the covariance matrix to compare the different priors. Finally to see if what we learned from simulated data is translated on a real data example we estimate the correlation among bird species counts using yearly bird count on Superior national forest. 
 
 \section{Statistical Models}
-This section describes the statistical methods used in this paper, the main focus of this work will be on covariance matrix inference.  We compare the covariance matrix priors in the context of a  multivariate normal model. We assume  $Y$  is a $d$ dimensional vector following a multivariate normal distribution, $Y \sim N_d(\mu, \Sigma)$, the parameter of interest will be the covariance matrix $\Sigma$. 
 
- Consider $n$ observations from $Y \sim N_d(0, \Sigma)$ distribution, the likelihood function can be written as follows:  
+Consider the multivariate normal model, that is let $Y_i\in \mathbb{R}^d$ for $i=1,\ldots,n$ and assume $Y_i \stackrel{iid}{\sim} N(\mu, \Sigma)$ with $\mu\in \mathbb{R}^d$ and $\Sigma$ is a $d$-dimensional positive definite matrix.   
   \begin{equation}
- p(y\vert \mu,\Sigma) \propto |\Sigma|^{-n/2} e^{- \frac{1}{2} \sum_{i=1}^n y_i^{'} \Sigma^{-1} y_i  } = |\Sigma|^{-n/2} e^{- \frac{1}{2}  tr(\Sigma^{-1}S_0)  } 
+ p(y\vert \mu,\Sigma) \propto |\Sigma|^{-n/2} e^{- \frac{1}{2} \sum_{i=1}^n y_i^\top \Sigma^{-1} y_i  } = |\Sigma|^{-n/2} e^{- \frac{1}{2}  \mbox{tr}(\Sigma^{-1}S_0)  } 
  \label{like}
  \end{equation} 
-where $y_i$ represents the $i$th  observation from the vector $Y$, and $S_0=\sum_{i=1}^n y_i y_i ^{'}$.  
+The likelihood is provided in equation \eqref{like} where $y$ represents the entire data and $S_0=\sum_{i=1}^n y_i y_i ^\top$.  
 
-Whenever is needed, we will separate individual the elements in the matrix in order to better understand the effect of each prior distribution we consider. Let standard deviation denoted by $\sigma_i$ and the correlation among components $i$ and $j$ of vector $Y$ denoted by $\rho_{ij}$. Then the diagonal entry will be $\Sigma_{ii} = \sigma_i^2$ and an entry outside the diagonal $\Sigma_{ij} = \rho_{ij}\sigma_i\sigma_j$. 
+For this study, the primary parameter of interest is the matrix $\Sigma$ with elements $\Sigma_{ij}$. We will often refer to the standard deviations $\sigma_i$ and correlations $\rho_{ij}$ where $\sigma_i^2 = \Sigma_{ii}$ and $\Sigma_{ij} = \rho_{ij}\sigma_i\sigma_j$. 
 
-Positive definite requirement for $\Sigma$ results in non trivial constrains for the matrix elements which makes difficult to set a prior distribution for it. This is the main reason of the existence of many different strategies to setting priors on covariance matrix. We organize covariance matrix prior alternatives to the conjugate inverse Wishart in a few broad categories. A first strategy is to decompose the covariance matrix into several components and treat each component separately. Secondly it is possible to use the inverse Wishart prior but adding priors on its parameters to give more flexibility, i.e. build a hierarchical model for the prior. Finally a third way to approach this problem is to consider a prior for a transformation of the covariance matrix. 
-
-We use the standard conjugate model inverse Wishart prior, because is the most used model in practice. We also consider the separation strategy proposed by  \cite{barnard2000} and scaled inverse Wishart approach. Among decomposition models these two are the more promising from an end user perspective because its interpretation (the former) or its applicability (the latter). Finally we consider the hierarchical approach proposed by \cite{huang2013simple}, this is the most recent proposal we found for this problem. 
+In the following subsections, we introduce a number of ``standard'' priors for covariance matrices including the inverse Wishart, scaled inverse Wishart, hierarchical inverse Wishart, and a separation strategy. One prior that is not included is the Jeffreys prior which is $p(\Sigma)\propto |\Sigma| ^ {\frac{-(d+1)}{2} } $ since this prior may lead to improper posteriors in the context of linear models \citep{gelman2006prior, SIW2008}. 
 
 
-%\subsection{Non-informative prior} 
-%The  Jeffrey prior for the model (\ref{like}) is $p(\Sigma)\propto |\Sigma| ^ {\frac{-(d+1)}{2} } $,  which is reduced to $p(\sigma) \propto \sigma^{-1}$  the usual conjugate prior for univariate model.  \cite{gelman2006prior} has showed this present problems for variance parameters within hierarchical models and \cite{SIW2008} extend this concerns to the multivariate case,  the main problem is that Jeffrey may lead to improper posterior within the context of linear models \citep{SIW2008}.  
+ Finally we consider the hierarchical approach proposed by \cite{huang2013simple}, this is the most recent proposal we found for this problem. 
 
 \subsection{Inverse Wishart prior}
 
-Inverse Wishart (IW) is a distribution for the entire covariance matrix $\Sigma$, represented as $\Sigma \sim IW(\nu,\Lambda)$ with density
- 
+The natural conjugate prior for a covariance matrix is the inverse Wishart (IW) prior\citep{barnard2000}. 
 \begin{equation} 
 p(\Sigma) \propto  |\Sigma|^{-(\nu+ d +1)/2 } e^{-\frac{1}{2} tr( \Lambda \Sigma^{-1}) }
 \label{eq:wis}
 \end{equation}
+The IW prior has density provided in \eqref{eq:wis} where $\Lambda\in \mathbb{R}^d$ is a positive definite $d$ dimensional matrix and $\nu$ is a scalar degrees of freedom. For a proper prior, $\nu>d-1$. The mean is $E(\Sigma) = \Sigma_0= \frac{\Lambda}{\nu - d - 1}$ for $\nu>d+1$. 
 
-$\Lambda$ is a positive definite $d$ dimensional matrix and $\nu$ is a scalar value representing degrees of freedom. In order to get a proper prior we should set $\nu > d-1$. At a multivariate level the prior mean is $E(\Sigma) = \Sigma_0= \frac{\Lambda}{\nu - d - 1}$ 
+The IW prior is commonly used due to its conjugacy properties with the normal sampling model. Specifically, the full conditional for $\Sigma$ is 
+%  \[
+%   p(\Sigma\vert y ) \propto |\Sigma|^{ -\left(\frac{n+\nu+d+1}{2} \right)} e^{- \frac{1}{2} tr( (\Lambda+S_0)\Sigma^{-1})}
+%  \] 
+% implying 
+$\Sigma \vert y \sim IW(n+\nu_0, \Lambda_0+S_0)$. \nacho{I believe this assumes $\mu=0$. I believe what we want is $\Sigma \vert y,\mu \sim IW(n+\nu_0, \Lambda_0+S_\mu)$ where $S_\mu = \sum_{i=1}^n (y_i-\mu) (y_i-\mu) ^\top$.} If $\mu|\Sigma \sim N(\mu_0,\Sigma/\kappa_0)$, then $\Sigma|y$ has an IW distribution (see Sec 3.6 of BDA 3rd edition \ref{}). 
 
-The main advantages of $IW$ prior are the conjugacy on normal model and its simplicity, most of the software has the $IW$ distribution as built-in function that can be directly used. Based on equations \ref{like} and \ref{eq:wis} we can derive the posterior distribution for $\Sigma$ as 
- \[
-  p(\Sigma\vert y ) \propto |\Sigma|^{ -\left(\frac{n+\nu+d+1}{2} \right)} e^{- \frac{1}{2} tr( (\Lambda+S_0)\Sigma^{-1})}
- \] 
-implying $\Sigma \vert y \sim IW(n+\nu_0, \Lambda_0+S_0)$. %Note $\frac{S_0}{n} = \frac{1}{n} \sum_{i=1}^n y_i y_i^{'} = \hat\Sigma_{mle}$ the MLE estimator of the covariance matrix, then we can write the posterior mean as follows 
-%\[  E(\Sigma\vert y) = \frac{\Lambda + S_0}{n+\nu-d-1} = \frac{ (\nu - k-1)\Lambda + n\hat\Sigma_{mle} } {n+\nu-d-1}  \] 
 
-Using an inverse Wishart prior for the covariance matrix induces an inverse scale chi-square distribution for each variance $\sigma_i^2\sim \mbox{inv}\chi^2(\nu - d + 1, \frac{\lambda_{ii}}{\nu-d+1} )$ where $\lambda_{ii}$ its a diagonal entry of $\Lambda$.  Also,  setting $\Lambda=I_d$ and $\nu=d+1$ where $I_d$ is an identity matrix of size $d$ induces a marginal uniform distribution on all correlations. 
-%However the marginal correlation conditional on variances is not uniform, in particular in two dimensional case ($d=2$). It isn't too hard to derive the conditional distribution for the correlation   
-%\begin{eqnarray}
-%\nonumber p(\rho \vert \sigma_1,\sigma^2) &\propto & p(\Sigma) \propto | \Sigma |^{-\frac{\nu+d+1}{2} }  e^{-\frac{1}{2} tr\left(\Lambda \Sigma^{-1}\right)} \\
-%\nonumber &\propto & (1-\rho^2)^{-\frac{\nu+d+1}{2}}e^{-(\lambda_{22} \sigma_1^2+\lambda_{11} \sigma_2^2 - 2\lambda_{12}\sigma_1\sigma_2)/(\sigma_1^2 \sigma_2^2(1-\rho^2)) }  
-%\end{eqnarray}
-%So with $\Lambda = I_2$ we get $p(\rho \vert \sigma_1,\sigma^2) \propto  (1-\rho^2)^{-\frac{\nu+d+1}{2}}e^{-(\sigma_1^2+\sigma_2^2)/(\sigma_1^2 \sigma_2^2(1-\rho^2))}$. 
- 
-There are two main problems with the $IW$ prior. 
-First, the uncertainty for all variance parameters (diagonal entries in the matrix) is controlled by the single degree of freedom parameter, this could  be too restrictive since ``\textit{implies the same amount of prior information about each of the variance parameters in the covariance matrix}'' \citep{bda2003}. Secondly, this prior imposes a dependency between $\rho_{ij}$ and $\sigma_i$, in particular higher values for the standard deviation $\sigma_i$ are associated with higher correlations, $\rho_{ij}$ close to 1 or -1 \citep{visualize}.  This can be a major problem if we are specially interested on making inference for correlations, since $\rho_{ij}$ will be large for coefficients with higher variance independently of its relation,  we illustrate this aspect based on simulations. 
+Using an inverse Wishart prior for the covariance matrix induces an inverse scale chi-square distribution for each variance $\sigma_i^2\sim \mbox{inv-}\chi^2(\nu - d + 1, \frac{\lambda_{ii}}{\nu-d+1} )$ where $\lambda_{ii}$ its a diagonal entry of $\Lambda$ \nacho{include the marginal distribution for the correlation}.  A ``standard'' approach for the IW prior sets $\Lambda=\I$ and $\nu=d+1$ where $\I$ is an identity matrix. The choice of all off diagonal elements being zero and $\nu=d+1$ results in marginal uniform distributions for all correlations.
+
+There are a least three problems with the $IW$ prior. First, the uncertainty for all variance parameters (diagonal entries in the matrix) is controlled by the single degree of freedom parameter and thus provides no flexibility to incorporate different amounts of prior knowledge to different variance components \citep{bda2003}. Second, when $\nu>1$, the implied scaled inv-$\chi^2$ distribution on each individual variance has extremely low density in a region near zero and thus causes bias in the result posteriors for these variances. Third, the IW prior imposes a dependency between $\rho_{ij}$ and $\sigma_i$ (as well as $\sigma_j$), in particular higher values $\sigma_i$ are associated with $|\rho_{ij}|\approx 1$ while small values for $\sigma_i$ are associated with $|\rho_{ij}|\approx 0$ \citep{visualize}.  We illustrate the last two problems in Section \ref{sec:results}.
 
 %\section{Alternative priors for $\Sigma$}
 %We present the alternatives to $IW$ prior that we use in this work ordered in terms of it increasing flexibility. We start with the scaled inverse Wishart ($SIW$) as it is also conjugate, next we present a hierarchical inverse Wishart prior that results in  half-t priors for the variances ($HIW_{ht}$), it is not clear which of these two options is the more flexible. The last prior we describe is an example of the separation strategy (SS) proposed by \cite{barnard2000} which implies marginal uniform correlations ($BMM_{mu}$).  
- 
-\subsection{Scaled Inverse Wishart}
-\cite{odomain} propose a strategy called Scaled inverse Wishart. Motivation for this is to give more flexibility in the variance estimates keeping the uniform distribution for correlations. It is based on the inverse Wishart distribution adding some scaling parameters, we use $\Sigma \sim SIW((\nu, \Lambda, b, \delta))$ to refer to this prior, $\nu$ is the degrees of freedom and $\Lambda$ is the location matrix for an inverse Wishart while $b_i$ and $\delta_i$ are location and standard deviation vector for the scaling parameters. 
 
-A hierarchical representation of the SIW approach start by decompose covariance into  $\Sigma = \Delta \; Q \; \Delta $ where $\Delta$ is a diagonal matrix with $\Delta_{ii}=\xi_i$, then 
 
-\begin{equation}
-Q  \sim  IW(\nu, \Lambda) \;\;,\;\;  log(\xi_i) \stackrel{iid} \sim N(b, \delta)
-\label{eq:siw}
-\end{equation}
+\subsection{Scaled Inverse Wishart \label{sec:siw}}
 
-Matrix $Q$ represent the \textsl{unscaled} covariance matrix distribution and the $\xi_i$ parameters are auxiliary parameters to correct the scale. Neither $Q$ nor $\xi_i$'s  parameters has meaning in separate fashion, inference for them is not possible since are not identifiable.  However together determines the covariance matrix distribution, for the individual elements of the covariance matrix, $SIW$ implies that $\sigma_i = \xi_i \sqrt{Q_{ii}}$, and $\Sigma_{ij}=\xi_i\xi_j\sqrt{Q_{ij}}$.   
+An alternative to the IW prior is the scaled inverse Wishart (SIW) prior which is based on the inverse Wishart distribution but adds additional parameters for flexibility \citep{odomain}. The SIW prior defines $\Sigma \equiv \Delta Q \Delta $ where $\Delta$ is a diagonal matrix with $\Delta_{ii}=\delta_i$, then $Q \sim  IW(\nu, \Lambda)$ and independently $\log(\delta_i) \stackrel{ind} \sim N(b_i, \xi_i)$ \nacho{Is $\xi_i$ the variance or the standard deviation?}. By construction, the SIW prior implies that $\sigma_i = \delta_i \sqrt{Q_{ii}}$, and $\Sigma_{ij}=\delta_i\delta_j\sqrt{Q_{ij}}$. We use $\Sigma \sim SIW(\nu, \Lambda, b, \xi)$ to refer to this prior. 
 
-There is no close form for the marginal distribution of the variances nor the conditional correlation, in order to study these distribution we need to obtain simulations from them. However marginally, the individual correlations are not affected by the auxiliary parameters $\xi$, then its distributional properties are the same than in the $IW$ case, so choosing $\nu=d+1$ and $ \Lambda=I_d$ we still get uniform prior on all the correlations. 
+\nacho{I changed $\delta\to\xi$ and $\xi\to\delta$ so that $\delta_i=\Delta_{ii}$. I hope I did the find-and-replace correctly.}
+
+
+
+Matrix $Q$ represent the unscaled covariance matrix distribution and the $\delta_i$ parameters are auxiliary parameters to correct the scale. Neither $Q$ nor $\delta_i$'s  parameters has meaning in separate fashion, inference for them is not possible since are not identifiable.  However together determines the covariance matrix distribution, for the individual elements of the covariance matrix, $SIW$ implies that 
+
+  
+
+There is no close form for the marginal distribution of the variances nor the conditional correlation, in order to study these distribution we need to obtain simulations from them. However marginally, the individual correlations are not affected by the auxiliary parameters $\delta$, then its distributional properties are the same than in the $IW$ case, so choosing $\nu=d+1$ and $ \Lambda=\I$ we still get uniform prior on all the correlations. 
 %\begin{eqnarray}
-%\nonumber p(\sigma^2) &=& \int p(\xi_i, \sigma^2) d\xi_i \\
-%\nonumber &\propto& \int \frac{e^{-(log(\xi_i)-b_i)^2/2\delta_i}}{\xi_i} \left(\frac{\sigma^2}{\xi^2}\right)^{-(\frac{\nu-d+1}{2}-1)} e^{- \frac{\lambda_{ii}\xi^2}{2\sigma^2} } d\xi_i \\
-%\nonumber &\propto& (\sigma^2)^{-(\frac{\nu-d+1}{2}-1)} \int\xi_i^{\nu-d+2}e^{ \frac{-(log(\xi_i)-b_i)^2}{2\delta_i} - \frac{\lambda_{ii}\xi^2}{2\sigma^2}}d\xi
+%\nonumber p(\sigma^2) &=& \int p(\delta_i, \sigma^2) d\delta_i \\
+%\nonumber &\propto& \int \frac{e^{-(log(\delta_i)-b_i)^2/2\xi_i}}{\delta_i} \left(\frac{\sigma^2}{\delta^2}\right)^{-(\frac{\nu-d+1}{2}-1)} e^{- \frac{\lambda_{ii}\delta^2}{2\sigma^2} } d\delta_i \\
+%\nonumber &\propto& (\sigma^2)^{-(\frac{\nu-d+1}{2}-1)} \int\delta_i^{\nu-d+2}e^{ \frac{-(log(\delta_i)-b_i)^2}{2\xi_i} - \frac{\lambda_{ii}\delta^2}{2\sigma^2}}d\delta
 %\end{eqnarray}
 
-This prior is recommended by \cite{gelmanhill}, setting $\nu=d+1$ and $\Lambda=I_d$ to ensure uniform priors on the correlations as the $IW$ prior but now there is more flexibility on incorporating some prior information about the standard deviations.
-%It could be the case that there is prior information for some of the variance parameters but not for all of them, then is possible to set up some the $\xi_i$ parameter with less variability to reflect this prior knowledge, which it was not possible to do with the $IW$ strategy. Also having $Q\sim IW$ we can take advantage of the conjugate property facilitating the computational implementation of this model. 
+This prior is recommended by \cite{gelmanhill}, setting $\nu=d+1$ and $\Lambda=\I$ to ensure uniform priors on the correlations as the $IW$ prior but now there is more flexibility on incorporating some prior information about the standard deviations.
+%It could be the case that there is prior information for some of the variance parameters but not for all of them, then is possible to set up some the $\delta_i$ parameter with less variability to reflect this prior knowledge, which it was not possible to do with the $IW$ strategy. Also having $Q\sim IW$ we can take advantage of the conjugate property facilitating the computational implementation of this model. 
 
 \subsection{Hierarchical Half-t prior}
 
-Recently, \cite{huang2013simple} have proposed a different approach, instead of decompose the covariance matrix into correlation and variance they propose a hierarchical model for the covariance matrix parameters. We write this prior as $\Sigma \sim HIW_{ht}(\nu, \delta)$ since is a hierarchical inverse Wishart prior which results in marginals half-t distributions for the standard deviations, $\nu$ is again the degrees of freedom parameter and $\delta$ will be the scale in the marginal deviations.   Letting  $\Lambda$ to be a diagonal matrix with $\Lambda_{ii} =\lambda_i $ then
+Recently, \cite{huang2013simple} have proposed a different approach, instead of decompose the covariance matrix into correlation and variance they propose a hierarchical model for the covariance matrix parameters. We write this prior as $\Sigma \sim HIW_{ht}(\nu, \xi)$ since is a hierarchical inverse Wishart prior which results in marginals half-t distributions for the standard deviations, $\nu$ is again the degrees of freedom parameter and $\xi$ will be the scale in the marginal deviations.   Letting  $\Lambda$ to be a diagonal matrix with $\Lambda_{ii} =\lambda_i $ then
 
 \begin{equation}
-\Sigma \sim IW( \nu + d - 1 ,  2\nu\Lambda) \;\;,\;\;  \lambda_i  \stackrel{ind} \sim \mbox{Ga}(\frac{1}{2} , \frac{1}{\delta_i^2}) \;\; \mbox{with} \; E(\lambda_i)=\frac{\delta_i^2}{2} 
+\Sigma \sim IW( \nu + d - 1 ,  2\nu\Lambda) \;\;,\;\;  \lambda_i  \stackrel{ind} \sim \mbox{Ga}(\frac{1}{2} , \frac{1}{\xi_i^2}) \;\; \mbox{with} \; E(\lambda_i)=\frac{\xi_i^2}{2} 
 \label{eq:ht}
 \end{equation}
 
-An important advantage of  $HIW_{ht}$ is that it implies that the standard deviations are distributed as a $t$ distribution with $\nu$ degrees of freedom and $\delta_i$ scale parameter truncated at 0 to cover only positive values, this is $\sigma_i \sim t_{\nu}^{+}(0, \delta_i)$, letting $\delta_i$ to have large values we can get weakly informative priors on the variance and maintain the conjugacy of the prior.  
+An important advantage of  $HIW_{ht}$ is that it implies that the standard deviations are distributed as a $t$ distribution with $\nu$ degrees of freedom and $\xi_i$ scale parameter truncated at 0 to cover only positive values, this is $\sigma_i \sim t_{\nu}^{+}(0, \xi_i)$, letting $\xi_i$ to have large values we can get weakly informative priors on the variance and maintain the conjugacy of the prior.  
 
 The marginal distribution implied for correlations is giving by $p(\rho) \propto (1-\rho^2)^{\frac{\nu_0}{2}-1}$ then letting $\nu=2$ implies marginally uniform distribution for the correlation coefficient. 
 %Conditional distribution for correlation given the variances in the two dimensional case can be found starting with the result from the IW case and integrating out the $\lambda_i$ parameters
 %\begin{eqnarray}
 %\nonumber p(\rho \vert \sigma_1,\sigma_2) &\propto & 
 %(1-\rho^2)^{-\frac{\nu+4}{2}} \int (\lambda_1\lambda2)^{\frac{\nu+1}{2}}e^{-\nu(\lambda_{2} \sigma_1^2+\lambda_{1}\sigma_2^2)/(\sigma_1^2 \sigma_2^2(1-\rho^2)) }p(\lambda_1)p(\lambda_2) d\lambda_i  \\ 
-%\nonumber  &\propto &  (1-\rho^2)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_1^2(1-\rho^2)} + \delta_1)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_2^2(1-\rho^2)} + \delta_2)^{-\frac{\nu+4}{2}}
+%\nonumber  &\propto &  (1-\rho^2)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_1^2(1-\rho^2)} + \xi_1)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_2^2(1-\rho^2)} + \xi_2)^{-\frac{\nu+4}{2}}
 %\end{eqnarray}
 A similar approach has proposed by \cite{daniels1999} and \cite{matilde} however they use flat priors for the diagonal entries of $\Lambda$ matrix and also let the degrees of freedom parameter have a distribution.
  
@@ -176,10 +172,10 @@ A similar approach has proposed by \cite{daniels1999} and \cite{matilde} however
 
 \cite{barnard2000} propose decompose the covariance as $\Sigma = \Lambda \; R \; \Lambda$  where $\Lambda$ is a diagonal matrix with  standard deviations $\sigma_{i}$, and $R$ is the correlation matrix with $\rho_{ij}$  as the $ij$ entry of the $R$ matrix. It is called Separation Strategy (SS), ensure prior independence between standard deviations and correlations.  Different ways to set priors for $R$ and $\Lambda$ are special cases of this general strategy. 
 
-In particular, we refer to the first strategy proposed in \cite{barnard2000} as $\Sigma \sim BMM_{mu}(\nu,b,\delta)$.  Letting $R = \Delta Q \Delta$ where $\Delta$ is a diagonal matrix with $\Delta_{ii} = Q_{ii}^{-1/2}$, then 
+In particular, we refer to the first strategy proposed in \cite{barnard2000} as $\Sigma \sim BMM_{mu}(\nu,b,\xi)$.  Letting $R = \Delta Q \Delta$ where $\Delta$ is a diagonal matrix with $\Delta_{ii} = Q_{ii}^{-1/2}$, then 
 
 \begin{equation}
-Q \sim IW(\nu, I ) \;\;, \;\;  log(\sigma_i) \stackrel{iid} \sim N(b_i, \delta_i)
+Q \sim IW(\nu, I ) \;\;, \;\;  log(\sigma_i) \stackrel{iid} \sim N(b_i, \xi_i)
 \label{eq:ss}
 \end{equation} 
 
@@ -205,7 +201,7 @@ A immediate problem with this method is that it only work when $\Sigma$ is the c
 
 We will add as another strategy to set up prior for $\Sigma$ matrix. The procedure is first scale the data set to have standard deviation equal to 1, then use the IW prior describe in equation \ref{eq:wis}. We present results for the cases in which the traditional IW approach shows serious problems for hitting right inference for correlations. 
 
-\section{Simulation study results}
+\section{Simulation study results \label{sec:results}}
 
 In this section we carry out a simulation based analysis to assess the performance of different strategies to impose covariance matrix prior. We start by studying a key aspect of priors distributions, the relationship between standard deviation and correlation that each prior implies. Then we describe all the scenarios we set up to simulate data and finally we present the results of the correlation inference based on simulations.  
 
@@ -230,10 +226,10 @@ We described the strategies to set up a covariance prior, here we compare these 
    \begin{tabular}{ l|c}
    \hline
       Prior    &  Parameter Values \\ \hline
-  $IW(\nu, \Lambda)$ &   $\nu=d+1$, $\Lambda=I_d$ \\ 
-  $SIW((\nu, \Lambda, b, \delta))$  & $b=0$, $\delta_i =1$,  $\nu_0= d + 1$, $\Lambda = 0.8I_d$ \\
-  $HIW_{ht}(\nu, \delta)$    &  $\nu=2$,  $\delta_i=1.04$ \\
-   $BMM_{mu}(\nu,,b,\delta)$   &  $\nu=d+1$, $b_i=log(.72)/2$ , $\delta_i=1$ \\ \hline
+  $IW(\nu, \Lambda)$ &   $\nu=d+1$, $\Lambda=\I$ \\ 
+  $SIW((\nu, \Lambda, b, \xi))$  & $b=0$, $\xi_i =1$,  $\nu_0= d + 1$, $\Lambda = 0.8\I$ \\
+  $HIW_{ht}(\nu, \xi)$    &  $\nu=2$,  $\xi_i=1.04$ \\
+   $BMM_{mu}(\nu,,b,\xi)$   &  $\nu=d+1$, $b_i=log(.72)/2$ , $\xi_i=1$ \\ \hline
    \end{tabular}
  \end{table}       
 
@@ -471,7 +467,7 @@ The covariance parameter it well captured by all priors choices, $IW$ present mo
 \caption{Density of $X\sim \mbox{IG}(1, 1/2)$, red line at $x=0.01$. \label{igamma} }
 \end{figure}
 
-Figure \ref{igamma} shows the density of an inverse gamma distributed variables for small values. This help us to understand why we observe a bias in the standard deviation using $IW$ prior. The marginal prior distribution for $\sigma_i$ implied by $IW$ prior is $\sigma_i \sim \mbox{IG}(1, 1/2)$ when we set the parameters as $\nu = d$ and $\Lambda=I_d$ the usual choice for get non-informative prior. The red line is drawn at 0.01 value where the prior put no probability mass which explains the overestimation we have observe on simulation study and with the bird count data. 
+Figure \ref{igamma} shows the density of an inverse gamma distributed variables for small values. This help us to understand why we observe a bias in the standard deviation using $IW$ prior. The marginal prior distribution for $\sigma_i$ implied by $IW$ prior is $\sigma_i \sim \mbox{IG}(1, 1/2)$ when we set the parameters as $\nu = d$ and $\Lambda=\I$ the usual choice for get non-informative prior. The red line is drawn at 0.01 value where the prior put no probability mass which explains the overestimation we have observe on simulation study and with the bird count data. 
 
  What prior should we use ? 
 
