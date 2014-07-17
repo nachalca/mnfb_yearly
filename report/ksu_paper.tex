@@ -134,11 +134,7 @@ An alternative to the IW prior is the scaled inverse Wishart (SIW) prior which i
 
 By construction, the SIW prior implies that $\sigma_i = \delta_i \sqrt{Q_{ii}}$, and $\Sigma_{ij}=\delta_i\delta_jQ_{ij}$ \nacho{you had $\sqrt{Q_{ij}}$ but shouldn't it be $Q_{ij}$?}. So, although there is no closed from expression for the standard deviations and correlations, simulations from these distributions are trivial. In particular, each standard deviation is the product of a log-normal and the square root of a scaled inv-$\chi^2$ while the correlations $\rho_{ij} = Q_{ij}/\sqrt{Q_{ii}Q_{jj}}$ have the same distribution they had under the inverse Wishart on $Q$.  
 
-Matrix $Q$ represent the unscaled covariance matrix distribution and the $\delta_i$ parameters are auxiliary parameters to correct the scale. Neither $Q$ nor $\delta_i$'s  parameters has meaning in separate fashion, inference for them is not possible since are not identifiable.  However together determines the covariance matrix distribution, for the individual elements of the covariance matrix, $SIW$ implies that 
-
-  
-
-There is no close form for the marginal distribution of the variances nor the conditional correlation, in order to study these distribution we need to obtain simulations from them. However marginally, the individual correlations are not affected by the auxiliary parameters $\delta$, then its distributional properties are the same than in the $IW$ case, so choosing $\nu=d+1$ and $ \Lambda=\I$ we still get uniform prior on all the correlations. 
+From a computational perspective, the SIW prior is appealling because \nacho{??}.
 %\begin{eqnarray}
 %\nonumber p(\sigma^2) &=& \int p(\delta_i, \sigma^2) d\delta_i \\
 %\nonumber &\propto& \int \frac{e^{-(log(\delta_i)-b_i)^2/2\xi_i}}{\delta_i} \left(\frac{\sigma^2}{\delta^2}\right)^{-(\frac{\nu-d+1}{2}-1)} e^{- \frac{\lambda_{ii}\delta^2}{2\sigma^2} } d\delta_i \\
