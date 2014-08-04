@@ -89,10 +89,11 @@ The rest of this paper is organized as follows: next section describes the stati
 
 Consider the multivariate normal model, that is let $Y_i\in \mathbb{R}^d$ for $i=1,\ldots,n$ and assume $Y_i \stackrel{iid}{\sim} N(\mu, \Sigma)$ with $\mu\in \mathbb{R}^d$ and $\Sigma$ is a $d$-dimensional positive definite matrix.   
   \begin{equation}
- p(y\vert \mu,\Sigma) \propto |\Sigma|^{-n/2} e^{- \frac{1}{2} \sum_{i=1}^n y_i^\top \Sigma^{-1} y_i  } = |\Sigma|^{-n/2} e^{- \frac{1}{2}  \mbox{tr}(\Sigma^{-1}S_0)  } 
+ p(y\vert \mu,\Sigma) \propto |\Sigma|^{-n/2} e^{- \frac{1}{2} \sum_{i=1}^n (y_i-\mu)^\top \Sigma^{-1} (y_i-\mu) } = |\Sigma|^{-n/2} e^{- \frac{1}{2}  \mbox{tr}(\Sigma^{-1}S_\mu)  } 
  \label{like}
  \end{equation} 
-The likelihood is provided in equation \eqref{like} where $y$ represents the entire data and $S_0=\sum_{i=1}^n y_i y_i ^\top$.  
+The likelihood is provided in equation \eqref{like} where $y$ represents the entire data and  $S_\mu = \sum_{i=1}^n (y_i-\mu) (y_i-\mu) ^\top$. 
+
 
 For this study, the primary parameter of interest is the matrix $\Sigma$ with elements $\Sigma_{ij}$. We will often refer to the standard deviations $\sigma_i$ and correlations $\rho_{ij}$ where $\sigma_i^2 = \Sigma_{ii}$ and $\Sigma_{ij} = \rho_{ij}\sigma_i\sigma_j$. 
 
@@ -110,13 +111,7 @@ p(\Sigma) \propto  |\Sigma|^{-(\nu+ d +1)/2 } e^{-\frac{1}{2} tr( \Lambda \Sigma
 \end{equation}
 The IW prior has density provided in \eqref{eq:wis} where $\Lambda\in \mathbb{R}^d$ is a positive definite $d$ dimensional matrix and $\nu$ is a scalar degrees of freedom. For a proper prior, $\nu>d-1$. The mean is $E(\Sigma) = \Sigma_0= \frac{\Lambda}{\nu - d - 1}$ for $\nu>d+1$. 
 
-The IW prior is commonly used due to its conjugacy properties with the normal sampling model. Specifically, the full conditional for $\Sigma$ is 
-%  \[
-%   p(\Sigma\vert y ) \propto |\Sigma|^{ -\left(\frac{n+\nu+d+1}{2} \right)} e^{- \frac{1}{2} tr( (\Lambda+S_0)\Sigma^{-1})}
-%  \] 
-% implying 
-$\Sigma \vert y \sim IW(n+\nu_0, \Lambda_0+S_0)$. \nacho{I believe this assumes $\mu=0$. I believe what we want is $\Sigma \vert y,\mu \sim IW(n+\nu_0, \Lambda_0+S_\mu)$ where $S_\mu = \sum_{i=1}^n (y_i-\mu) (y_i-\mu) ^\top$.} If $\mu|\Sigma \sim N(\mu_0,\Sigma/\kappa_0)$, then $\Sigma|y$ has an IW distribution (see Sec 3.6 of BDA 3rd edition \ref{}). 
-
+The IW prior is commonly used due to its conjugacy properties with the normal sampling model. Specifically, the full conditional for $\Sigma$ is $\Sigma \vert y,\mu \sim IW(n+\nu_0, \Lambda_0+S_\mu)$ If $\mu|\Sigma \sim N(\mu_0,\Sigma/\kappa_0)$, then $\Sigma|y$ has an IW distribution (see Sec 3.6 of BDA 3rd edition \ref{}). 
 
 Using an inverse Wishart prior for the covariance matrix induces an inverse scale chi-square distribution for each variance $\sigma_i^2\sim \mbox{inv-}\chi^2(\nu - d + 1, \frac{\lambda_{ii}}{\nu-d+1} )$ \nacho{we need to deine this density} where $\lambda_{ii}$ its a diagonal entry of $\Lambda$ \nacho{include the marginal distribution for the correlation}.  A ``standard'' approach for the IW prior sets $\Lambda=\I$ and $\nu=d+1$ where $\I$ is an identity matrix. The choice of all off diagonal elements being zero and $\nu=d+1$ results in marginal uniform distributions for all correlations.
 
@@ -130,11 +125,7 @@ There are a least three problems with the $IW$ prior. First, the uncertainty for
 
 An alternative to the IW prior is the scaled inverse Wishart (SIW) prior which is based on the inverse Wishart distribution but adds additional parameters for flexibility \citep{odomain}. The SIW prior defines $\Sigma \equiv \Delta Q \Delta $ where $\Delta$ is a diagonal matrix with $\Delta_{ii}=\delta_i$, then $Q \sim  IW(\nu, \Lambda)$ and independently $\log(\delta_i) \stackrel{ind} \sim N(b_i, \xi_i)$ \nacho{Is $\xi_i$ the variance or the standard deviation?}.  We use $\Sigma \sim SIW(\nu, \Lambda, b, \xi)$ to refer to this prior. 
 
-\nacho{I changed $\delta\to\xi$ and $\xi\to\delta$ so that $\delta_i=\Delta_{ii}$. I hope I did the find-and-replace correctly.}
-
-By construction, the SIW prior implies that $\sigma_i = \delta_i \sqrt{Q_{ii}}$, and $\Sigma_{ij}=\delta_i\delta_jQ_{ij}$ \nacho{you had $\sqrt{Q_{ij}}$ but shouldn't it be $Q_{ij}$?}. So, although there is no closed from expression for the standard deviations and correlations, simulations from these distributions are trivial. In particular, each standard deviation is the product of a log-normal and the square root of a scaled inv-$\chi^2$ while the correlations $\rho_{ij} = Q_{ij}/\sqrt{Q_{ii}Q_{jj}}$ have the same distribution they had under the inverse Wishart on $Q$.  
-
-From a computational perspective, the SIW prior is appealling because \nacho{??}.
+By construction, the SIW prior implies that $\sigma_i = \delta_i \sqrt{Q_{ii}}$, and $\Sigma_{ij}=\delta_i\delta_jQ_{ij}$ So, although there is no closed from expression for the standard deviations and correlations, simulations from these distributions are trivial. In particular, each standard deviation is the product of a log-normal and the square root of a scaled inv-$\chi^2$ while the correlations $\rho_{ij} = Q_{ij}/\sqrt{Q_{ii}Q_{jj}}$ have the same distribution they had under the inverse Wishart on $Q$.  
 %\begin{eqnarray}
 %\nonumber p(\sigma^2) &=& \int p(\delta_i, \sigma^2) d\delta_i \\
 %\nonumber &\propto& \int \frac{e^{-(log(\delta_i)-b_i)^2/2\xi_i}}{\delta_i} \left(\frac{\sigma^2}{\delta^2}\right)^{-(\frac{\nu-d+1}{2}-1)} e^{- \frac{\lambda_{ii}\delta^2}{2\sigma^2} } d\delta_i \\
@@ -153,17 +144,10 @@ Recently, \cite{huang2013simple} have proposed a different approach, instead of 
 \label{eq:ht}
 \end{equation}
 
-An important advantage of  $HIW_{ht}$ is that it implies that the standard deviations are distributed as a $t$ distribution with $\nu$ degrees of freedom and $\xi_i$ scale parameter truncated at 0 to cover only positive values, this is $\sigma_i \sim t_{\nu}^{+}(0, \xi_i)$, letting $\xi_i$ to have large values we can get weakly informative priors on the variance and maintain the conjugacy of the prior.  
+This prior implies the standard deviations are distributed as a $t$ distribution with $\nu$ degrees of freedom and $\xi_i$ scale parameter truncated at 0 to cover only positive values, this is $\sigma_i \sim t_{\nu}^{+}(0, \xi_i)$.  The marginal distribution implied for correlations is giving by $p(\rho) \propto (1-\rho^2)^{\frac{\nu_0}{2}-1}$ then letting $\nu=2$ implies marginally uniform distribution for the correlation coefficient. 
 
-The marginal distribution implied for correlations is giving by $p(\rho) \propto (1-\rho^2)^{\frac{\nu_0}{2}-1}$ then letting $\nu=2$ implies marginally uniform distribution for the correlation coefficient. 
-%Conditional distribution for correlation given the variances in the two dimensional case can be found starting with the result from the IW case and integrating out the $\lambda_i$ parameters
-%\begin{eqnarray}
-%\nonumber p(\rho \vert \sigma_1,\sigma_2) &\propto & 
-%(1-\rho^2)^{-\frac{\nu+4}{2}} \int (\lambda_1\lambda2)^{\frac{\nu+1}{2}}e^{-\nu(\lambda_{2} \sigma_1^2+\lambda_{1}\sigma_2^2)/(\sigma_1^2 \sigma_2^2(1-\rho^2)) }p(\lambda_1)p(\lambda_2) d\lambda_i  \\ 
-%\nonumber  &\propto &  (1-\rho^2)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_1^2(1-\rho^2)} + \xi_1)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_2^2(1-\rho^2)} + \xi_2)^{-\frac{\nu+4}{2}}
-%\end{eqnarray}
-A similar approach has proposed by \cite{daniels1999} and \cite{matilde} however they use flat priors for the diagonal entries of $\Lambda$ matrix and also let the degrees of freedom parameter have a distribution.
- 
+A similar approach has proposed by \cite{daniels1999} and \cite{matilde}, they use flat priors for the diagonal entries of $\Lambda$ matrix and also let the degrees of freedom parameter have a distribution.  An important advantage of  $HIW_{ht}$ is the implied $\sigma_i \sim t_{\nu}^{+}(0, \xi_i)$ which is recommended by \cite{gelman2006prior}, letting $\xi_i$ to have large values we can get weakly informative priors on the variance and maintain the conjugacy of the prior.  
+
 \subsection{Separation Strategy \label{ss.sec} }
 
 \cite{barnard2000} propose decompose the covariance as $\Sigma = \Lambda \; R \; \Lambda$  where $\Lambda$ is a diagonal matrix with  standard deviations $\sigma_{i}$, and $R$ is the correlation matrix with $\rho_{ij}$  as the $ij$ entry of the $R$ matrix. It is called Separation Strategy (SS), ensure prior independence between standard deviations and correlations.  Different ways to set priors for $R$ and $\Lambda$ are special cases of this general strategy. 
