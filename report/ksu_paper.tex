@@ -12,7 +12,9 @@
 
 \graphicspath{{figs/}}
 
-\newcommand{\nacho}[1]{\textcolor{red}{(Ignacio: #1)}}
+\newcommand{\jarad}[1]{\textcolor{red}{(jarad: #1)}}
+\newcommand{\nacho}[1]{\textcolor{blue}{(nacho: #1)}}
+\newcommand{\matt}[1]{\textcolor{green}{(matt: #1)}}
 \newcommand{\I}{\mathrm{I}}
 
 %----------------------------------
@@ -45,7 +47,7 @@
 %-------------------------------------
 
 \title{Bayesian Inference for a Covariance Matrix}
-\author{Ignacio Alvarez \and Jarad Niemi \nacho{We should probably include Matt on this.}}
+\author{Ignacio Alvarez \and Jarad Niemi \and Matt Simpson  \nacho{Is the names order right?} }
 \date{ Spring 2014 }
 
 \begin{document}
@@ -111,11 +113,11 @@ p(\Sigma) \propto  |\Sigma|^{-(\nu+ d +1)/2 } e^{-\frac{1}{2} tr( \Lambda \Sigma
 \end{equation}
 The IW prior has density provided in \eqref{eq:wis} where $\Lambda\in \mathbb{R}^d$ is a positive definite $d$ dimensional matrix and $\nu$ is a scalar degrees of freedom. For a proper prior, $\nu>d-1$. The mean is $E(\Sigma) = \Sigma_0= \frac{\Lambda}{\nu - d - 1}$ for $\nu>d+1$. 
 
-The IW prior is commonly used due to its conjugacy properties with the normal sampling model. Specifically, the full conditional for $\Sigma$ is $\Sigma \vert y,\mu \sim IW(n+\nu_0, \Lambda_0+S_\mu)$ If $\mu|\Sigma \sim N(\mu_0,\Sigma/\kappa_0)$, then $\Sigma|y$ has an IW distribution (see Sec 3.6 of BDA 3rd edition \ref{}). 
+The IW prior is commonly used due to its conjugacy properties with the normal sampling model. Specifically, the full conditional for $\Sigma$ is $\Sigma \vert y,\mu \sim IW(n+\nu_0, \Lambda_0+S_\mu)$ If $\mu|\Sigma \sim N(\mu_0,\Sigma/\kappa_0)$, then $\Sigma|y$ has an IW distribution (see Sec 3.6 of \cite{bda2013} \nacho{check the section for this} ). 
 
-Using an inverse Wishart prior for the covariance matrix induces an inverse scale chi-square distribution for each variance $\sigma_i^2\sim \mbox{inv-}\chi^2(\nu - d + 1, \frac{\lambda_{ii}}{\nu-d+1} )$ \nacho{we need to deine this density} where $\lambda_{ii}$ its a diagonal entry of $\Lambda$ \nacho{include the marginal distribution for the correlation}.  A ``standard'' approach for the IW prior sets $\Lambda=\I$ and $\nu=d+1$ where $\I$ is an identity matrix. The choice of all off diagonal elements being zero and $\nu=d+1$ results in marginal uniform distributions for all correlations.
+Using an inverse Wishart prior for the covariance matrix induces an scaled inverse chi-square distribution\footnote{Scaled inverse chi-square denoted by $X \sim \mbox{inv-}\chi^2(\nu, s^2)$ have a density function given by $p(x) =  \frac{(\nu/2)^{\nu/2}} {\Gamma(\nu/2)} s^{\nu}x^{-(\nu/2 + 1)} e{-\nu s^2 / 2x} $} for each variance $\sigma_i^2\sim \mbox{inv-}\chi^2(\nu - d + 1, \frac{\lambda_{ii}}{\nu-d+1} )$ where $\lambda_{ii}$ its a diagonal entry of $\Lambda$, and assuming $\Lambda$ to be a diagonal matrix the marginal correlations has marginal density as $p(\rho_{ij}) \propto (1 - \rho_{ij}^2)^{(\nu - d + 1)/2}$. \nacho{I've taken from Matt pdf} A ``standard'' approach for the IW prior sets $\Lambda=\I$ and $\nu=d+1$ where $\I$ is an identity matrix. The choice of all off diagonal elements being zero and $\nu=d+1$ results in marginal uniform distributions for all correlations.
 
-There are a least three problems with the $IW$ prior. First, the uncertainty for all variance parameters (diagonal entries in the matrix) is controlled by the single degree of freedom parameter and thus provides no flexibility to incorporate different amounts of prior knowledge to different variance components \citep{bda2003}. Second, when $\nu>1$, the implied scaled inv-$\chi^2$ distribution on each individual variance has extremely low density in a region near zero and thus causes bias in the result posteriors for these variances. Third, the IW prior imposes a dependency between $\rho_{ij}$ and $\sigma_i$ (as well as $\sigma_j$), in particular higher values $\sigma_i$ are associated with $|\rho_{ij}|\approx 1$ while small values for $\sigma_i$ are associated with $|\rho_{ij}|\approx 0$ \citep{visualize}.  We illustrate the last two problems in Section \ref{sec:results}.
+There are a least three problems with the $IW$ prior. First, the uncertainty for all variance parameters (diagonal entries in the matrix) is controlled by the single degree of freedom parameter and thus provides no flexibility to incorporate different amounts of prior knowledge to different variance components \citep{bda2013} \nacho{change the reference from BDA 2nd to BDA 3rd edition}. Second, when $\nu>1$, the implied scaled inv-$\chi^2$ distribution on each individual variance has extremely low density in a region near zero and thus causes bias in the result posteriors for these variances. Third, the IW prior imposes a dependency between $\rho_{ij}$ and $\sigma_i$ (as well as $\sigma_j$), in particular higher values $\sigma_i$ are associated with $|\rho_{ij}|\approx 1$ while small values for $\sigma_i$ are associated with $|\rho_{ij}|\approx 0$ \citep{visualize}.  We illustrate the last two problems in Section \ref{sec:results}.
 
 %\section{Alternative priors for $\Sigma$}
 %We present the alternatives to $IW$ prior that we use in this work ordered in terms of it increasing flexibility. We start with the scaled inverse Wishart ($SIW$) as it is also conjugate, next we present a hierarchical inverse Wishart prior that results in  half-t priors for the variances ($HIW_{ht}$), it is not clear which of these two options is the more flexible. The last prior we describe is an example of the separation strategy (SS) proposed by \cite{barnard2000} which implies marginal uniform correlations ($BMM_{mu}$).  
@@ -123,7 +125,7 @@ There are a least three problems with the $IW$ prior. First, the uncertainty for
 
 \subsection{Scaled Inverse Wishart \label{sec:siw}}
 
-An alternative to the IW prior is the scaled inverse Wishart (SIW) prior which is based on the inverse Wishart distribution but adds additional parameters for flexibility \citep{odomain}. The SIW prior defines $\Sigma \equiv \Delta Q \Delta $ where $\Delta$ is a diagonal matrix with $\Delta_{ii}=\delta_i$, then $Q \sim  IW(\nu, \Lambda)$ and independently $\log(\delta_i) \stackrel{ind} \sim N(b_i, \xi_i)$ \nacho{Is $\xi_i$ the variance or the standard deviation?}.  We use $\Sigma \sim SIW(\nu, \Lambda, b, \xi)$ to refer to this prior. 
+An alternative to the IW prior is the scaled inverse Wishart (SIW) prior which is based on the inverse Wishart distribution but adds additional parameters for flexibility \citep{odomain}. The SIW prior defines $\Sigma \equiv \Delta Q \Delta $ where $\Delta$ is a diagonal matrix with $\Delta_{ii}=\delta_i$, then $Q \sim  IW(\nu, \Lambda)$ and independently $\log(\delta_i) \stackrel{ind} \sim N(b_i, \xi_i)$ \jarad{Is $\xi_i$ the variance or the standard deviation?}.  We use $\Sigma \sim SIW(\nu, \Lambda, b, \xi)$ to refer to this prior. 
 
 By construction, the SIW prior implies that $\sigma_i = \delta_i \sqrt{Q_{ii}}$, and $\Sigma_{ij}=\delta_i\delta_jQ_{ij}$ So, although there is no closed from expression for the standard deviations and correlations, simulations from these distributions are trivial. In particular, each standard deviation is the product of a log-normal and the square root of a scaled inv-$\chi^2$ while the correlations $\rho_{ij} = Q_{ij}/\sqrt{Q_{ii}Q_{jj}}$ have the same distribution they had under the inverse Wishart on $Q$.  
 %\begin{eqnarray}
