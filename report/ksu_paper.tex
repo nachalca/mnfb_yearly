@@ -93,9 +93,9 @@ There are many alternative ways to construct priors for the covariance matrices 
  
 The objective of this study is to understand the impact of some prior choices on the posterior inference of the covariance matrix. We select some of the proposed prior models in the literature and first run a simulation study to assess the impact on posterior, then we apply each model to a real data set consisting of bird counts in national forest in the Great Lakes. 
 
-The rest of this paper is organized as follows: next section describes the statistical methods and the covariance prior distributions we use. Then we present a simulation study consisting in simulate data from a multivariate normal model and make inference about the covariance matrix to compare the different priors. Finally to see if what we learned from simulated data is translated on a real data example we estimate the correlation among bird species counts using yearly bird count on Superior national forest. \matt{Reference the section numbers here}
+The rest of this paper is organized as follows: section \ref{sec:models} describes the statistical methods and the covariance prior distributions we use. Then in section \ref{sec:results}, we present a simulation study consisting in simulate data from a multivariate normal model and make inference about the covariance matrix to compare the different priors. Finally, in section \ref{sec:birds} to see if what we learned from simulated data is translated on a real data example we estimate the correlation among bird species counts using yearly bird count on Superior national forest. 
 
-\section{Statistical Models}
+\section{Statistical Models \label{sec:models} }
 
 Consider the multivariate normal model, that is let $Y_i\in \mathbb{R}^d$ for $i=1,\ldots,n$ and assume $Y_i \stackrel{iid}{\sim} N(\mu, \Sigma)$ with $\mu\in \mathbb{R}^d$ and $\Sigma$ is a $d$-dimensional positive definite matrix.   
   \begin{equation}
@@ -240,12 +240,11 @@ Table \ref{paramvals} presents the parameter values we used to obtain samples fr
 \begin{center}
  \includegraphics[width=\textwidth ]{prior_sis2} 
   \vspace{-.5in}
-\caption{Scatterplot of prior samples, relationship among the standard deviation for the first two components (both in log base ten scale).  Column panels represent each covariance matrix prior and the row panels are the dimension of the data, color represent the absolute value of the correlation coefficient, above 0.5 is red colored and with blue below that level.  \label{priorF2} 
-\matt{ 1) Get the labels in the row names - e.g. it should say dim: 2 and dim: 10 or 2-d and 10-d. 2) the plot is difficult to read in black and white because of the colors. Maybe this is ok, but it's worth thinking about. 3) Is a 3 color scale even needed anyway? Going from white to red, for example, would work in both color and black and white.} }
+\caption{Scatterplot of prior samples, relationship among the standard deviation for the first two components (both in log base ten scale).  Column panels represent each covariance matrix prior and the row panels are the dimension of the data, color represent the absolute value of the correlation coefficient, red intensity increase when correlation is close to 1.  \label{priorF2} }
 \end{center}
 \end{figure}
 
-Figure \ref{priorF2} shows a scatterplot with the first two standard deviations from 10000 draws of each of the four priors. The color represents the absolute value of the correlation coefficient with red tones for correlations bigger than 0.5 in absolute value and black for the correlations below 0.5. 
+Figure \ref{priorF2} shows a scatterplot with the first two standard deviations from 10000 draws of each of the four priors. The color represents the absolute value of the correlation coefficient, red intensity increase when correlation is close to 1. 
 
 The $IW$ prior implies a positive relationship among the standard deviations especially in two dimensions. Also large correlations values appear more predominantly when the two variances are high, while low correlations appears when variances are low, this confirms the dependence between correlations and variances implicit on the $IW$ prior. 
 
@@ -366,10 +365,9 @@ Figure \ref{sciw} illustrates this solution. By showing the inference for the co
    \caption{Scaled data with IW prior results. Scatterplot of posterior mean for $\rho$  against correlation true value used in simulation. Each panel is a combination of standard deviation (columns) and sample size (rows). \label{sciw} }
 \end{figure}
 
-We can see the bias for large correlation values is no longer a problem. This plot looks similar to the results from the alternative priors studied here. This suggests pre-scaling the data can be an alternative when the only prior available is the IW prior. \matt{Should mention that this isn't surprising given the similarlity between prescaling the data and the scaled inverse Wishart prior.}
+We can see the bias for large correlation values is no longer a problem. This plot looks similar to the results from the alternative priors studied here. This suggests pre-scaling the data can be an alternative when the only prior available is the IW prior,  this is not surprising recalling the similarity between prescaling the data and the $SIW$ prior. 
 
-
-\section{Bird counts on Superior national forest}
+\section{Bird counts on Superior national forest \label{sec:birds}}
 
 The Natural Resources Research Institute (University of Minnesota Duluth) carry out ``an extensive, long-term monitoring program with over 1600 off-road sampling points designed to track regional population trends and investigate the response of forest birds to regional land use patterns''. We use the data generated from this program over the years as an example where to apply the methods we have presented earlier. We choose some of the most abundant species and estimate the correlation coefficient among species in both a pairwise and multivariate fashion. 
 %This consist in a similar structure data than the simulated data we have already used, the inference for pairs of bird species match with the bivariate case and the multivariate correlation inference is similar to the ten-dimensional simulation data. 
@@ -444,7 +442,7 @@ The $SIW$, $HIW_{ht}$ and $BMM_{mu}$ priors show similar behavior no matter whic
 %\end{figure}
 %Figure \ref{trend}  shows the dynamics for the five species identify on the correlation matrix. AS the data are centered, the lines represent the difference between the average yearly count and the historical mean for that species. The three species with high correlation shows the same temporal pattern, a sort of inverted u-shape specially marked on the case of OVEN. The two species with small correlation have a very stable pattern with no big departures from its own mean. 
 
-\section{Discussion} 
+\section{Discussion \label{sec:discu}} 
 
 Simulations from the prior show that $IW$ constraints the covariance matrix parameter implying strong dependence among these individual matrix components. Correlations tend to be small when standard deviations are small and tend to be high in absolute value when the standard deviation is large. In addition, the variances from different components are positive correlated.  Priors $SIW$ and $HIW_{ht}$ show similar characteristics to $IW$ but both seem to be more flexible than the $IW$ prior. The $BMM_{mu}$ prior presents the most flexibility since variances and correlations are by construction independent.
 

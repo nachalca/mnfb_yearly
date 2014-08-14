@@ -9,7 +9,9 @@ iterations <- read.table('data/diag_res.csv', header=T)
 
 # reorder and relabel prior factor
 res$prior.old <- res$prior
+
 res$prior <- factor(res$prior, levels=c('iw','siw', 'ht', 'ss'),labels=c('IW','SIW', 'HIWht', 'BMMmu'))
+
 rescov$prior <- factor(rescov$.id, levels=c('iw','siw', 'ht', 'ss'),labels=c('IW','SIW', 'HIWht', 'BMMmu'))
 
 with(res, table(prior,prior.old))
