@@ -309,7 +309,7 @@ qplot(data=dd , X1b,X2b,geom='tile', fill=value) + scale_fill_gradient2(low='bla
 # use the 10 species most abundant species in 2007, use only superior forest data
 # we work with centered data
 spcorr.dtraw <- subset(bird.yeartotal, abbrev %in% mostab07$Abbrev & forestN=='Superior',
-                    select= c('year','count.add',"abbrev","ave.add","yearc")) 
+                    select= c('year','count.add',"abbrev","ave.add","yearc","samples")) 
 colnames(spcorr.dtraw)[c(2,4)] <- c("count.add.or","ave.add.or" )
 aux <- ddply(spcorr.dtraw, .(abbrev), summarise, 
              count.add = scale(count.add.or, scale=FALSE), 
@@ -325,7 +325,6 @@ tab <- ddply(spcorr.dtraw, .(common), summarise,abbrev=abbrev[1],
              mean.count=mean(count.add.or), 
         sd.count = sd(count.add.or), 
         mean.ave =mean(ave.add.or), sd.ave = sd(ave.add.or))
-
 tab <- tab[order(tab$mean.count,decreasing=T),]
 
 
@@ -337,6 +336,23 @@ qplot(data=spcorr.dtraw,x=year, xlab='Year',ylab='Total Bird Count',y=count.add.
   geom_line() + theme(legend.title=element_blank(), legend.position='bottom') + 
   guides(col = guide_legend(ncol = 5, byrow = TRUE))
 dev.off()
+
+pdf(file='report/figs/rawtrend_ave.pdf', height=4)
+qplot(data=spcorr.dtraw,x=year, xlab='Year',ylab='Average Bird Count',y=ave.add.or,color=common, size=I(3))+
+  geom_line() + theme(legend.title=element_blank(), legend.position='bottom') + 
+  guides(col = guide_legend(ncol = 5, byrow = TRUE))
+dev.off()
+
+
+# total samples points per year
+samples <- ddply(spcorr.dtraw, .(year), summarise, samples=mean(samples))
+pdf(file='report/figs/samples.pdf', height=4)
+qplot(data=samples,x=year, xlab='Year',ylab='Total sampling points',y=samples, size=I(3))+
+  geom_line() + ylim(c(400,600))
+#+ theme(legend.title=element_blank(), legend.position='bottom') + 
+#  guides(col = guide_legend(ncol = 5, byrow = TRUE))
+dev.off()
+
 
 
 # We write 3 functions: f1 to create data set, f2 to fit the stan models, f3 to collect results. 

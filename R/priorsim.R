@@ -214,12 +214,12 @@ qplot(data=dm, x=rho, geom='density') + facet_grid(facets=dim~prior)
 
 
 # relation among s1 and s2 and the effect on rho
-dm$dim2 <- factor(dm$dim, levels=c(2,10), labels=paste('d',c(2,10),sep='=='))
+dm$dim2 <- factor(dm$dim, levels=c(2,10), labels=paste(c(2,10),'d',sep='-'))
 
 pdf('report/figs/prior_sis2.pdf', height=5)
 p <- qplot(data=dm, x=s2, y=s1,size=I(.8),color=abs(rho)) + facet_grid(facets=dim2~prior,labeller=label_parsed) 
 p + xlab( expression( sigma[1] )  ) + ylab(  expression( sigma[2] )) + scale_x_log10() + scale_y_log10(limits=c(0.01,100)) +
-scale_colour_gradient2(name=expression('|'~ rho ~ '|'), low='black',high='red', limits=c(0,1),midpoint=0.5) +
+scale_colour_gradient(name=expression('|'~ rho ~ '|'), low='white',high='red', limits=c(0,1)) +
 theme(legend.position='bottom')
 dev.off()
 
