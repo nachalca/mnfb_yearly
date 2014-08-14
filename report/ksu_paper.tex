@@ -85,12 +85,13 @@ Estimation of covariance matrices appears in multivariate problems and most comm
 
 Bayesian estimation of a covariance matrix is a difficult problem, mainly because the standard approaches of conjugacy or non-informativeness present problems. In particular, the  Jeffreys covariance prior may lead to an improper posterior distributions when it is used in hierarchical models.  
 
-The natural conjugate prior for the multivariate normal distribution is the inverse Wishart distribution. Conjugacy property has made of this choice the most commonly used approach for covariance matrix. However, this prior presents some problems, It can be too restrictive because assume the same amount of prior information about every variance parameters. \matt{maybe explain why the IW prior forces this to happen} More importantly, it shows a prior relationship between the variances and correlations. These characteristics of the prior can impact posterior inferences about the covariance matrix. We show in this paper that even for simple models inverse Wishart prior may become an extremely informative prior resulting in biased inference for correlation and variances. In a scenario with small variability, inverse Wishart might severely underestimate the correlation and overestimate variances. \matt{This section could probably also include a discussion of the problems with using the inverse gamma prior on a variance since they are related - e.g. cite Gelman's paper.}
+The natural conjugate prior for the multivariate normal distribution is the inverse Wishart distribution. Conjugacy property has made of this choice the most commonly used approach for covariance matrix. However, this prior presents some problems, It can be too restrictive because assume the same amount of prior information about every variance parameters. %\matt{maybe explain why the IW prior forces this to happen}
+ More importantly, it shows a prior relationship between the variances and correlations. These characteristics of the prior can impact posterior inferences about the covariance matrix. We show in this paper that even for simple models inverse Wishart prior may become an extremely informative prior resulting in biased inference for correlation and variances. In a scenario with small variability, inverse Wishart might severely underestimate the correlation and overestimate variances. %\matt{This section could probably also include a discussion of the problems with using the inverse gamma prior on a variance since they are related - e.g. cite Gelman's paper.}
 
 There are many alternative ways to construct priors for the covariance matrices that have been proposed,  however \cite{visualize} states that 
  \textit{``even fewer analytical results are known for these families, making it even more challenging to understand precisely the properties of such distributions. Consequently, our analytical understanding of these distributions falls short of providing us a full understanding of the inverse-Wishart distribution'' }
  
-The objective of this study is to understand the impact of some prior choices on the posterior inference of the covariance matrix. We select some of the proposed prior models in the literature , with these options we first run a simulation study to assess the impact on posterior and we then apply each model  to a real data set consisting of bird counts in national forest in the Great Lakes. 
+The objective of this study is to understand the impact of some prior choices on the posterior inference of the covariance matrix. We select some of the proposed prior models in the literature and first run a simulation study to assess the impact on posterior, then we apply each model to a real data set consisting of bird counts in national forest in the Great Lakes. 
 
 The rest of this paper is organized as follows: next section describes the statistical methods and the covariance prior distributions we use. Then we present a simulation study consisting in simulate data from a multivariate normal model and make inference about the covariance matrix to compare the different priors. Finally to see if what we learned from simulated data is translated on a real data example we estimate the correlation among bird species counts using yearly bird count on Superior national forest. \matt{Reference the section numbers here}
 
@@ -106,10 +107,7 @@ The likelihood is provided in equation \eqref{like} where $y$ represents the ent
 
 For this study, the primary parameter of interest is the matrix $\Sigma$ with elements $\Sigma_{ij}$. We will often refer to the standard deviations $\sigma_i$ and correlations $\rho_{ij}$ where $\sigma_i^2 = \Sigma_{ii}$ and $\Sigma_{ij} = \rho_{ij}\sigma_i\sigma_j$. 
 
-In the following subsections, we introduce a number of ``standard'' priors for covariance matrices including the inverse Wishart, scaled inverse Wishart, hierarchical inverse Wishart, and a separation strategy. One prior that is not included is the Jeffreys prior which is $p(\Sigma)\propto |\Sigma| ^ {\frac{-(d+1)}{2} } $ since this prior may lead to improper posteriors in the context of linear models \citep{gelman2006prior, SIW2008}. 
-
-
- Finally we consider the hierarchical approach proposed by \cite{huang2013simple}, this is the most recent proposal we found for this problem. 
+In the following subsections, we introduce a number of ``standard'' priors for covariance matrices including the inverse Wishart, scaled inverse Wishart, hierarchical inverse Wishart, and a separation strategy. One prior that is not included is the Jeffreys prior which is $p(\Sigma)\propto |\Sigma| ^ {\frac{-(d+1)}{2} } $ since this prior may lead to improper posteriors in the context of linear models \citep{gelman2006prior, SIW2008}. \matt{Probably don't need to list Jeffrey's prior since we don't do anything with it} Finally we consider the hierarchical approach proposed by \cite{huang2013simple}, this is the most recent proposal we found for this problem. 
 
 \subsection{Inverse Wishart prior}
 
@@ -122,9 +120,9 @@ The IW prior has density provided in \eqref{eq:wis} where $\Lambda\in \mathbb{R}
 
 The IW prior is commonly used due to its conjugacy properties with the normal sampling model. Specifically, the full conditional for $\Sigma$ is $\Sigma \vert y,\mu \sim IW(n+\nu_0, \Lambda_0+S_\mu)$ If $\mu|\Sigma \sim N(\mu_0,\Sigma/\kappa_0)$, then $\Sigma|y$ has an IW distribution (see Sec 3.6 of \cite{bda2013} \nacho{check the section for this} ). 
 
-Using an inverse Wishart prior for the covariance matrix induces scaled inverse chi-square distribution\footnote{The scaled inverse chi-square denoted by $X \sim \mbox{inv-}\chi^2(\nu, s^2)$ have a density function given by $p(x) =  \frac{(\nu/2)^{\nu/2}} {\Gamma(\nu/2)} s^{\nu}x^{-(\nu/2 + 1)} \mbox{exp}\left\{-\nu s^2 / 2x\right\} $}  for each variance $\sigma_i^2\sim \mbox{inv-}\chi^2(\nu - d + 1, \frac{\lambda_{ii}}{\nu-d+1} )$ where $\lambda_{ii}$ is its a diagonal entry of $\Lambda$, and assuming $\Lambda$ to be a diagonal matrix the marginal correlations has marginal density as $p(\rho_{ij}) \propto (1 - \rho_{ij}^2)^{(\nu - d + 1)/2}$. \nacho{I've taken from Matt pdf} A ``standard'' approach for the IW prior sets $\Lambda=\I$ and $\nu=d+1$ where $\I$ is an identity matrix. The choice of all off diagonal elements being zero and $\nu=d+1$ results in marginal uniform distributions for all correlations. \matt{I don't know about space constraints, but maybe this paragraph could have more detail. In particular, it might be worth writing down the marginal prior for $\rho$ in the general case and noting that when $\Lambda$ isn't diagonal, the marginal prior for $\rho$ depends on the {\it covariance} element of $\Lambda$, not the implied correlation.}
+Using an inverse Wishart prior for the covariance matrix induces scaled inverse chi-square distribution\footnote{The scaled inverse chi-square denoted by $X \sim \mbox{inv-}\chi^2(\nu, s^2)$ have a density function given by $p(x) =  \frac{(\nu/2)^{\nu/2}} {\Gamma(\nu/2)} s^{\nu}x^{-(\nu/2 + 1)} \mbox{exp}\left\{-\nu s^2 / 2x\right\} $}  for each variance $\sigma_i^2\sim \mbox{inv-}\chi^2(\nu - d + 1, \frac{\lambda_{ii}}{\nu-d+1} )$ where $\lambda_{ii}$ is its a diagonal entry of $\Lambda$, and assuming $\Lambda$ to be a diagonal matrix the marginal correlations has marginal density as $p(\rho_{ij}) \propto (1 - \rho_{ij}^2)^{(\nu - d + 1)/2}$. \nacho{I've taken from Matt pdf} A ``standard'' approach for the IW prior sets $\Lambda=\I$ and $\nu=d+1$ where $\I$ is an identity matrix. The choice of all off diagonal elements being zero and $\nu=d+1$ results in marginal uniform distributions for all correlations. 
 
-There are a least three problems with the $IW$ prior. First, the uncertainty for all variance parameters (diagonal entries in the matrix) is controlled by the single degree of freedom parameter and thus provides no flexibility to incorporate different amounts of prior knowledge to different variance components \citep{bda2013} \nacho{change the reference from BDA 2nd to BDA 3rd edition}. Second, when $\nu>1$, the implied scaled inv-$\chi^2$ distribution on each individual variance has extremely low density in a region near zero and thus causes bias in the result posteriors for these variances. \citep{gelman2006prior}. Third, the IW prior imposes a dependency between $\rho_{ij}$ and $\sigma_i$ (as well as $\sigma_j$), in particular higher values $\sigma_i$ are associated with $|\rho_{ij}|\approx 1$ while small values for $\sigma_i$ are associated with $|\rho_{ij}|\approx 0$ \citep{visualize}.  We illustrate the last two problems in Section \ref{sec:results}.
+There are a least three problems with the $IW$ prior. First, the uncertainty for all variance parameters is controlled by the single degree of freedom parameter and thus provides no flexibility to incorporate different amounts of prior knowledge to different variance components \citep{bda2013} \nacho{change the reference from BDA 2nd to BDA 3rd edition}. Second, when $\nu>1$, the implied scaled inv-$\chi^2$ distribution on each individual variance has extremely low density in a region near zero and thus causes bias in the result posteriors for these variances. \citep{gelman2006prior}. Third, the IW prior imposes a dependency between $\rho_{ij}$ and $\sigma_i$ (as well as $\sigma_j$), in particular higher values $\sigma_i$ are associated with $|\rho_{ij}|\approx 1$ while small values for $\sigma_i$ are associated with $|\rho_{ij}|\approx 0$ \citep{visualize}.  We illustrate the last two problems in Section \ref{sec:results}.
 
 %\section{Alternative priors for $\Sigma$}
 %We present the alternatives to $IW$ prior that we use in this work ordered in terms of it increasing flexibility. We start with the scaled inverse Wishart ($SIW$) as it is also conjugate, next we present a hierarchical inverse Wishart prior that results in  half-t priors for the variances ($HIW_{ht}$), it is not clear which of these two options is the more flexible. The last prior we describe is an example of the separation strategy (SS) proposed by \cite{barnard2000} which implies marginal uniform correlations ($BMM_{mu}$).  
@@ -165,7 +163,7 @@ A similar approach has proposed by \cite{daniels1999} and \cite{matilde}, they u
 
 \subsection{Separation Strategy \label{ss.sec} }
 
-\cite{barnard2000} propose the so-called Separation Strategy (SS). It consist on decompose the covariance as $\Sigma = \Lambda \; R \; \Lambda$  where $\Lambda$ is a diagonal matrix with  standard deviations $\sigma_{i}$, and $R$ is the correlation matrix with $\rho_{ij}$  as the $ij$ entry of the $R$ matrix. The SS ensure prior independence between standard deviations and correlations.  Different ways to set priors for $R$ and $\Lambda$ are special cases of this general strategy. 
+\cite{barnard2000} propose the so-called Separation Strategy (SS). It depends on decomposing the covariance as $\Sigma = \Lambda \; R \; \Lambda$  where $\Lambda$ is a diagonal matrix with  standard deviations $\sigma_{i}$, and $R$ is the correlation matrix with $\rho_{ij}$  as the $ij$ entry of the $R$ matrix. The SS ensures prior independence between standard deviations and correlations.  Different ways to set priors for $R$ and $\Lambda$ are special cases of this general strategy. 
 
 In particular, we refer to the first strategy proposed in \cite{barnard2000} as $\Sigma \sim BMM_{mu}(\nu,b,\xi)$.  Letting $R = \Delta Q \Delta$ where $\Delta$ is a diagonal matrix with $\Delta_{ii} = Q_{ii}^{-1/2}$, then 
 
@@ -174,7 +172,7 @@ Q \sim IW(\nu, I ) \;\;, \;\;  log(\sigma_i) \stackrel{iid} \sim N(b_i, \xi_i)
 \label{eq:ss}
 \end{equation} 
 
-determining the prior density for the correlation matrix as $p(R) \propto |R|^{-\frac{1}{2}(\nu+k+1) }  (\prod_{i=1}^k r^{ii}) ^{\frac{\nu}{2}}$ , where $r^{ii}$ is the $i$th diagonal element of $R^{-1}$. 
+determining the prior density for the correlation matrix as $p(R) \propto |R|^{-\frac{1}{2}(\nu+k+1) }  (\prod_{i=1}^k r^{ii}) ^{\frac{\nu}{2}}$, where $r^{ii}$ is the $i$th diagonal element of $R^{-1}$. 
 %So the prior for the correlation matrix is based on an inverse Wishart distribution with $\nu$ degrees of freedom and identity matrix as location parameter, transforming this prior into a correlation matrix implies the distribution for the correlations, which has the expression  
 
 Under $BMM_{mu}$ specification, individual correlations has the marginal density $p(\rho_{ij}) \propto (1-\rho_{ij}^2)^{\frac{\nu-d-1}{2}}$ and then setting $\nu=d+1$ lead to marginally uniformly distributed correlations which are also independent from the variances by construction. 
@@ -183,26 +181,24 @@ The main disadvantage of $BMM_{mu}$ is mainly computational. Losing the conjugac
 
 With more recently developed software, e.g. Stan, \citep{stan2014} this restriction is not a very important problem, since this is not based on Gibbs but instead a Hamiltonian strategy to obtain the MCMC iterations.  In fact, the STAN manual \citep{stanmanual2014} recommends following a separation strategy instead working with the $SIW$ model, but introduce a different prior distribution for the correlation matrix. They propose to use another distribution for $R$ proposed by \cite{lewandowski2009generating}, called the LJK prior.   
 
-This prior it has a simple from $p_{LKJ}(R) \propto |R|^{\eta-1}$  with $\eta > 0$. In order to get marginally uniformly distribution on the individual correlations we should  set $\eta \in (0,1)$ and probably make it lower when the dimension increase, however small values for this parameter make the LKJ sampler unstable. There is no a clear guide on how to fix the $\eta$ value. We will not use this LKJ prior as one of the options in this work. 
+This prior has a simple form: $p_{LKJ}(R) \propto |R|^{\eta-1}$  with $\eta > 0$. In order to get marginally uniform distributions on the individual correlations we should  set $\eta \in (0,1)$ and probably make it lower when the dimension of the covariance matrix is larger. However small values for this parameter make the LKJ sampler unstable. There is no a clear guide on how to set $\eta$. We will not use the LKJ prior in our simulations.
 
 \subsection{Options for applied modeling}
 
-The IW prior is probably the most common distribution used as covariance matrix prior, it conjugacy make it easily implemented, computationally effective. It is already implemented in most of Bayesian statistical software, which is not true for any other alternative. For instance, JAGS does not allow to use any of the other prior alternatives used in this exercise, only IW can be used in the data model step \footnote{Within the context of a hierarchical linear models it is possible to implements at least the scaled inverse strategy}.  
+The IW distribution is probably the most common distribution used as covariance matrix prior, its conjugacy make it easily implemented and computationally cheap. It is already implemented in most of Bayesian statistical software, which is not true for any other alternative. For instance, JAGS does not allow the use of any of the other priors we discuss\footnote{Within the context of a hierarchical linear models it is possible to implements at least the scaled inverse strategy}.  
 
-Then it is important to be aware of the limitation of this prior but also would be nice to have an easy solution to continue using it. The main problem for IW is that the inference for $\rho$ is affected by the scale of the data and in some cases posterior inferences can be severely impacted. However we could take advantage of the problem in order to get better inferences. Simply re-scaling the data previous to fit the model will make the posterior inferences for the correlation get better. 
-
-This pre-scaling strategy is essentially the same as using the $SIW$ prior except with a point mass prior on the standard deviations at the sample standard deviations.
+So it is important to be aware of the limitations of this prior but also it would be nice to have an easy solution to continue using it. The main problem for IW is that the inference for $\rho$ is affected by the scale of the data and in some cases posterior inferences can be severely impacted. However we could take advantage of the problem in order to get better inferences. Simply re-scaling the data before fitting the model will improve posterior inference for the correlation. This pre-scaling strategy is essentially the same as using the $SIW$ prior except with a point mass prior on the standard deviations at the sample standard deviations.
 %This seems related to the $SIW$ prior since here we are imposing another covariance matrix decomposition, $\Sigma = DQD$ where D is a diagonal matrix with the sample standard deviations and $Q\sim IW(\nu, \Lambda)$. So the main difference with $SIW$ would be among $D$ and $\Delta$, i.e. the elements of D are fixed and known while the elements of $\Delta$ are log-normally distributed. \matt{This paragraph could be clearer. In addition, I'm pretty sure prescaling the data is essentially the same as using the SIW prior except with a point mass prior on the standard deviations at the sample standard deviations.}
 
-A immediate problem with this method is that it only work when $\Sigma$ is the covariance matrix of observed data. If $\Sigma$ appears related to some random effects covariances matrix in a linear model or another parameter vector in some hierarchical model we can not scale those in order to use this correction.  Maybe one option is to fit the model with an $IW$ prior, get an estimate for standard deviations and then re-estimate the model scaling the parameters. \matt{Again, could be a bit clearer. Refer to scaled the data before running fitting the model with an IW prior by name - e.g. $IWsc$, which you use later in a plot.}
+A immediate problem with this method is that it only works when $\Sigma$ is the covariance matrix of observed data. If $\Sigma$ appears related to some random effects covariances matrix in a linear model or another parameter vector in some hierarchical model we can not scale those in order to use this correction.  Maybe one option is to fit the model with an $IW$ prior, get an estimate for standard deviations and then re-estimate the model scaling the parameters. %\matt{Again, could be a bit clearer. Refer to scaled the data before running fitting the model with an IW prior by name - e.g. $IWsc$, which you use later in a plot.}
 
-We will add as another strategy to set up prior for $\Sigma$ matrix. The procedure is first scale the data set to have standard deviation equal to 1, then use the IW prior describe in equation \ref{eq:wis}. We present results for the cases in which the traditional IW approach has serious problems estimating the correlations. 
+We will add this as another strategy to define a prior for $\Sigma$ matrix. The procedure is first scale the data so that each variable has a standard deviation of 1, then use the IW prior describe in equation \ref{eq:wis}. We present results for the cases in which the traditional IW approach has serious problems estimating the correlations. 
 
 \section{Simulation study results \label{sec:results}}
 
 In this section we carry out a simulation based analysis to assess the performance of different strategies for selecting a covariance matrix prior. We start by studying a key aspect of prior distributions, the relationship between standard deviation and correlation that each prior implies. Then we describe all the scenarios we set up to simulate data and finally we present the results of the correlation inference based on simulations.  
 
-We simulate centered data, $Y^{(k)}\sim N(0,\Sigma)$, it is possible extend this to include a mean vector $\mu$ and perform a similar simulation study. However the focus here will be the inference about the covariance matrix and we prefer not to deal with the mean estimation. A similar approach is taken by  \cite{daniels1999} and \cite{matilde} in their simulations. \matt{Do we know anything about how the covariance matrix prior impact inference about the mean parameters, e.g. in a regression model? Maybe just a reference.}
+We simulate centered data, $Y^{(k)}\sim N(0,\Sigma)$, it is possible extend this to include a mean vector $\mu$ and perform a similar simulation study. However the focus here will be the inference about the covariance matrix and we prefer not to deal with the mean estimation. A similar approach is taken by  \cite{daniels1999} and \cite{matilde} in their simulations. \matt{Do we know anything about how the covariance matrix prior impacts inference about the mean parameters, e.g. in a regression model? Maybe just a reference.}
 
 \subsection{Samples from  prior distribution} 
 We described the strategies to set up a covariance prior; here we compare these strategies to understand what each prior implies about the marginal distribution of parameters and possible dependencies among them. 
@@ -229,7 +225,7 @@ We described the strategies to set up a covariance prior; here we compare these 
    \end{tabular}
  \end{table}       
 
-Table \ref{paramvals} presents the parameter values we used to obtain samples from each prior distribution. We use as a reference the $IW$ prior with the non-informative values for the parameters, i.e., the identity matrix as location parameter and $\nu=d+1$ for degrees of freedom. This implies a marginal uniform prior on correlations and a IG$(1,1/2)$ for marginal prior for the variances which have a median of 0.72.  We set the parameter values for the other three priors to imply marginal uniform prior for correlations and a prior median of 0.72 for the variances. 
+Table \ref{paramvals} presents the parameter values we used to obtain samples from each prior distribution. We use as a reference the $IW$ prior with the non-informative values for the parameters, i.e., the identity matrix as location parameter and $\nu=d+1$ for degrees of freedom. This implies a marginal uniform prior on the correlations and a IG$(1,1/2)$ for marginal prior for the variances which have a median of 0.72.  We set the parameter values for the other three priors to imply a marginal uniform prior for the correlations and a prior median of 0.72 for the variances. 
 %\begin{figure}[htbp]
 %\begin{center}
 % \includegraphics[width=\textwidth ]{priorsim2d} 
@@ -249,25 +245,24 @@ Table \ref{paramvals} presents the parameter values we used to obtain samples fr
 \end{center}
 \end{figure}
 
-Figure \ref{priorF2} shows a scatterplot with the first two standard deviations from 10000 draws of each of the four priors. The color represent the absolute value of the correlation coefficient with reds tones for correlations bigger than 0.5 in absolute value and black for the correlations below 0.5. 
+Figure \ref{priorF2} shows a scatterplot with the first two standard deviations from 10000 draws of each of the four priors. The color represents the absolute value of the correlation coefficient with red tones for correlations bigger than 0.5 in absolute value and black for the correlations below 0.5. 
 
-$IW$ prior implies a positive relationship among the standard deviations especially with two dimensions. Also large correlations values appear more predominantly when the two variances are high, while low correlations appears when variances are low, this confirms the dependence between correlations and variances implicit on the $IW$ prior. 
+The $IW$ prior implies a positive relationship among the standard deviations especially in two dimensions. Also large correlations values appear more predominantly when the two variances are high, while low correlations appears when variances are low, this confirms the dependence between correlations and variances implicit on the $IW$ prior. 
 
-$SIW$ and $HIW_{ht}$ priors show a similar picture than $IW$ prior but all relations weaker. For instance, the high correlations are mostly present when variances are also high, however we do see some red points for small values of the standard deviations. 
-Finally,  $BMM_{mu}$ prior is again showing a picture with independence among scales and also independence with respect to the correlations. 
+The $SIW$ and $HIW_{ht}$ priors show a similar picture to the $IW$ prior but all relations weaker. For instance, the high correlations are mostly present when variances are also high, however we do see some red points for small values of the standard deviations. Finally,  $BMM_{mu}$ prior is again showing a picture with independence among scales and also independence with respect to the correlations. 
 
 \subsection{Impact on posterior} 
 
-We study the sensitivity of the correlation inference to the choice of the covariance matrix prior, we simulate two dimensional and ten dimensional data sets under difference scenarios of correlation, variance and sample size. The main idea is that although the properties of the prior distribution are important what really matters is the effects on the posterior.
+We study the sensitivity of correlation inference to the choice of the covariance matrix prior. We simulate two dimensional and ten dimensional data sets using different correlations, variances and sample sizes. The main idea is that although the properties of the prior distribution are important what really matters is the effects on the posterior.
 
-We simulate normally distributed data, $Y \sim N_d(\mu, \Sigma) $ where $d$ represent the dimension. The bivariate case $d=2$ data came from the following model 
+We simulate normally distributed data, $Y \sim N_d(\mu, \Sigma) $ where $d$ represent the dimensionof $Y$. The bivariate case $d=2$ data came from the following model 
 \begin{equation}
 \begin{pmatrix}  Y_1 \\ Y_2 \end{pmatrix} \sim 
 N\left( \begin{pmatrix}  0 \\ 0 \end{pmatrix}, \begin{pmatrix}  \sigma_{1}^2 & \rho\sigma_{1}\sigma_{2} \\ \rho\sigma_{1}\sigma_{2} & \sigma_{2}^2 \end{pmatrix} \right)
 \label{modsim}
 \end{equation} 
 
-Simulations are centered on 0 and also we fix the variances to be equal $\sigma_{1}^2=\sigma_{2}^2=\sigma^2$ and correlation equal to $\rho$. 
+Simulations are centered at 0 and we also fix the variances to be the equal $\sigma_{1}^2=\sigma_{2}^2=\sigma^2$ while the correlation is $\rho$.
 
 We extend this simulation for larger dimension maintaining this structure, so $\mu= 0$, $(\Sigma)_{ii} = \sigma_{i}=\sigma \;\; \forall i=1,\ldots,d$ and $(\Sigma)_{ij} = \rho\sigma^2$ which implies all variables have the same variance and each pair of variables has the same correlation, $Corr(Y_{i}, Y_{j}) = \rho$. 
 
@@ -286,7 +281,7 @@ To define a simulation scenario we need to set values for $d$, $\sigma$, $\rho$,
    \end{tabular}
 \end{table}
 
-We cover the possible correlation values from no correlation to extremely high correlation only with positive correlations values. It will be important to assess if the scale of the data affect the correlation inference, we cover a wide range of scales from standard deviations from 0.01 to 100. 
+We cover the possible correlation values from no correlation to extremely high correlation only with positive correlations values. It will be important to assess if the scale of the data affects the correlation inference, so we cover a wide range of scales from standard deviations from 0.01 to 100. 
 
 %Another aspect that will directly affect the estimation results is the sample size, here we consider 3 different values, from a small sample to a fairly big sample, $n=250$ would be consider as a big sample size in the bivariate case where there are only 3 parameters to estimate, in ten dimensions the number of parameter to estimate increase up to 55 but also there are more data since now each observation corresponds to ten observed values. \matt{most of the information in this paragraph seems unnecessary}
 To reduce Monte Carlo variability in the simulations, data set were simulated for $\sigma=1$ and then rescaled to get the others cases with different variances. For instance, there is one data set that consist on ten observations from $N_2(0, I_2 )$ corresponding to $n=10$, $d=2$ $\rho=0$ and $\sigma=1$ scenario. Then each variable is multiplied by 0.01, 0.1, 10  and 100 to obtain the others data sets, this becomes relevant since when we analyze the effect of the scale in the simulations results we actually comparing the same data. 
@@ -298,21 +293,22 @@ With the simulated data from model \eqref{modsim} and its ten-dimensional varian
    \centering
    \includegraphics[width=\textwidth] {fig_rho_d2} 
     \vspace{-.5in}
-   \caption{Bivariate data results. Scatterplot of posterior mean for $\rho$  against correlation true value used in simulation. Each panel is a combination of standard deviation (columns) and sample size (rows),  color and shape of the points represent the covariance prior. The points are horizontally jittered. \label{rhod2} \matt{Printed out in black and white, the different symbols in this plot are unreadable. So are the colors, but that is expected. Maybe instead of making each row a different sample size, make each row a different prior, then given each sample size a different symbol on the plot.}}
+   \caption{Bivariate data results. Scatterplot of posterior mean for $\rho$  against correlation true value used in simulation. Each panel is a combination of standard deviation (columns) and sample size (rows),  color and shape of the points represent the covariance prior. The points are horizontally jittered. \label{rhod2}%\matt{Printed out in black and white, the different symbols in this plot are unreadable. So are the colors, but that is expected. Maybe instead of making each row a different sample size, make each row a different prior, then given each sample size a different symbol on the plot.}
+}
 \end{figure}
 
 Figure \ref{rhod2} shows the results for the bivariate simulations, a scatterplot of the posterior mean for $\rho$, $E[\rho\vert y]$ against its true value used in simulations.  Each panel represent a specific combination of variance and sample size.  
 
-When standard deviation is small, $\sigma=0.01$ or $\sigma=0.1$ the IW prior heavily shrinks the posterior correlation towards 0 even if the true correlation is close to 1. In the first case the bias is huge and the posterior distribution is close to zero for all sample sizes.  With $\sigma=0.1$ this bias is really big when sample size is small ($n=10$) and it is also present on a bigger sample size of $n=50$ (recall there are only three parameters to estimate in this data set). The main message of the plot is that if the data suggest that the variance is small then we need to be careful in the correlation coefficient inference when we use the IW prior. 
+When the standard deviation is small, $\sigma=0.01$ or $\sigma=0.1$ the IW prior heavily shrinks the posterior correlation towards 0 even if the true correlation is close to 1. In the first case the bias is huge and the posterior distribution is close to zero for all sample sizes.  With $\sigma=0.1$ this bias is really big when sample size is small ($n=10$) and it is also present on a bigger sample size of $n=50$ (recall there are only three parameters to estimate in this data set). The main message of the plot is that if the data suggest that the variance is small then we need to be careful in the correlation coefficient inference when we use the IW prior. 
 %Posterior means for all the rest of priors in the bivariate case  do not show the bias effect for the small variance case, mostly all estimates are near the true value and the variability gets smaller when the sample size increase.  The biggest issues with these estimates is the case where no correlation and the sample size is small but does not seem to be affected by the variance.  With only 10 data points we could expect lot of variability in the correlation estimates,Figures \ref{rhod10}  shows the results for the 10-dimensional case. Again we can see the bias in the posterior mean when the variance is small and we use IW prior, actually the bias get bigger than the bivariate case, here for a true correlation value of 0.99 the posterior means using $IW$ prior are close to 0 with  $n=10$ and $\sigma=0.01$. Also in ten dimensions is more clear that when the variance gets bigger the $\rho$ posterior mean increase its variability when true correlation values are zero. Figure \ref{d2d10} in the appendix shows the posterior means comparison across dimension, basically we can see that the inference for the correlation among the first two components is almost the same when those components represent the complete data set and when are the first two variables  in a ten dimensional vector. 
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=\textwidth]{cilength} % requires the graphicx package
     \vspace{-.5in}
-   \caption{Length for a 95\% credible interval for $\rho$. Each panel represent a standard deviation value,  color represent the covariance prior, sample size is $n=10$ in every case.  \label{cilength} \matt{The colors don't come through very well in black and white, but using different symbols will probably work well.} }
+   \caption{Length for a 95\% credible interval for $\rho$. Each panel represent a standard deviation value,  color represent the covariance prior, sample size is $n=10$ in every case.  \label{cilength}}
 \end{figure}
 
-We compute the length of a 95\% credible interval and results are shown in Figure \ref{cilength}. The parametric space for the correlation is bounded, so a credible interval centered on 0 is more likely to be longer than if were close to 1. We use the Fisher transformation\footnote{ Fisher transformation for the correlation coefficient is defined as $z = \mbox{log} \left( \frac{1 + \rho}{1 - \rho} \right)$ where $\rho$ is the correlation. } for correlation coefficient to  map its parametric space onto the whole real line, and then get fair comparison of the credible intervals length. 
+We compute the length of a 95\% credible interval and results are shown in Figure \ref{cilength}. The parametric space for the correlation is bounded, so a credible interval centered on 0 is more likely to be longer than if were close to 1. We use the Fisher transformation\footnote{ Fisher transformation for the correlation coefficient is defined as $z = \mbox{log} \left( \frac{1 + \rho}{1 - \rho} \right)$ where $\rho$ is the correlation. } for the correlation coefficient to map its parametric space onto the whole real line, and then get fair comparison of the length of the credible intervals.
 
 Credible interval length is highly affected by sample size getting smaller when sample size increase, obviously this is not surprising.  Since for sample size of $n=50$ and $n=250$ it no difference among any of the prior so these cases are not shown in the figure. For the small sample size case, credible intervals are wider on high correlations for every prior except $IW$ which is extremely biased
 
@@ -322,12 +318,13 @@ Inference about the standard deviations is also relevant. Here we present the re
    \centering
    \includegraphics[width=\textwidth]{fig_s1_d2} 
     \vspace{-.5in}
-   \caption{Bivariate data results. Scatterplot of posterior mean for $\sigma_1$  against its true value used in simulation. Each panel is a combination of correlation (columns) and sample size (rows),  color and shape of the points represent the covariance prior. The points are horizontally jittered. \label{devF1} \matt{Same comment here as for Figure 2.}}
+   \caption{Bivariate data results. Scatterplot of posterior mean for $\sigma_1$  against its true value used in simulation. Each panel is a combination of correlation (columns) and sample size (rows),  color and shape of the points represent the covariance prior. The points are horizontally jittered. \label{devF1} %\matt{Same comment here as for Figure 2.}
+}
 \end{figure}
 
 Figure \ref{devF1} shows a scatterplot of the standard deviation posterior mean, $E[\sigma_1\vert y]$  against the true values used for simulating the data. 
 
-In all correlations and sample sizes the $IW$ prior overestimates the standard deviation for small values of $\sigma_1$.  In the smallest case ($\sigma_1=0.01$) the posterior means are close to $0.1$, a value ten times larger than the true one. This large bias is present even when the sample size is $n=250$.  A similar situation is present of $\sigma_1=0.1$, but in this case the bias vanishes when we let the sample size increase.  
+For all correlations and sample sizes the $IW$ prior overestimates the standard deviation for small values of $\sigma_1$.  In the smallest case ($\sigma_1=0.01$) the posterior means are close to $0.1$, a value ten times larger than the true one. This large bias is present even when the sample size is $n=250$.  A similar situation is present for $\sigma_1=0.1$, but in this case the bias vanishes when we let the sample size increase.  
 
 The other three priors do not present any bias in estimating standard deviation, the results are pretty consistent even with small sample size. There are no problems in estimating the standard deviation in any of its true values and the posterior mean of standard deviation seem not affected by the correlation level.  
 
@@ -338,7 +335,7 @@ The other three priors do not present any bias in estimating standard deviation,
    \caption{Length for a 95\% credible interval for $\sigma_1$ with sample size $n=10$. Each panel represent a correlation value,  color and shape represent the covariance prior. \label{devF3} }
 \end{figure}
 %Figure \ref{devF2} shows the standard deviation results for simulation study on the ten dimensional case, results are quite similar compare with the two dimension data sets case, $IW$ prior shows a high bias in estimating small standard deviations for any value os the correlation.  
-Figure \ref{devF3} present credible interval length for $\sigma_1$ for every model we fit. Overall the length of the interval increase linearly with the scale of the true value for $\sigma$. The only cases that do not follow this is when there is a small variability in the data set and $IW$ prior is used. When the estimate from an $IW$  prior is really biased the credible interval is really wide covering the true value. 
+Figure \ref{devF3} presents credible interval length for $\sigma_1$ for every model we fit. Overall the length of the interval increases linearly with the scale of the true value for $\sigma$. The only cases that do not follow this is when there is a small variability in the data set and $IW$ prior is used. When the estimate from an $IW$ prior is really biased the credible interval is really wide covering the true value. 
 %There are some differences among the inference results for correlations and standard deviations. In both cases $IW$ prior presents biased results for some scenarios, however in correlations this occurs only when the variably is low and correlation high, the bias in small variance estimation appears to be independent from the correlation true value.  The length for credible intervals in $IW$ prior, shows the biased estimate of the correlation has no too much uncertainty while this uncertainty is really big for the biased values in the standard deviations. 
 
 The combination of the results presented in Figures \ref{rhod2} and \ref{devF1}  suggest that in the $IW$ prior, the overestimation of the standard deviation is causing the underestimation for the correlation coefficient. To explore this explanation we should consider the estimates for the individual covariance terms. 
@@ -350,16 +347,17 @@ We can see there is no bias in the covariance estimation for any of the priors. 
    \centering
    \includegraphics[width=\textwidth]{fig_cov_d2} 
     \vspace{-.5in}
-   \caption{Bivariate data results. Scatterplot of posterior mean for $\sigma_{12}=\rho\sigma_1\sigma_2$  against its true value used in simulation. Each panel is a combination of standard deviation (columns) and sample size (rows),  color and shape of the points represent the covariance prior. \label{devCov} \matt{Similar comment here as for Figure 2, though I don't know how to fix it.}}
+   \caption{Bivariate data results. Scatterplot of posterior mean for $\sigma_{12}=\rho\sigma_1\sigma_2$  against its true value used in simulation. Each panel is a combination of standard deviation (columns) and sample size (rows),  color and shape of the points represent the covariance prior. \label{devCov} %\matt{Similar comment here as for Figure 2, though I don't know how to fix it.}
+}
 \end{figure}
 
 \subsection{Inverse Wishart on pre-scaled data}
 
-It is clear from Figure \ref{rhod2} that $IW$ prior cannot be used in context where the variability is small, since the results will be highly biased. However sometimes $IW$ prior can be the only option available to model so we need to find an easy rule to use it avoiding the estimation bias. 
+It is clear from Figure \ref{rhod2} that $IW$ prior cannot be used in contexts where the variability is small, since the results will be highly biased. However sometimes $IW$ prior can be the only option available to model so we need to find an easy rule to use it avoiding the estimation bias. 
 
-We scale the data toset the variance to one and after that, fit the model with IW prior to see if the pre-scaling strategy fixes problem. 
+We scale the data to set the variance to one and after that, fit the model with IW prior to see if the pre-scaling strategy fixes problem. 
 
-Figure \ref{sciw} illustrates this solution. By showing the inference for the correlation coefficient on the rescaled data. Each row represents a sample size and the columns are different standard deviation value. 
+Figure \ref{sciw} illustrates this solution. By showing the inference for the correlation coefficient on the rescaled data. Each row represents a sample size and the columns correspond to different standard deviation values. 
 
 \begin{figure}[htbp]
    \centering
@@ -395,16 +393,14 @@ Ovenbirds are consistently the most abundant species over all years in Superior 
 
 We want to estimate the species correlation over time using information only from the Superior forest and for the 10 most abundant species in 2007. This set up for inference similar to the simulated data inference we have already worked with, in this sense we expect the results over real data set will be similar to the ones we observed on simulated data. 
 
-We consider different set ups to estimate the correlation among species, which vary in dimensionality, response variable and covariance matrix prior. In all cases the data will be centered.
-
-With ten bird species we have 45 correlation coefficients to estimate. The data model is in every case a normal model with zero mean, $Y \sim N_d(0, \Sigma)$. We estimate each correlation several times, using different contexts:
+We consider different set ups to estimate the correlation among species, which vary in dimensionality, response variable and covariance matrix prior. In all cases the data will be centered. With ten bird species we have 45 correlation coefficients to estimate. The data model is in every case a normal model with zero mean, $Y \sim N_d(0, \Sigma)$. We estimate each correlation several times, using different contexts:
 
 \begin{description}
 \item[Covariance Prior] The main focus of the paper is to understand the effect of  $\Sigma$ prior distribution. Then we consider all the 4 prior distributions described previously, $IW$, $SIW$, $HIW_{ht}$, $BMM_{mu}$ and finally pre-scale data and use the $IW$. 
 
-\item[ Dimensions] The value of $d$ indicate the dimension of the model, we consider two options here. A bivariate case, in which we fit a different model for each pair of species, so this scenario consist in 45 models with 3 parameters each (two variance and the correlation). Also we fit a model for all ten species together, forming one model with 55 parameters (45 correlations and 10 variances). 
+\item[ Dimensions] The value of $d$ indicates the dimension of the model. We consider two options here. A bivariate case, in which we fit a different model for each pair of species, so this scenario consist in 45 models with 3 parameters each (two variance and the correlation). Also we fit a model for all ten species together, forming one model with 55 parameters (45 correlations and 10 variances). 
 
-\item[Response] We also will use two different response variables. We use the yearly bird count and the yearly average, the latter represent an option with a very little variability in the response while the total count is highly variable. From the simulation results we expect the scale may affect the correlation inference for the $IW$ prior case. 
+\item[Response] We also will use two different response variables. We use the yearly bird count and the yearly average --- the latter represent an option with very little variability in the response while the total count is highly variable. From the simulation results we expect the scale may affect the correlation inference for the $IW$ prior case. 
 \end{description}
 
 \begin{figure}[hbpt]
@@ -412,7 +408,8 @@ With ten bird species we have 45 correlation coefficients to estimate. The data 
 \includegraphics[width=\textwidth]{rescorr}
  \vspace{-.5in}
 \caption{Correlation inference results. Posterior mean for $\rho$  against Pearson correlation coefficient. 
-Columns panel represent the dimension of the model (bivariate or ten-dimensional), row panels represent the response variable (average of the count or total count)  and color of the points represent the covariance prior. \label{fig:coring}  \matt{It's kinda hard to make out these plots in black and white, but it's not terrible and the main point is still demonstrated - but if you can think of a better way to deal with the different colors/symbols, it might be worth it.}}
+Columns panel represent the dimension of the model (bivariate or ten-dimensional), row panels represent the response variable (average of the count or total count)  and color of the points represent the covariance prior. \label{fig:coring}  %\matt{It's kinda hard to make out these plots in black and white, but it's not terrible and the main point is still demonstrated - but if you can think of a better way to deal with the different colors/symbols, it might be worth it.}
+}
 \end{figure}
 %
 %\begin{figure}[hbpt]
@@ -424,12 +421,12 @@ Columns panel represent the dimension of the model (bivariate or ten-dimensional
 
 Figure \ref{fig:coring} presents the estimated correlations. The posterior mean for each model is plotted against the Pearson correlation coefficient. The four panels represent each combination of response and dimension and within each panel there are four estimates for each pair of bird species corresponding to the five priors used. 
 
-These results are quite interesting and match closely with we found on simulated data. When we use the average count as response variable, we see each estimate is shrunk towards zero a little bit, but the case of the $IW$ this shrinkage is really big. Correlations estimated using IW prior are smaller in absolute value than the rest of the prior options. This effect is expected taking into account that the average count variability is small. 
+These results are quite interesting and match closely with we found on simulated data. When we use the average count as response variable, we see each estimate is shrunk towards zero a little bit, but the case of the $IW$ this shrinkage is really big. Correlations estimated using the IW prior are smaller in absolute value than the rest of the prior options. This effect is expected taking into account that the average count variability is small. 
 
 However the results change if we decide to use a response with as high a variance as the total count. The $IW$ prior shows a totally different inference picture. Now there is no shrinkage towards small correlation values and in the case of a ten dimensional model there are several $IW$ correlation mean which are actually bigger than Pearson coefficient. 
 %\matt{We were looking at posterior means before - why the sudden change to median? (FWIW I like the median better in all cases - for one we're certain it exists!)}
 
-The $SIW$, $HIW_{ht}$ and $BMM_{mu}$ priors shows similar behavior no matter which is the response used to estimate the covariance matrix, and estimating correlation with any of these priors will lead to basically same conclusions. Finally if we scale the data to have variance equals to 1 then, $IW$ prior shows a similar behavior than the rest.
+The $SIW$, $HIW_{ht}$ and $BMM_{mu}$ priors show similar behavior no matter which response is used to estimate the covariance matrix, and estimating correlation with any of these priors will lead to basically same conclusions. Finally if we scale the data to have a variance of 1, then the $IW$ prior shows a similar behavior to the rest.
 
 %Inference about standard deviations is presented on figure \ref{birdsd}. Here we present only results for the ten dimensional models, the models using pairs of variables lead to several estimates for the same parameter because each species appears in nine different bivariate models. The standard deviation results also match what we found on simulated data, the only prior showing any problems is $IW$ which overestimate (with respect to the sample standard deviation) standard deviations that are lower than 0.1. 
 %\begin{figure}[hbpt]
@@ -460,6 +457,7 @@ The covariance parameter is well captured by all prior choices. $IW$ presents mo
 \matt{Talking about causation here is difficult because this is math - we could just as easily explain it the other way and be exactly correct, i.e. the underestimated correlation causes the overestimated standard deviations. I think the story we want to be telling here has something to do with the fact that the marginal prior for the correlation depends on the expected covariance, not the expected correlation. There's some details here we don't understand, but I think that's where it's at. In particular, I think if we write down the marginal posterior for the correlation coefficient - which we can do in the simple model you're working with - we'll see that it depends on the sample {\it covariance} not the sample correlation. So the scale of the data must affect the posterior distribution for the correlation.}
 \nacho{... but for instance using IW prior the model parameters are covariances and variance, correlation is not a parameter in the model, then the directionality should go from the $\sigma$ to $\rho$ but not viceversa. So we might claim something like this at least for some cases like IW. Actually the only prior that have the correlation as parameter is separation strategy.}
 
+
 \begin{figure}[hbpt]
 \centering
 \includegraphics[width=\textwidth]{ig}
@@ -471,9 +469,9 @@ Figure \ref{igamma} shows the density of an inverse gamma distributed variables 
 
  \subsection{What prior should we use ?} 
 
-From a modeler point of view, the $BMM_{mu}$ prior flexibility is appealing since we can model correlations and variance in separate fashion and let the data define their relationship.  The $BMM_{mu}$ prior is the original proposal of \cite{barnard2000}, however a separation strategy could use a different prior for variances and correlations, for instance a half-t or uniform which are better within the hierarchical models context. 
+From a modeler's point of view, the $BMM_{mu}$ prior flexibility is appealing since we can model correlations and variance in separate fashion and let the data define their relationship.  The $BMM_{mu}$ prior is the original proposal of \cite{barnard2000}, however a separation strategy could use a different prior for variances and correlations, for instance a half-t or uniform which are better within the hierarchical models context. 
 
- From a computational perspective we expect the $BMM_{mu}$ prior to be the most complex, since all the others conserve the conjugacy properties of the $IW$ distribution. This is especially relevant for a Gibbs sampler, where conjugacy allows for a full Gibbs step instead of a metropolis step. Using Stan which is based on Hamiltonian Monte Carlo strategy to obtain samples from posterior, there is not much cost to using a non conjugate prior such as$BMM_{mu}$.  Results for $SIW$ prior show much better computational performance than the rest with the best ratio between effective sample size over time.  
+From a computational perspective we expect the $BMM_{mu}$ prior to be the most complex, since all the others conserve the conjugacy properties of the $IW$ distribution. This is especially relevant for a Gibbs sampler, where conjugacy allows for a full Gibbs step instead of a metropolis step. Using Stan which is based on Hamiltonian Monte Carlo strategy to obtain samples from posterior, there is not much cost to using a non conjugate prior such as$BMM_{mu}$.  Results for $SIW$ prior show much better computational performance than the rest with the best ratio between effective sample size over time.  
 
 In summary, the answer to the previous question may depend on which are the computational resources we are working with:
 \begin{itemize}
