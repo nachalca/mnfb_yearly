@@ -63,7 +63,7 @@ Some alternatives distributions has been proposed. The scaled inverse Wishart di
 
 Estimation of covariance matrices appears in multivariate problems. Bayesian estimation of a covariance matrix requires a prior for the covariance matrix . The natural conjugate prior for the multivariate normal distribution is the inverse Wishart distribution \citep{barnard2000}. Due to its conjugacy, this is the most common prior implemented in Bayesian software. However, this prior has issues: the uncertainty for all variances is controlled by a single degree of freedom parameter \citep{bda2013}, the marginal distribution for the variances has low density in a region near zero \citep{gelman2006prior}, and there is an \emph{a priori} dependence between correlations and variances \citep{visualize}. These characteristics of the prior can impact posterior inferences about the covariance matrix. 
 
-Alternative covariance matrix priors have been proposed including the scaled inverse Wishart \citep{odomain}, a hierarchial inverse Wishart \cite{huang2013simple}, and a separation strategy \cite{barnard2000}. However \cite{visualize} states that 
+Alternative covariance matrix priors have been proposed including the scaled inverse Wishart \citep{odomain}, a hierarchial inverse Wishart \citep{huang2013simple}, and a separation strategy \citep{barnard2000}. However \citep{visualize} states that 
 \begin{quote}
 Even fewer analytical results are known for these families, making it even more challenging to understand precisely the properties of such distributions. Consequently, our analytical understanding of these distributions falls short of providing us a full understanding of the inverse-Wishart distribution.
  \end{quote}
@@ -142,7 +142,7 @@ A similar approach was proposed by \cite{daniels1999} and \cite{matilde}, they u
 
 \cite{barnard2000} propose the a separation strategy (SS) where the standard deviations and correlations are modeled independently and then combined to form a prior on the covariance matrix. They decompose the covariance as $\Sigma = \Lambda R \Lambda$  where $\Lambda$ is a diagonal matrix with the $i^{th}$ element $\sigma_{i}$ and $R$ is a correlation matrix with $\rho_{ij}$ as the $i^{th}$ row and $j^{th}$ column element of $R$. 
 
-\cite{barnard2000} constructs a correlation matrix $R$ from an inverse Wishart distribution. Specifically, let $Q\sim IW(\nu, I )$ then $R = \Delta Q \Delta$ where $\Delta$ is a diagonal matrix with $i^{th}$ diagonal element $Q_{ii}^{-1/2}$. The prior density for the correlation matrix is $p(R) \propto |R|^{-\frac{1}{2}(\nu+k+1) }  (\prod_{i=1}^k r^{ii}) ^{\frac{\nu}{2}}$, where $r^{ii}$ is the $i$th diagonal element of $R^{-1}$. They then assume a log-normal distribution for the logarithm of the standard deviations, i.e. $\log(\sigma_i) \stackrel{iid} \sim N(b_i, \xi_i)$.  We use the notation $\Sigma \sim \mbox{BMM}_{mu}(\nu,b,\xi)$ to distinguish this prior which results in . 
+\cite{barnard2000} constructs a correlation matrix $R$ from an inverse Wishart distribution. Specifically, let $Q\sim IW(\nu, I )$ then $R = \Delta Q \Delta$ where $\Delta$ is a diagonal matrix with $i^{th}$ diagonal element $Q_{ii}^{-1/2}$. The prior density for the correlation matrix is $p(R) \propto |R|^{-\frac{1}{2}(\nu+k+1) }  (\prod_{i=1}^k r^{ii}) ^{\frac{\nu}{2}}$, where $r^{ii}$ is the $i$th diagonal element of $R^{-1}$. They then assume a log-normal distribution for the logarithm of the standard deviations, i.e. $\log(\sigma_i) \stackrel{iid} \sim N(b_i, \xi_i)$.  We use the notation $\Sigma \sim \mbox{BMM}_{mu}(\nu,b,\xi)$ to distinguish this prior which results in .\matt{??} 
 
 Under the BMM$_{mu}$ specification, individual correlations have the marginal density $p(\rho_{ij}) \propto (1-\rho_{ij}^2)^{\frac{\nu-d-1}{2}}$ and then setting $\nu=d+1$ lead to marginally uniformly distributed correlations which are also independent from the variances by construction. 
 
@@ -178,7 +178,7 @@ We started with the default IW$(d+1,\I)$ prior which implies a marginal uniform 
   IW$(\nu, \Lambda)$ &   $\nu=d+1$, $\Lambda=\I$ \\ 
   SIW$(\nu, \Lambda, b, \xi)$  & $b=0$, $\xi_i =1$,  $\nu_0= d + 1$, $\Lambda = 0.8\I$ \\
   HIW$_{ht}(\nu, \xi)$    &  $\nu=2$,  $\xi_i=1.04$ \\
-   BMM$_{mu}(\nu,,b,\xi)$   &  $\nu=d+1$, $b_i=log(.72)/2$ , $\xi_i=1$ \\ \hline
+   BMM$_{mu}(\nu,,b,\xi)$   &  $\nu=d+1$, $b_i=\log(.72)/2$ , $\xi_i=1$ \\ \hline
    \end{tabular}
  \end{table}       
 
@@ -238,7 +238,7 @@ We study the sensitivity of correlation and standard deviation point estimates t
    \caption{Simulation scenarios. Specific values used in simulations for each parameter. \label{scen}} 
      \begin{tabular}{lcc} \hline
           &  Bivariate    & Ten-dimensional  \\ \hline
-      Sample size   ($n$)   & 10,50,250   &  10,50  \\
+      Sample size   ($n$)   & 10, 50, 250   &  10, 50  \\
       Standard deviation ($\sigma$)  & 0.01, 0.1, 1, 10, 100 & 0.1, 1, 100 \\
       Correlation ($\rho$)   &  0, 0,25, 0.5, 0.75, 0.99  &  0, 0.99 \\ \hline
    \end{tabular}
@@ -415,8 +415,7 @@ From a modeling perspective, the BMM$_{mu}$ prior flexibility is appealing since
 From a computational perspective we expect the BMM$_{mu}$ prior to be the most complex, since all the others conserve the conjugacy properties of the IW distribution. This is especially relevant for a Gibbs sampler, where conjugacy allows for a Gibbs steps. Using Stan or any other HMC-based approach, there is relatively little cost to using other prior such as BMM$_{mu}$. 
 Computationally, the SIW prior is more efficient than HIW or BMM even when using Stan \citep{CCalvarez}. 
 
-In summary, the answer to the previous question may depend on which are the computational resources are available. If it is possible to use a HMC sampler such as STAN, the separation strategy proposed by \cite{barnard2000} gives modeling flexibility and good inference properties. Whenever we use Gibbs based samplers, e.g. JAGS or BUGS, a prior which maintains some conjugacy might be preferable. For some Bayesian software, the IW prior may be our only option. In this case, if our only objective is to estimate the correlation, it is possible to pre-scale that data such that each component as an empirical variance of 1 and then proceed with the IW prior. This appears to provide unbiased estimates of the correlations \citep{CCalvarez}. %\jarad{nacho: I think you should put your CC on arXiv and reference it here and in other locations where we currently say ``results not shown''.}
-
+In summary, the answer to the previous question may depend on which are the computational resources are available. If it is possible to use a HMC sampler such as STAN, the separation strategy proposed by \cite{barnard2000} gives modeling flexibility and good inference properties. Whenever we use Gibbs based samplers, e.g. JAGS or BUGS, a prior which maintains some conjugacy might be preferable. For some Bayesian software, the IW prior may be our only option. In this case, if our only objective is to estimate the correlation, it is possible to pre-scale that data such that each component as an empirical variance of 1 and then proceed with the IW prior. This appears to provide unbiased estimates of the correlations \citep{CCalvarez}. 
 % There are multiple ways in which we could continue with this line of work. However, there are three issues that seems more natural ways to continue.  \matt{This part seems both a bit out of place and lacking some detail. Probably you just need a better transition into it and to discuss it in paragraph form.} 
 %\begin{description}
 %\item[Different Model] Extend the simulation analysis to a hierarchical linear model context, since the effect of $p(\Sigma)$ might be different \citep{gelman2006prior}. 
