@@ -133,7 +133,7 @@ d$rx <- d$r + runif(nrow(d),-.05,.05)
 d$ns <- factor(d$ns, levels=c(10,50,250), labels=paste('n',c(10,50,250),sep='=='))
 d$dim2 <- factor(d$dim, levels=c(2,10), labels=paste('dim',c(2,10),sep='='))
 d$ss <- factor(d$s, levels=c(0.01,0.1,1,10,100), labels=paste('sigma',c(0.01,0.1,1,10,100),sep='=='))
-qplot(data=d ,x=rx,color=I('red'), y=mean,xlab='True Correlation', ylab='Posterior Median') + facet_grid(facets=ns~ss,scales='free', labeller=label_parsed) + 
+qplot(data=d ,x=rx,color=I('red'), y=mean,xlab='True Correlation', ylab='Posterior Mean') + facet_grid(facets=ns~ss,scales='free', labeller=label_parsed) + 
   geom_abline(1) + scale_color_discrete(name=element_blank()) + theme(legend.position= 'bottom') + scale_x_continuous(breaks=c(0,1))
 dev.off()
 
@@ -318,18 +318,20 @@ aux <- ddply(spcorr.dtraw, .(abbrev), summarise,
              count.add.or = count.add.or,             
              yearc= yearc) 
 spcorr.dt <- aux[order(aux$year), ]
+
 spnm <- subset(code, abbrev %in% spcorr.dtraw$abbrev, select=c('common','abbrev'))
 spcorr.dtraw<- merge(spcorr.dtraw, spnm)
 
-tab <- ddply(spcorr.dtraw, .(common), summarise,abbrev=abbrev[1], 
+tab <- ddply(spcorr.dtraw, .(common), summarise, 
              mean.count=mean(count.add.or), 
         sd.count = sd(count.add.or), 
         mean.ave =mean(ave.add.or), sd.ave = sd(ave.add.or))
 tab <- tab[order(tab$mean.count,decreasing=T),]
 
 
-xt <- xtable(tab, caption='Species summary statistics', label='count07')
-print(xt, file="report/highcounts.tex", include.rownames=FALSE, caption.placement='top')
+xt <- xtable(tab, caption='Summary statistics of bird count data in Superior National Forest from
+1995 to 2013 for the 10 most abundant species.', label='tab:bird', digits=c(NA,NA,0,0,2,2))
+print(xt, file="report/bird_stat.tex", include.rownames=FALSE, caption.placement='top')
 
 pdf(file='report/figs/rawtrend.pdf', height=4)
 qplot(data=spcorr.dtraw,x=year, xlab='Year',ylab='Total Bird Count',y=count.add.or,color=common, size=I(3))+
@@ -475,7 +477,7 @@ sample.corr$pair <- x
 
 rescorr.end <- merge(res_corr, sample.corr)
 rescorr.end$pair <- reorder(rescorr.end$pair, rescorr.end$r)
-rescorr.end$var <- factor(rescorr.end$var, levels=c('ave','cnt'),labels =c('Average', 'Total Count'))
+rescorr.end$var <- factor(rescorr.end$var, levels=c('ave','cnt'),labels =c('Mean', 'Total Count'))
 rescorr.end$type <- factor(rescorr.end$type, levels=c('pairwise','tendim'), labels=c('Bivariate', 'Ten-Dimensional'))
 colnames(rescorr.end)[4] <- 'Prior'
 rescorr.end$Prior <- factor(rescorr.end$Prior, levels=c("iw","siw","ht","ss","iw.sc"),labels=c('IW','SIW', 'HIWht', 'BMMmu','IWsc'))
@@ -498,7 +500,8 @@ resvar.end$mean2[resvar.end$Prior=='IWsc'] <- resvar.end$mean2[resvar.end$Prior=
 
 # prior effect on correlations plots
 pdf(file='report/figs/rescorr.pdf', height=4.5)
-qplot(data=rescorr.end ,y=mean,x=r,shape=Prior, color=Prior,facets=var~type,ylab='Correlation posterior Mean', xlab='Pearson correlation coefficient') + geom_abline(1)+ theme(legend.position='bottom')
+d <- subset(rescorr.end, Prior != 'IWsc')
+qplot(data=d ,y=mean,x=r,shape=Prior, color=Prior,facets=var~type,ylab='Correlation posterior Mean', xlab='Pearson correlation coefficient') + geom_abline(1)+ theme(legend.position='bottom')
 dev.off()
 
 # prior effect on variance  plots

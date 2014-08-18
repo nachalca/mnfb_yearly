@@ -59,7 +59,7 @@ Covariance matrix estimation arises in multivariate problems including multivari
 
 Covariance matrix estimation arises in multivariate problems including multivariate normal sampling models and regression models where random effects are jointly modeled, e.g. random-intercept, random-slope models. Bayesian estimation of a covariance matrix requires a prior for the covariance matrix . The natural conjugate prior for the multivariate normal distribution is the inverse Wishart distribution \citep{barnard2000}. Due to its conjugacy, this is the most common prior implemented in Bayesian software. However, this prior has issues: the uncertainty for all variances is controlled by a single degree of freedom parameter \citep{bda2013}, the marginal distribution for the variances has low density in a region near zero \citep{gelman2006prior}, and there is an \emph{a priori} dependence between correlations and variances \citep{visualize}. These characteristics of the prior can impact posterior inferences about the covariance matrix. 
 
-Alternative covariance matrix priors have been proposed including the scaled inverse Wishart \citep{odomain}, a hierarchial inverse Wishart \citep{huang2013simple}, and a separation strategy \citep{barnard2000}. However \citep{visualize} states that 
+Alternative covariance matrix priors have been proposed including the scaled inverse Wishart \citep{odomain}, a hierarchial inverse Wishart \citep{huang2013simple}, and a separation strategy \citep{barnard2000}. However \cite{visualize} states that 
 \begin{quote}
 Even fewer analytical results are known for these families, making it even more challenging to understand precisely the properties of such distributions. Consequently, our analytical understanding of these distributions falls short of providing us a full understanding of the inverse-Wishart distribution.
  \end{quote}
@@ -117,7 +117,7 @@ We use the notation $\Sigma \sim SIW(\nu, \Lambda, b, \xi)$ to refer to this pri
 %\nonumber &\propto& (\sigma^2)^{-(\frac{\nu-d+1}{2}-1)} \int\delta_i^{\nu-d+2}e^{ \frac{-(log(\delta_i)-b_i)^2}{2\xi_i} - \frac{\lambda_{ii}\delta^2}{2\sigma^2}}d\delta
 %\end{eqnarray}
 
-This prior is recommended by \cite{gelmanhill}, setting $\nu=d+1$ and $\Lambda=\I$ to ensure uniform priors on the correlations as in the IW prior but now there is more flexibility on incorporating prior information about the standard deviations. \nacho{ Gelman-Hill use $\delta \sim unif(0,100)$ which is also commented on BDA2013; O'maley used the lognormal but does not have a recommendation for $\xi$ }
+This prior is recommended by \cite{gelmanhill}, setting $\nu=d+1$ and $\Lambda=\I$ to ensure uniform priors on the correlations as in the IW prior but now there is more flexibility on incorporating prior information about the standard deviations. %\nacho{ Gelman-Hill use $\delta \sim unif(0,100)$ which is also commented on BDA2013; O'maley used the lognormal but does not have a recommendation for $\xi$ }
 %It could be the case that there is prior information for some of the variance parameters but not for all of them, then is possible to set up some the $\delta_i$ parameter with less variability to reflect this prior knowledge, which it was not possible to do with the IW strategy. Also having $Q\sim IW$ we can take advantage of the conjugate property facilitating the computational implementation of this model. 
 
 \subsection{Hierarchical Half-t prior}
@@ -160,21 +160,21 @@ With more recently developed software, e.g. Stan \citep{stan2014}, this restrict
 
 \section{Simulation study results \label{sec:results}}
 
-In this section we carry out a simulation based analysis to assess the performance of these different covariance matrix prior. First, we simulate from each prior to study the \emph{a priori} relationship between correlations and standard deviations. Second, we simulate data from the model and analyze posterior means to determine the impact prior choice has on posterior inference.
+In this section we carry out a simulation based analysis to assess the performance of these different covariance matrix prior. First, we simulate from each prior to study the \emph{a priori} relationship between correlations and standard deviations. Second, we simulate data from the model and analyze posterior means to determine the impact prior choice has on posterior inference. Table \ref{paramvals} presents the hyperparameter values used in both simulations study for every prior. 
 
-We started with the default IW$(d+1,\I)$ prior which implies a marginal uniform prior on the correlations and an IG$(1,1/2)$ marginal prior for the variances. We set hyperparameters for the other three priors to imply marginal uniform priors for the correlations and prior medians on the variances to match the median of an IG$(1,1/2)$ of 0.72. Table \ref{paramvals} presents the resulting hyperparameter values.   
+We started with the default IW$(d+1,\I)$ prior which implies a marginal uniform prior on the correlations and an IG$(1,1/2)$ marginal prior for the variances. We set hyperparameters for the other three priors to imply marginal uniform priors for the correlations and prior medians on the variances to match the median of an IG$(1,1/2)$ of 0.72.    
 
 \begin{table}[htbp]
    \centering
-    \caption{ Parameter values for simulation study on prior samples}
+    \caption{ Parameter values for simulation study}
    \label{paramvals} 
-   \begin{tabular}{ l|c}
+   \begin{tabular}{ l|c|c}
    \hline
-      Prior    &  Parameter Values \\ \hline
-  IW$(\nu, \Lambda)$ &   $\nu=d+1$, $\Lambda=\I$ \\ 
-  SIW$(\nu, \Lambda, b, \xi)$  & $b=0$, $\xi_i =1$,  $\nu_0= d + 1$, $\Lambda = 0.8\I$ \\
-  HIW$_{ht}(\nu, \xi)$    &  $\nu=2$,  $\xi_i=1.04$ \\
-   BMM$_{mu}(\nu,,b,\xi)$   &  $\nu=d+1$, $b_i=\log(.72)/2$ , $\xi_i=1$ \\ \hline
+      Prior    &  Values for prior sampling & Values for posterior inference\\ \hline
+  IW$(\nu, \Lambda)$ &   $\nu=d+1$, $\Lambda=\I$  & $\nu=d+1$, $\Lambda=\I$  \\ 
+  SIW$(\nu, \Lambda, b, \xi)$  & $b=0$, $\xi_i =1$,  $\nu_0= d + 1$, $\Lambda = 0.8\I$ & $b=0$, $\xi_i =100$,  $\nu_0= d + 1$, $\Lambda = \I$ \\
+  HIW$_{ht}(\nu, \xi)$    &  $\nu=2$,  $\xi_i=1.04$ & $\nu=2$,  $\xi_i= \sqrt{1000}$ \\
+   BMM$_{mu}(\nu,,b,\xi)$   &  $\nu=d+1$, $b_i=\log(.72)/2$ , $\xi_i=1$ &  $\nu=d+1$, $b_i=0$ , $\xi_i=100$ \\ \hline
    \end{tabular}
  \end{table}       
 
@@ -243,12 +243,12 @@ We study the sensitivity of correlation and standard deviation point estimates t
 %Another aspect that will directly affect the estimation results is the sample size, here we consider 3 different values, from a small sample to a fairly big sample, $n=250$ would be consider as a big sample size in the bivariate case where there are only 3 parameters to estimate, in ten dimensions the number of parameter to estimate increase up to 55 but also there are more data since now each observation corresponds to ten observed values. \matt{most of the information in this paragraph seems unnecessary}
 To reduce Monte Carlo variability in the simulations, data were simulated for $\sigma=1$ and then rescaled to get obtain simulations with the other variances. For instance, five replicate data sets that consists of ten observations from a bivariate independent standard normal, i.e. $n=10$, $d=2$ $\rho=0$ and $\sigma=1$, were simulated. Each simulated value is multiplied by 0.01 (or 0.1, 10, and 100) to obtain data sets with standard deviation approximately 0.01 (or 0.1, 10, and 100).
 
-The models are estimated in Stan software (\cite{stan2014}) which uses a Hamiltonian Monte Carlo (HMC) algorithm to construct posterior samples with the No U-turn sampler (NUTS, \cite{hoffman2011no}) strategy. Initial values for the chains are automatically set as uniformly disperse on the parametric space, the model convergence is monitored using the Potential scale reduction factor statistic proposed by \cite{bda2003}.
-Initially, 3 chains with 1000 iterations after burn-in is used for every model. Whenever the reduction factor is bigger than 1.1 a longer model with 2000 iterations per chain after burn-in period is estimated.  \jarad{nacho: we need details of the MCMC here, e.g. used Stan, monitored convergence, etc}
+The models are estimated using Stan software (\cite{stan2014}) which uses a HMC algorithm to construct posterior samples with the No U-turn sampler (NUTS, \cite{hoffman2011no}) strategy. Default initial values were used. Model convergence is monitored using the potential scale reduction factor \citep{bda2003}.
+Initially, 3 chains with 1000 iterations after burn-in is used for every model. Whenever the reduction factor is bigger than 1.1 a longer model with 2000 iterations per chain after burn-in period is estimated.  
 
 \subsubsection{Inference for Correlation coefficient}
 
-For inference, the true sampling model is assumed and the covariance matrix priors shown in Table \ref{paramvals} were assumed. Only the bivariate results are shown here but the ten-dimensional results are similar.
+For inference, the true sampling model is assumed and the covariance matrix priors shown in Table \ref{paramvals} were assumed with the parameter values for posterior inference column. Only the bivariate results are shown here but the ten-dimensional results are similar.
 
 \begin{figure}[hbtp]
 \centering
@@ -335,7 +335,7 @@ Under these simulation conditions, we find the IW prior to have no bias in estim
 
 \section{Bird counts in the Superior National Forest \label{sec:birds}}
 
-The Natural Resources Research Institute conducts a long-term monitoring program in Superior National Forest to track regional avian population trends. The specific data set which it is used in this report consist of the yearly bird counts for the 10 most abundant species from 1995 to 2013. 
+The Natural Resources Research Institute conducts a long-term monitoring program in Superior National Forest to track regional avian population trends. The specific data set which it is used in this manuscript consist of the yearly bird counts for the 10 most abundant species from 1995 to 2013. 
 % A first look of the data is shown on Figure \ref{figtr}, where the total bird count per year is plotted for all species. 
 % \begin{figure}[hbpt]
 % \centering
@@ -360,7 +360,7 @@ From a scientific perspective, the choice of whether to use the total count vers
 
 We run analyses of these data assuming a multivariate normal for each year with a mean of zero and an unknown covariance matrix. We assume the four prior distributions described in Table \ref{paramvals} as well as the IW prior using the scaled data. We also perform the analysis for each pair of species independently using a 2-dimensional normal and also simultaneously for all species using a 10-dimensional multivariate normal. Finally, we consider using the seemingly abitrary choice of total count and average count. 
 
-These models are estimated with same methods used for the models with simulated data, using Stan software \citep{stan2014}. \jarad{nacho: we need MCMC details here or perhaps they were the same as the simulation study? if so, say so.}
+These models are estimated with same methods used for the models with simulated data, using Stan software \citep{stan2014}. 
 
 \begin{figure}[hbpt]
 \centering
@@ -411,7 +411,7 @@ From a modeling perspective, the BMM$_{mu}$ prior flexibility is appealing since
 From a computational perspective we expect the BMM$_{mu}$ prior to be the most complex, since all the others conserve the conjugacy properties of the IW distribution. This is especially relevant for a Gibbs sampler, where conjugacy allows for a Gibbs steps. Using Stan or any other HMC-based approach, there is relatively little cost to using other prior such as BMM$_{mu}$. 
 Computationally, the SIW prior is more efficient than HIW or BMM even when using Stan \citep{CCalvarez}. 
 
-In summary, the answer to the previous question may depend on which are the computational resources are available. If it is possible to use a HMC sampler such as STAN, the separation strategy proposed by \cite{barnard2000} gives modeling flexibility and good inference properties. Whenever we use Gibbs based samplers, e.g. JAGS or BUGS, a prior which maintains some conjugacy might be preferable. For some Bayesian software, the IW prior may be our only option. In this case, if our only objective is to estimate the correlation, it is possible to pre-scale that data such that each component as an empirical variance of 1 and then proceed with the IW prior. This appears to provide unbiased estimates of the correlations \citep{CCalvarez}. 
+In summary, the prior choice may depend on which are the computational resources are available. If it is possible to use a HMC sampler such as STAN, the separation strategy proposed by \cite{barnard2000} gives modeling flexibility and good inference properties. Whenever we use Gibbs based samplers, e.g. JAGS or BUGS, a prior which maintains some conjugacy might be preferable. For some Bayesian software, the IW prior may be our only option. In this case, if our only objective is to estimate the correlation, it is possible to pre-scale that data such that each component as an empirical variance of 1 and then proceed with the IW prior. This appears to provide unbiased estimates of the correlations \citep{CCalvarez}. 
 % There are multiple ways in which we could continue with this line of work. However, there are three issues that seems more natural ways to continue.  \matt{This part seems both a bit out of place and lacking some detail. Probably you just need a better transition into it and to discuss it in paragraph form.} 
 %\begin{description}
 %\item[Different Model] Extend the simulation analysis to a hierarchical linear model context, since the effect of $p(\Sigma)$ might be different \citep{gelman2006prior}. 
