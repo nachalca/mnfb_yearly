@@ -12,17 +12,17 @@ $RECYCLE.BIN/
 .DS_Store
 ### LaTeX
 *concordance.tex
-.synctex.gz
-.log
-.aux
-.dvi
-.ps
-.bbl
-.blg
-.nav
-.smn
-.out
-.pdf
+*.synctex.gz
+*.log
+*.aux
+*.dvi
+*.ps
+*.bbl
+*.blg
+*.nav
+*.snm
+*.out
+*.pdf
 ## R files
 *.Rhistory
 .Rproj.user
