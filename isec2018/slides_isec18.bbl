@@ -1,0 +1,20 @@
+\begin{thebibliography}{3}
+\newcommand{\enquote}[1]{``#1''}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{Barnard et~al.(2000)Barnard, McCulloch, and Meng}]{barnard2000}
+Barnard, J., McCulloch, R., and Meng, X.-L. (2000), \enquote{Modeling
+  covariance matrices in terms of standard deviations and correlations, with
+  application to shrinkage,} \textit{Statistica Sinica}, 10, 1281--1312.
+
+\bibitem[{Gelman et~al.(2003)Gelman, Carlin, Stern, and Rubin}]{bda2003}
+Gelman, A., Carlin, J.~B., Stern, H.~S., and Rubin, D.~B. (2003),
+  \textit{Bayesian data analysis}, Chapman and Hall.
+
+\bibitem[{Tokuda et~al.(2011)Tokuda, Goodrich, Van~Mechelen, and
+  Gelman}]{visualize}
+Tokuda, T., Goodrich, B., Van~Mechelen, I., and Gelman, A. (2011),
+  \enquote{Visualizing Distributions of Covariance Matrices,}
+  \url{http://www.stat.columbia.edu/~gelman/research/unpublished/Visualization.pdf}.
+
+\end{thebibliography}

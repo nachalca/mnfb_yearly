@@ -1,0 +1,6 @@
+\beamer@sectionintoc {1}{Introduction}{2}{0}{1}
+\beamer@subsectionintoc {1}{1}{Motivation example}{4}{0}{1}
+\beamer@sectionintoc {2}{Covariance matrix priors}{8}{0}{2}
+\beamer@subsectionintoc {2}{1}{Multivariate normal model }{9}{0}{2}
+\beamer@sectionintoc {3}{Simulation Study}{15}{0}{3}
+\beamer@sectionintoc {4}{Discussion}{20}{0}{4}

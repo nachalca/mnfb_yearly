@@ -1,0 +1,21 @@
+---
+title: "Bayesian inference for a covariance matrix"
+author: "Ignacio Alvarez-Castro"
+date: "1/15/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract
+Hierarchical modelling of species community data has been recently proposed to facilitate the connection between community ecology theories and statistical methods (Ovaskainen et al, 2017) . Covariance matrix estimation arises in this type of hierarchical models and, more generally, in multivariate problems including multivariate normal sampling models and regression models where random effects are jointly modeled, e.g. random-intercept, random-slope models.
+
+A Bayesian analysis of these problems requires a prior on the covariance matrix. Here we compare an inverse Wishart, scaled inverse Wishart, hierarchical inverse Wishart, and a separation strategy as possible priors for the covariance matrix. The objective of this study is to understand the impact of these prior choices on the posterior inference of the covariance matrix. We select some of the proposed prior models in the literature and first run a simulation study to assess the impact on posterior, then we apply each model to a real data set consisting of bird counts in national forest in the Great Lakes.
+
+Generally all priors work well with the exception of the inverse Wishart when the true variance is small relative to prior mean. In this case, the posterior for the variance is biased toward larger values and the correlation is biased toward zero. This bias persists even for large sample sizes and therefore caution should be used when using the inverse Wishart prior.
+
+References
+
+Ovaskainen, O., Tikhonov, G., Norberg, A., Guillaume Blanchet, F., Duan, L., Dunson, D., Roslin, T. and Abrego, N. (2017), How to make more out of community data? A conceptual framework and its implementation as models and software. Ecol Lett, 20: 561–576. doi:10.1111/ele.12757

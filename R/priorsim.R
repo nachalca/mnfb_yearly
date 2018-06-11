@@ -223,6 +223,18 @@ scale_colour_gradient(name=expression('|'~ rho ~ '|'), low='white',high='red', l
 theme(legend.position='bottom')
 dev.off()
 
+# alternative plot with geom_hex
+dm %>% filter(s2 > 1/100) %>%
+  ggplot(aes(x=s2, y=s1, z=abs(rho)) ) + stat_summary_hex(bins = 100) +  
+  facet_grid(facets=dim2~prior,labeller=label_parsed, scales = 'free_x') +
+  xlab( expression( sigma[1] )  ) + ylab(  expression( sigma[2] )) + 
+  scale_x_log10() + scale_y_log10( ) + 
+  scale_fill_gradient2(name=expression('|'~ rho ~ '|'),midpoint = .5, limits=c(0,1)) +
+  theme(legend.position='bottom') +
+  ggsave( filename = 'report/figs/prior_s1s2_hex.pdf', height = 7, width = 7) 
+
+
+
 # Prior plot: countour?? how many lines ?? smooth is better ?? 
 pdf('report/figs/priorsim2d.pdf', height=5)
 p <- qplot(data=dm, x=s1, y=rho,size=I(.6)) + facet_grid(facets=dim2~prior, scales='free', labeller=label_parsed) 
