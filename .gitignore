@@ -23,6 +23,8 @@ $RECYCLE.BIN/
 *.snm
 *.out
 *.pdf
+*.bbl
+*.toc
 ## R files
 *.Rhistory
 .Rproj.user
