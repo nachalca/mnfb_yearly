@@ -5,7 +5,8 @@
 library(tidyverse); library(rstan)
 
 # Data are created on mnfb repository, with the yearly_data.R code. 
-bird.yeartotal <- read.csv('data/bird_yeartotal.csv') %>%
+bird.yeartotal <- read.csv('data/bird_yeartotal.csv') %>% 
+  mutate( count.add = count*(count>0) + (count == 0)  ) %>% 
   mutate( ave.add  = count.add/samples, # compute average using the count.add (this step should be on yearly_data.R)
           yearc = year - 2000) 
 
@@ -47,7 +48,6 @@ obs.cfs %>% unnest(cfs) %>%
 
 # Bayesian hierarchical model
 # with rstan?? 
-reg.iw <- stan_model(file = 'R/hier_reg.stan')
 
 dt.ls <- with(bird.yeartotal, list(
   N=nrow(bird.yeartotal), K = 3, J=length(unique(abbrev)), 
@@ -57,8 +57,15 @@ dt.ls <- with(bird.yeartotal, list(
   y = log(count.add)
 ))
 
+# Use 2 models: using IW and sep strategy based on lkj 
+reg.iw <- stan_model(file = 'R/hier_reg.stan')
+reg.lkj <- stan_model(file = 'R/hier_reg_lkj.stan')
+
 res.reg.iw <- sampling(reg.iw, data = dt.ls)  
 saveRDS(res.reg.iw, 'isec2018/reg_example.rds')
+
+res.reg.lkj <- sampling(reg.lkj, data = dt.ls)  
+saveRDS(res.reg.lkj, 'isec2018/reg_example_lkj.rds')
 
 plot(res.reg.iw, plotfun='rhat')
 plot(res.reg.iw, plotfun='ess')
@@ -66,9 +73,6 @@ plot(res.reg.iw, plotfun='ess')
 rhos <- extract(res.reg.iw, pars='Sigma')$Sigma %>%
   apply( 1, function(z) z[2,3]/(sqrt(z[2,2]*z[3,3]))  ) %>%
   as_data_frame() %>% set_names(nm = 'smp')
-  
-
-ggplot(rhos) + geom_density(aes(x = smp))
 
 ggplot(rhos) + geom_histogram(aes(x=smp, y=..density..)) +
 labs(x='correlation', y = '') + 
@@ -76,4 +80,16 @@ labs(x='correlation', y = '') +
   theme(axis.title.x =  element_text(size=I(20)), axis.text.x =  element_text(size=I(20))) +
   ggsave( filename = 'report/figs/reg_rho_hist.pdf', height = 7, width = 7) 
 
+rr <- extract(res.reg.lkj, pars='Omega')$Omega %>%
+  apply( 1, function(z) z[2,3]  ) %>%
+  as_data_frame() %>% set_names(nm = 'smp') %>%
+  bind_rows( rhos, .id = 'met' ) %>%
+  mutate(met = factor(met, labels = c('lkj', 'iw') ))
+
+table(rr$met)
+ggplot(rr) + geom_density(aes(x = smp, color = met))  +
+  labs(x='correlation', y = '') + 
+  theme_bw() + 
+  theme(axis.title.x =  element_text(size=I(20)), axis.text.x =  element_text(size=I(20))) +
+  ggsave( filename = 'report/figs/reg_rho_den.pdf', height = 7, width = 7) 
 
