@@ -39,6 +39,7 @@ obs.cfs <- bird.yeartotal %>%
 
 obs.cfs$cfs[[1]]
 obs.cfs %>% unnest(cfs) %>% with(cor(`I(yearc^2)`, yearc))
+
 obs.cfs %>% unnest(cfs) %>% 
   ggplot() + geom_point(aes(`I(yearc^2)`, yearc), size=I(3) ) + 
   labs(x='quadratic term', y='linear term') + 
@@ -48,6 +49,7 @@ obs.cfs %>% unnest(cfs) %>%
 # Bayesian hierarchical model
 # with rstan?? 
 reg.iw <- stan_model(file = 'R/hier_reg.stan')
+reg.lkj <- stan_model(file = 'R/hier_reg_lkj.stan')
 
 dt.ls <- with(bird.yeartotal, list(
   N=nrow(bird.yeartotal), K = 3, J=length(unique(abbrev)), 
@@ -75,5 +77,20 @@ labs(x='correlation', y = '') +
   theme_bw() + 
   theme(axis.title.x =  element_text(size=I(20)), axis.text.x =  element_text(size=I(20))) +
   ggsave( filename = 'report/figs/reg_rho_hist.pdf', height = 7, width = 7) 
+
+
+res.reg.lkj <- sampling(reg.lkj, data = dt.ls)  
+saveRDS(res.reg.lkj, 'isec2018/reg_example_lkj.rds')
+
+
+plot(res.reg.lkj, plotfun = 'rhat')
+
+rhos.lkj <- extract(res.reg.lkj, pars='Omega')$Omega %>%
+  apply( 1, function(z) z[2,3]  ) %>%
+  as_data_frame() %>% set_names(nm = 'smp')
+
+
+ggplot(rhos.lkj) + geom_density(aes(x = smp))
+
 
 
