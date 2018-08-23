@@ -1,4 +1,6 @@
 
+
+###############################################################################
 # Simulate from Inverse Wishart for different values in the lambda matrix
 library(plyr)
 library(ggplot2)
@@ -21,6 +23,9 @@ sims <- rdply(5000, mdply(sig, simIW) )
 qplot(data=sims, x=SD1, geom='density', facets=s2~s1) + scale_x_log10()
 qplot(data=sims, x=cor, geom='density') + facet_grid(facets=s2~s1,scales='free')
 
+###############################################################################
+
+###### 22 Agosto, 2018 #### 
 
 
 
