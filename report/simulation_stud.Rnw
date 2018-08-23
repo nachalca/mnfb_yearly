@@ -77,24 +77,17 @@ qplot(data=d ,x=r, y=mean,facets=ns~s) + geom_abline(1, color=I('red'))
 @
 \caption{Posterior mean against true value of $\rho$, under HT prior. \label{rhoiw}}
 \end{figure}
-
 <<rho2, eval=FALSE>>=
-
 # probability arround true rho and percentile for tru rho in posterior 
 qplot(data=per, x=factor(ns), y=prob, geom='boxplot', fill=prior, main='Probability arround true value pm 0.1') + facet_wrap(facets=~s)
-
 qplot(data=subset(per,r==.99), x=factor(ns), y=per, geom='boxplot', fill=prior, main='True value percentile') + facet_wrap(facets=~s)
-
 qplot(data=subset(per,prior=='ss') ,x=r, y=per, facets=s~ns)
-
-# bias and ecm
+# bias and mse
 res$ecm <-  with(res, (mean-r)^2 + sd^2  )
 res$bias <- with(res, (mean-r) )
-qplot(data=subset(res,param=='rho'), x=r, y=ecm,color=prior) + facet_wrap(facets=ns~s, scale='free_y')
+qplot(data=subset(res,param=='rho'), x=log(s), y=sd,color=prior) + facet_grid(facets=ns~r) + stat_smooth(method='lm', formula=y~x)
 qplot(data=subset(res,param=='rho'), x=r, y=bias,color=prior) + facet_wrap(facets=ns~s, scale='free_y')
 @
-
-
 
 % \begin{figure}
 % <<cimu, dependson='getsim',echo=FALSE,message=FALSE,warning=FALSE>>=
