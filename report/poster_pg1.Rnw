@@ -1,0 +1,362 @@
+
+\documentclass[final]{beamer}
+\usepackage[scale=1.24]{beamerposter}
+\usepackage{graphicx}      % allows us to import images
+\usepackage{subcaption}
+\usepackage{fancybox}
+%%%%%%%%%%%%%
+\usepackage{textpos}
+\usepackage{lipsum}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,hooks}
+\usetikzlibrary{shadows}
+\graphicspath{{figs/}}
+\tcbset{colframe=structure,fonttitle=\bfseries,beamer}
+%-----------------------------------------------------------
+% Define the column width and poster size
+% To set effective sepwid, onecolwid and twocolwid values, first choose how many columns you want and how much separation you want between columns
+% The separation I chose is 0.024 and I want 4 columns
+% Then set onecolwid to be (1-(4+1)*0.024)/4 = 0.22
+% Set twocolwid to be 2*onecolwid + sepwid = 0.464
+%-----------------------------------------------------------
+
+\newlength{\sepwid}
+\newlength{\onecolwid}
+\newlength{\twocolwid}
+\newlength{\threecolwid}
+\setlength{\paperwidth}{48in}
+\setlength{\paperheight}{36in}
+\setlength{\sepwid}{0.024\paperwidth}
+\setlength{\onecolwid}{0.30\paperwidth}
+\setlength{\twocolwid}{0.624\paperwidth}
+\setlength{\threecolwid}{0.924\paperwidth}
+\setlength{\topmargin}{-0.5in}
+%\usetheme{TUGraz}
+\usetheme{confposter}
+%\usetheme{AAU}
+%\usetheme{Berlin}
+\usepackage{exscale}
+
+%-----------------------------------------------------------
+% The next part fixes a problem with figure numbering. Thanks Nishan!
+% When including a figure in your poster, be sure that the commands are typed in the following order:
+% \begin{figure}
+% \includegraphics[...]{...}
+% \caption{...}
+% \end{figure}
+% That is, put the \caption after the \includegraphics
+%-----------------------------------------------------------
+\usecaptiontemplate{
+\small
+\structure{\insertcaptionname~\insertcaptionnumber:}
+\insertcaption}
+
+%-----------------------------------------------------------
+% Define colours (see beamerthemeconfposter.sty to change these colour definitions)
+%-----------------------------------------------------------
+% \setbeamercolor{frametitle headline}{fg=white}
+% \setbeamercolor{institute in headline}{fg=white}
+% \setbeamercolor{author in headline}{fg=white}
+% \setbeamercolor{title in headline}{fg=white}
+%\setbeamertemplate{blocks}[rounded][shadow=true] 
+
+\setbeamercolor{block title}{fg=white,bg=dblue!120}
+\setbeamercolor{block body}{fg=white, bg=dblue!30}
+
+\setbeamercolor{block alerted title}{fg=white,bg=dblue!120}
+\setbeamercolor{block alerted body}{fg=black,bg=white}
+
+\setbeamercolor{postit}{fg=white,bg=dgreen!50}
+\setbeamercolor{box.te}{fg=white,bg=dblue!60}
+\setbeamercolor{box.ti}{fg=white,bg=dblue!100}
+
+
+% \addtobeamertemplate{frametitle}{
+% \begin{textblock*}{\paperwidth}(-10pt,0pt)
+% \includegraphics[width=.9\paperwidth,height=1cm]{comunidad}
+% \end{textblock*}
+% }
+% \newenvironment{bloque}[3]{%
+% \setbeamercolor{block title}{fg=white,bg=dblue!120}
+% \setbeamercolor{block body}{fg=black,bg=dblue!50}
+%  \begin{actionenv}#2%
+%  \def\insertblocktitle{\leftskip=1pt\rightskip=10pt\vspace{10pt} #1\vspace{10pt}}%
+%  \par%
+%  \usebeamertemplate{block begin}\leftskip=10pt\rightskip=10pt\vspace{10pt}}
+%  {\par\vspace{10pt}\usebeamertemplate{block end}
+%  \end{actionenv}}
+% \setbeamercolor{alerted text}{fg=blue}
+% \setbeamercolor{background canvas}{bg=white}
+% \setbeamercolor{block body alerted}{bg=normal text.bg!90!blue}
+% \setbeamercolor{block body}{bg=normal text.bg!90!blue}
+% \setbeamercolor{block body example}{bg=normal text.bg!90!blue}
+% \setbeamercolor{block title alerted}{use={normal text,alerted text},fg=alerted text.fg!75!normal text.fg,bg=normal text.bg!75!blue}
+% \setbeamercolor{block title}{bg=blue}
+% \setbeamercolor{block title example}{use={normal text,example text},fg=example text.fg!75!normal text.fg,bg=normal text.bg!75!blue}
+% \setbeamercolor{fine separation line}{}
+% \setbeamercolor{frametitle}{fg=brown}
+% \setbeamercolor{item projected}{fg=blue}
+% \setbeamercolor{normal text}{bg=blue,fg=yellow}
+% \setbeamercolor{palette sidebar primary}{use=normal text,fg=normal text.fg}
+% \setbeamercolor{palette sidebar quaternary}{use=structure,fg=structure.fg}
+% \setbeamercolor{palette sidebar secondary}{use=structure,fg=structure.fg}
+% \setbeamercolor{palette sidebar tertiary}{use=normal text,fg=normal text.fg}
+% \setbeamercolor{section in sidebar}{fg=brown}
+% \setbeamercolor{section in sidebar shaded}{fg= grey}
+% \setbeamercolor{separation line}{}
+ \setbeamercolor{sidebar}{bg=red}
+% \setbeamercolor{sidebar}{parent=palette primary}
+% \setbeamercolor{structure}{bg=blue, fg=green}
+% \setbeamercolor{subsection in sidebar}{fg=brown}
+% \setbeamercolor{subsection in sidebar shaded}{fg= grey}
+%\usebackgroundtemplate{bg=white}
+%\setbeamercolor{title}{fg=white}
+%\setbeamercolor{titlelike}{fg=white}
+%\setbeamertemplate{background}{\includegraphics[width=\paperwidth, height=\paperheight]{figure/comunidad}}
+%\setbeamertemplate{blocks}[rounded][shadow=true]
+
+ \setbeamertemplate{background canvas}[vertical shading][bottom=red!20,top=structure.fg!25]
+ \setbeamertemplate{sidebar canvas left}[horizontal shading][left=white!40!black,right=black]
+
+%-----------------------------------------------------------
+% Name and authors of poster/paper/research
+%-----------------------------------------------------------
+% \addtobeamertemplate{frametitle}{}
+\usepackage{tcolorbox}
+
+
+\setbeamertemplate{headline}{
+\leavevmode
+ \begin{columns}
+  \begin{column}{\linewidth}
+   \vskip1cm
+   \centering
+\usebeamercolor{title in headline}{\color{jblue}\fontsize{100}{120}{\textbf{\inserttitle}}\\[0.5ex]}
+   \usebeamercolor{author in headline}{\color{fg}\Large{\insertauthor}\\[1ex]}
+   \usebeamercolor{institute in headline}{\color{fg}\large{\insertinstitute}\\[1ex]}
+   \vskip1cm
+  \end{column}
+  \vspace{1cm}
+ \end{columns}
+
+\vspace{0.5in}
+\hspace{0.5in}\begin{beamercolorbox}[wd=47in,colsep=0.15cm]{cboxb}\end{beamercolorbox}
+\vspace{0.1in}
+}
+
+\title{Bayesian Inference for covariance matrix}
+\author{Ignacio Alvarez \and Jarad Niemi}
+\institute{Department of Statistics, Iowa State University}
+%\leftcorner{\includegraphics[height=1cm,width=10cm]{figure/comunidad}}
+%-----------------------------------------------------------
+% Start the poster itself
+%-----------------------------------------------------------
+
+\begin{document}
+
+\begin{frame}
+  \begin{columns}[t,totalwidth=\threecolwid]  											% the [t] option aligns the column's content at the top
+    %\begin{column}{\sepwid}\end{column}			% empty spacer column
+    \begin{column}{1.05\twocolwid}      
+      \begin{alertblock}{Community Description. Based on Census Bureau Information } 
+      \begin{columns}[t,totalwidth=\twocolwid]
+          \begin{column}{15in}
+
+\begin{beamercolorbox}[sep=1pt]{box.te}
+The map below shows the Communities location, most of them are from the East Coast of US. Size of the dots represents population size. Detroit and Philadelphia are the biggest ones, Aberdeen and Milledgeville the smallest. 
+\end{beamercolorbox}
+
+\begin{beamercolorbox}[sep=1pt]{box.ti} \centering \textbf{Age Distribution} \end{beamercolorbox} 
+\begin{beamercolorbox}[sep=1pt]{box.te}
+Where the 18-21 years old and over 55 go ? 18-21 to college? (State College, Grand Forks) Over 55 to retirement communities? (Palm Beach, Bradenton)
+\end{beamercolorbox} 
+  
+\begin{figure}[htbp]
+\begin{center}
+ \includegraphics{priorsim2d} 
+ \vspace{-.5in}
+\caption{Scatterplot of prior samples, correlation coefficient and standard deviation of the first component (on $\mbox{log}_{10}$ scale). Column panels represent each covariance prior and the row panels are the dimension of the data.  \label{priorF1}}
+\end{center}
+\end{figure}
+
+            
+\begin{figure}[htbp]
+\begin{center}
+ \includegraphics{prior_sis2} 
+  \vspace{-.5in}
+\caption{Scatterplot of prior samples, relationship among the standard deviation for the first two components (both in log base ten scale).  Column panels represent each covariance matrix prior and the row panels are the dimension of the data, color represent the absolute value of the correlation coefficient, above 0.5 is red colored and with blue below that level.  \label{priorF2}}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+ \includegraphics{conditional} 
+ \vspace{-.5in}
+\caption{Correlation conditional density, $p(\rho\vert \sigma_1^2, \sigma_2^2)$, for some values of variances. Each line represent a conditional density for a combination of the two variances, $(\sigma_1^2, \sigma_2^2) = [(.1,.1), (.1, .72), (.72,.72), (10, .1), (10, .72), (10, 10) ] $ \label{condo}}
+\end{center}
+\end{figure}
+
+ \end{column}            
+\begin{column}{14.5in}      
+
+\begin{beamercolorbox}[sep=1pt]{box.ti} \centering \textbf{GOAL} of the Study \end{beamercolorbox} 
+%\begin{beamerboxesrounded}[upper=upcol,lower=lowcol,shadow=true,rounded=TRUE]
+\begin{beamercolorbox}[sep=10pt,rounded=TRUE,shadow=TRUE]{postit}
+Identify key patterns to understand the attachment process in the communities. %We want to understand \textbf{what attaches people to their community and how these attachment differ among communities}.  
+Questions to address:
+\begin{enumerate}
+\item How different are the communities?
+\item What attaches people to their community?
+\item What are key drivers behind emotional attachment?
+\item How different are attached people from not attached people? 
+\end{enumerate}
+\end{beamercolorbox}
+%\end{beamerboxesrounded}
+%\ovalbox{hello}
+ % \Ovalbox{world}
+
+
+\begin{beamercolorbox}[sep=1pt]{box.ti} \textbf{Socioeconomics, Income Distribution, Wealth and Education.}  \end{beamercolorbox} 
+\begin{beamercolorbox}[sep=1pt]{box.te} Income per-capita level and Income distribution shows a positive association. Communities with more equitable income distribution correspond to those with more people with  degrees. This occurs for communities at all levels of income. 
+\end{beamercolorbox}
+
+\begin{figure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=450pt,height=500pt]{figure/graphics-income1} 
+\includegraphics[width=450pt,height=500pt]{figure/graphics-income2} 
+%\caption{Income per capita by Gini and education level lesss than high school graduate \label{ecolink}}
+\end{knitrout}
+\end{figure}
+
+\begin{beamercolorbox}[sep=1pt]{box.ti} \textbf{Communities Groups}
+\end{beamercolorbox}
+\begin{beamercolorbox}[sep=1pt]{box.te}
+Based on a cluster analysis on community characteristics we can find subgroups of similar communities. Bradenton and Palm Bach (entire group 3) are communities with older people, not working and not African-American. Also Group 4 is just form by four communities: Charlotte, Grand Forks, Long Beach and State College, relatively younger people, with high education and not equitable income distribution. 
+\end{beamercolorbox}
+
+\begin{figure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=450pt,height=500pt]{figure/graphics-cluster_cen2}  
+\includegraphics[width=450pt,height=500pt]{figure/graphics-cluster_cen1}
+%\caption{Left panel shows a box plots for proportion variables at population level and a household level base on Census information. Right panel shows the proportion of population by education level in each community in decreasing order by higer education level} 
+\end{knitrout}
+\end{figure}
+\begin{beamercolorbox}[sep=1pt]{box.te}
+Others two subgroups are the big size communities, and the African-American communities. 
+\end{beamercolorbox}
+\end{column}
+\end{columns}
+\vspace{1pt}
+\end{alertblock}
+
+\vspace{1cm}
+
+\begin{beamercolorbox}[sep=15pt]{postit}
+Data Sources and Statistical Software :\\
+\begin{itemize} 
+\item Knight Foundation-Gallup: data from 47821 people over three years (2008,2009 and 2010) in 26 communities across the United States. The data are available in http://streaming.stat.iastate.edu/dataexpo/2013/ as part of the Data Expo competition.
+\vspace{0.5cm}
+
+\item United State Census Bureau: information for all the 26 communities base on the American Community Survey 5-Year estimates 2007-2011. 
+\vspace{0.5cm}
+
+\end{itemize} 
+R Packages: {\tt reshape2}, {\tt survey}, {\tt productplots}, {\tt ggplot2}, {\tt stats}, {\tt randomForest}, {\tt maps}, {\tt GGally}, {\tt fpc},{\tt xtable} ,{\tt reldist} and {\tt car}.
+\end{beamercolorbox}
+
+\end{column}
+%\begin{columns}[t]
+
+\begin{column}{1cm}\end{column}  		% empty spacer column
+
+\begin{column}{1.05\onecolwid}
+  
+\begin{alertblock}{Attachment by Community. Combining Data.}
+
+\begin{beamercolorbox}[sep=1pt]{box.ti} \centering \textbf{Good Things Come in Small Packages} \end{beamercolorbox} 
+\begin{beamercolorbox}[sep=1pt]{box.te}
+Small communities are more attached than big ones. In Top fifteen,  only St Paul is big.
+
+\end{beamercolorbox}
+\begin{figure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=450pt,height=500pt]{figure/graphics-qsbplot}
+\includegraphics[width=450pt,height=500pt]{figure/graphics-corplot}
+%\caption{Left panel shows attachment among communities and right panel shows the most correlated variables with attached and not atached people using census information}
+\end{knitrout}
+\end{figure}
+
+\begin{columns}{\onecolwid}
+\begin{column}{7in}
+\begin{beamercolorbox}[sep=1.5pt]{box.te}
+In crisis period the relationship between attachment and economy is smaller.
+
+Communities with more influx of population and with big proportion of people between 18 and 21 are more attached. 
+\end{beamercolorbox}
+\end{column}
+
+\begin{column}{5.5in}
+\begin{figure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+{\centering \includegraphics[width=350pt,height=250pt]{figure/graphics-econ} 
+}
+\end{knitrout}
+%\caption{Attachment vs economic dimension \label{eco}}
+\end{figure}
+
+\end{column}
+\end{columns}
+
+%The top three communities in terms of attachment are Brandenton, Myrtle Beach and State College while the bottom three are Gary, Detroit and Miami. We can observe that \textbf{most of the small communities have bigger index in attachment} than most of the big communities, 
+%In the top fifteen communities only St Paul seems to be a big city. This could implies the community size is important to explain people  attachment.
+
+\end{alertblock}
+
+\begin{alertblock}{People Characteristics and Attachment}
+\begin{beamercolorbox}[sep=2pt]{box.te}
+Clustering of people on Soul data without using attachment variables.
+\end{beamercolorbox}
+\begin{figure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[scale=1.6]{figure/graphics-cluster_plot1}  
+%\caption{Mean value for some of the variables used to construct the k-means cluster solution.}
+\end{knitrout}
+\end{figure}
+%Cluster 3 (Blue) shows the second biggest mean in most of the variables while cluster 2 (Green) has the biggest mean in most of the variables items for Q7 and Q8,  but it has low mean values for CCE1,CCE2 and Q6A. 
+\begin{beamercolorbox}[sep=1pt]{box.te}
+%\begin{itemize}
+Cluster 1: Love their community, it is good place for different social groups, no much family in the community.\\
+Cluster 2: Opposite to cluster 1, not satisfied with the community, low economic indicators. \\
+Clusters 3 and 4 are very similar, always in the middle. Cluster 4has more family and friends in the community than cluster 3. 
+%\end{itemize}
+\end{beamercolorbox}
+
+\begin{columns}{\onecolwid}
+\begin{column}{6in}
+\begin{figure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=450pt,height=350pt]{figure/graphics-cluster_plot2} 
+%\caption{Relation between community attachment and k-means cluster solution.\label{clus1}}
+\end{knitrout}
+\end{figure}
+\end{column}
+\begin{column}{7in}
+\begin{beamercolorbox}[sep=1pt]{box.ti} \centering \textbf{Cliques Do Not Click} \end{beamercolorbox}
+\begin{beamercolorbox}[sep=2pt]{box.te}
+Cluster 3 and 4 are identical in terms of attachment, and also in most of the variables. Family and friends living in the community are not important to attachment. Cluster 1 is the most attached, cluster 2 is mainly No-Attached people.
+\end{beamercolorbox}
+\end{column}
+\end{columns}
+\end{alertblock}
+ \end{column} 
+
+\end{columns}
+
+\end{frame}
+\end{document}

@@ -10,12 +10,12 @@
 \usepackage{amsfonts}
 \usepackage{authblk}
 \usepackage{url}
-\usepackage{hyperref}
+%\usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, filecolor=black, urlcolor=black}
 
 \usepackage[top=1.5in, bottom=1in, left=1in, right=1in]{geometry}
 
-\graphicspath{{figs/}}
+%\graphicspath{{figs/}}
 
 
 \newcommand{\jarad}[1]{\textcolor{green}{(jarad: #1)}}
@@ -43,6 +43,7 @@
 \affil[2]{Department of Statistics and Department of Economics, Iowa State University}
 
 \date{August 2014}
+\pagenumbering{gobble}
 
 \begin{document}
  
@@ -185,7 +186,7 @@ Figure \ref{priorF2} shows a scatterplot with the first two standard deviations 
 
 \begin{figure}[htbp]
 \begin{center}
- \includegraphics[width=\textwidth ]{prior_sis2} 
+ \includegraphics[width=\textwidth ]{prior_sis2.pdf} 
   \vspace{-.5in}
 \caption{Samples from the prior distribution for the first two standard deviations coded by absolute value of the correlation for the four covariance matrix priors (columns) for a two- and ten-dimensional matrix (rows).}
 \label{priorF2} 
@@ -252,7 +253,7 @@ For inference, the true sampling model is assumed and the covariance matrix prio
 
 \begin{figure}[hbtp]
 \centering
-\includegraphics[width=\textwidth] {fig_rho_d2} 
+\includegraphics[width=\textwidth] {fig_rho_d2.pdf} 
 \vspace{-.5in}
 \caption{Posterior mean of the correlation (vertical axis) versus jittered true correlations for the range of true standard deviations (columns) and sample sizes (rows) using the four covariance matrix priors.}
 \label{rhod2}
@@ -280,7 +281,7 @@ Figure \ref{devF1} shows a scatterplot of the standard deviation posterior mean 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{fig_s1_d2} 
+\includegraphics[width=\textwidth]{fig_s1_d2.pdf} 
 \vspace{-.5in}
 \caption{Posterior mean of the first standard deviation (vertical axis) versus jittered true standard deviations for the range of true correlations (columns) and sample sizes (rows) using the four covariance matrix priors.}
 \label{devF1} 
@@ -364,7 +365,7 @@ These models are estimated with same methods used for the models with simulated 
 
 \begin{figure}[hbpt]
 \centering
-\includegraphics[width=\textwidth]{rescorr}
+\includegraphics[width=\textwidth]{rescorr.pdf}
  \vspace{-.5in}
 \caption{Posterior mean of the correlation for total count (bottom row) versus average count (top row) when performing the analysis for each pair of species independently (left column) versus all species simultaneously (right column) for four different priors on the covariance matrix as well as the IW prior using scaled data (IWsc).}
 \label{fig:coring}
