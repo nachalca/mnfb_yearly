@@ -6,6 +6,6 @@ data {
 }
 model { }
 generated quantities {
-  cov_matrix[k] Sig_iw;
-  Sig_iw = inv_wishart_rng(d, R);   // IW prior 
+  cov_matrix[k] Sigma;
+  Sigma = inv_wishart_rng(d, R);   // IW prior
 }
