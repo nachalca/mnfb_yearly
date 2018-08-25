@@ -73,9 +73,10 @@
 \setbeamertemplate{footline}[frame number]
 
 \title{Bayesian inference for covariance matrix}
-\author[Ignacio Alvarez-Castro]{Ignacio Alvarez}
-\institute[IESTA]{IESTA, Universidad de la República, Uruguay}
-\date{ISEC 2018}
+\author{Ignacio Alvarez-Castro}
+\institute[IESTA]{ Center of Statistical Research (IESTA) \\ Universidad de la República, Uruguay.}
+\date{2nd - 6th July 2018. University of St Andrews. \\ 
+International Statistical Ecology Conference.}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
  \frame{\titlepage}
@@ -104,40 +105,49 @@ Covariance matrix estimation
 \item \cite{ovaskainen2017make} includes covariance matrix priors for comunity data hierarchical models
 \end{itemize}
 }
-% \begin{frame}
-% \frametitle{Problems with the conjugate option}
-% Inverse Wishart distribution is conjugate and usually available in software. 
-% 
-% However,
-% \begin{itemize}
-% \item  ``\textit{implies the same amount of prior information about each of the variance parameters in the covariance matrix}'' \citep{bda2003}.  
-% \item  relation between $\rho_{ij}$ and $\sigma_i$, higher values for the standard deviation $\sigma_i$ are associated with higher correlations, $\rho_{ij}$ close to 1 or -1 \citep{visualize}. 
-% \end{itemize}
-% \vspace{.5cm}
-% 
-% Also, we have found in a scenario with small variability,
-% \begin{itemize}
-% \item underestimate correlation
-% \item overestimate standard deviation
-% \end{itemize}
-% \end{frame}
-
 
 \subsection{Motivation example}
 \begin{frame}
 \frametitle{Bird counts on Superior forests}
  The Natural Resources Research Institute (University of Minnesota Duluth) carry out monitoring program for study regional population trends of forest birds.
-            \includegraphics[width=\textwidth, height = 7cm ]{rawtrend}
+%\includegraphics[width=\textwidth, height = 7cm ]{rawtrend}
+\vspace{.5cm}
+
+Want to study population trend over time
+\[
+E(y_{st})  = \beta_{0s} + \beta_{1s} t + \beta_{2t}t^2
+\]
+
+\begin{columns}
+\begin{column}{4cm}
+Point count for :
+\begin{itemize}
+  \item 19 years (1995 - 2013)
+  \item 3 forest
+  \item 73 bird species
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+Response $y_{st}$
+\begin{itemize}
+  \item Total count in logs
+  \item Average count accros sites
+  \item Total count
+\end{itemize}
+
+\end{column}
+\end{columns}
+
 \end{frame}
 
 \begin{frame}
 \frametitle{Quadratic trend model}
   \begin{columns}[T] % the "c" option specifies center vertical alignment
   \column{.5\textwidth} % column designated by a command
-
+Separate model for each species:
 \begin{itemize}
   \item $y_{st}$: bird count for spacies $s$ in year $t$.
-  \item OLS regression model for each species
+  \item OLS regression model 
 \end{itemize}
 
 \[
@@ -145,10 +155,12 @@ y_{st}  \sim  N(\beta_{0s} + \beta_{1s} t + \beta_{2t}t^2, \sigma^2)
 \]
 
 \vspace{.5cm}
-
-\begin{itemize}
-  \item Corr$(\hat\beta_{1s}, \hat\beta_{2s}) = -.77$    
-\end{itemize}
+Correlation among coefficient estimates
+\begin{description}
+  \item[Total in logs] Corr$(\hat\beta_{1s}, \hat\beta_{2s}) = -.77$
+  \item[Average] Corr$(\hat\beta_{1s}, \hat\beta_{2s}) = -.94$
+  \item[Total] Corr$(\hat\beta_{1s}, \hat\beta_{2s}) = -.88$
+\end{description}
 
   \column{.5\textwidth}
     \includegraphics[scale=.3]{ols_regs}
@@ -158,9 +170,6 @@ y_{st}  \sim  N(\beta_{0s} + \beta_{1s} t + \beta_{2t}t^2, \sigma^2)
 
 \begin{frame}
 \frametitle{Quadratic trend model}
-  \begin{columns}[T] % the "c" option specifies center vertical alignment
-  \column{.5\textwidth} % column designated by a command
-
 
 Hierarchical linear model with $IW$ prior. 
 
@@ -173,109 +182,65 @@ y_{st}  & \sim  N(\beta_{0s} + \beta_{1s} t + \beta_{2t}t^2, \sigma^2) \\
 \end{array}
 \]
 
-Define $\rho = \Sigma_{23}/\sqrt{\Sigma_{22}\Sigma_{33}}$. 
+Correlation among coefficient
+\[ \rho = \Sigma_{23}/\sqrt{\Sigma_{22}\Sigma_{33}} \]
 
-  \column{.5\textwidth}
-  \pause
-  How does $p(\rho| y)$ look like?
-    \includegraphics[scale=.3]{reg_rho_hist}
-  \end{columns}
 \end{frame}
+
+\begin{frame}
+\frametitle{Quadratic trend model}
+
+Hierarchical linear model with $IW$ prior. Posterior $p(\rho | y)$
+
+\begin{center}
+\includegraphics[trim= 0cm 2cm 0cm 3cm, clip, scale=.7]{reg_3modIW}
+\end{center}
+
+\end{frame}
+
 %============
 
 \section{Multivariate normal model } 
 \begin{frame}
 \frametitle{Multivariate normal model }
-Consider $n$ observations from $Y_i \sim N_d(0, \Sigma)$ distribution. 
-\vspace{.5cm}
 
-Likelihood: 
-\[
-p(y\vert \mu,\Sigma) \propto |\Sigma|^{-n/2} e^{- \frac{1}{2} \sum_{i=1}^n y_i^{'} \Sigma^{-1} y_i  } = |\Sigma|^{-n/2} e^{- \frac{1}{2}  tr(\Sigma^{-1}S_0)  } 
- \]
- \vspace{.5cm}
- 
-where $y_i \in R^d$ a realization of $Y_i$,  $S_0=\sum_{i=1}^n y_i y_i ^{'}$, individual entries of $\Sigma$ are $\Sigma_{ii} = \sigma_i^2$ and $\Sigma_{ij} = \sigma_i\sigma_j\rho_{ij}$. 
-\end{frame}
+\cite{Alvarez2014} compare alternative priors for $\Sigma$ in this for multivariate normal data.
+\[ Y_i \sim N_d(0, \Sigma) \]
 
-\begin{frame}
-\frametitle{Multivariate normal model }
+Alternative $\Sigma$ priors
+\begin{itemize}
+\item Inverse Wishart: $IW(\nu, \Lambda)$:  $p(\Sigma) \propto  |\Sigma|^{-(\nu+ d +1)/2 } e^{-\frac{1}{2} tr( \Lambda \Sigma^{-1}) }$
 
-\cite{Alvarez2014} compare alternative priors for $\Sigma$ in this context.
+\item Scaled Inverse Wishart 
+\item Hierarchical inverse Wishart
+\item Separation strategy 
+\end{itemize}
+
+Asses prior inpact on posterior inference:
 \begin{itemize}
 \item using simulations
 \item with the bird count data set (not shown)
 \end{itemize}
-
-Alternative $\Sigma$ priors
-\begin{itemize}
-\item Inverse Wishart: $IW(\nu, \Lambda)$.   
-\[  p(\Sigma) \propto  |\Sigma|^{-(\nu+ d +1)/2 } e^{-\frac{1}{2} tr( \Lambda \Sigma^{-1}) } \]
-
-\item Scaled Inverse Wishart 
-
-\item Hierarchical inverse Wishart
-
-\item Separation strategy 
-
-\end{itemize}
 \end{frame}
 
 
 
 
+
+
 % \begin{frame}
-% \frametitle{ Alternative $\Sigma$ priors}
+% \frametitle{ Samples from prior }
 % 
-% \begin{description}
-% \item[$IW(\nu, \Lambda)$] Inverse Wishart:  $\Lambda$ is matrix parameter related to location and $\nu$ degrees of freedom parameter.    \[  p(\Sigma) \propto  |\Sigma|^{-(\nu+ d +1)/2 } e^{-\frac{1}{2} tr( \Lambda \Sigma^{-1}) } \]
-% \pause
+% \begin{figure}[htbp]
+% \begin{center}
+%  \includegraphics[scale=.3]{prior_sis2} 
+% \end{center}
+% \end{figure}
 % 
-% \item[$SIW(\nu, \Lambda, b, \delta)$] Scaled inverse Wishart: $\Sigma = \Delta \; Q \; \Delta$ where $ \Delta_{ii} =\xi_i$, then \[Q \sim IW(\nu, \Lambda) \;\;\;\;\;\;\; \log(\xi_i) \stackrel{ind} \sim N(b_i, \delta_i) \]
-% \pause
-% 
-% \item[$HIW_{ht}(\nu, \lambda, \delta)$] Hierarchical inverse Wishart:  $\Lambda$ diagonal matrix, $\Lambda_{ii} = \lambda_i$,   \[\Sigma\vert\lambda \sim IW( \nu + d - 1 ,  2\nu\Lambda)  \;\;\;\; \lambda_i \stackrel{ind} \sim \mbox{Ga}\left(\frac{1}{2} , \frac{1}{\delta_i^2}\right) \;\;\; E(\lambda_i)=\frac{\delta_i^2}{2} \]  
-% \pause
-% 
-% \item[$ BMM_{mu}(\nu, \Lambda, b, \delta)$] Separation strategy: $\Sigma = \Lambda \; R \; \Lambda$  where $\Lambda_{ii}=\sigma_{i}$ and $R=\Delta^q Q \Delta^q$ with $\Delta^q_{ii} = Q_{ii}^{-1/2}$ \[  Q \sim IW(\nu, I )  \;\;\; \log(\sigma_i) \stackrel{ind} \sim N(b_i, \delta_i) \]
-% \end{description}
+% Positive relationship among $\sigma_1$ and $\sigma_2$, also large $|\rho_{12}|$ values appear when the two variances are high.
 % \end{frame}
 
-\begin{frame}
-\frametitle{ Samples from prior }
 
-\begin{figure}[htbp]
-\begin{center}
- \includegraphics[scale=.3]{prior_sis2} 
-%\caption{Scatter-plot of prior samples, relationship among the standard deviation for the first two components (both in log base ten scale). $IW$ prior imply a positive relationship among the standard deviations. Also large correlations values appear the two variance are high and low.} 
-\end{center}
-\end{figure}
-
-Positive relationship among $\sigma_1$ and $\sigma_2$, also large $|\rho_{12}|$ values appear when the two variances are high.
-\end{frame}
-
-% \begin{frame}
-% \frametitle{Impact on the posterior inference}
-% 
-% We simulate normally distributed data, 
-% 
-% \[Y \sim N_d(0, \Sigma)\] 
-% 
-% where $d$ represent the dimension, we use $(\Sigma)_{ii} =\sigma \;\; \forall i \in \left\{1,\ldots,d\right\} $ and $(\Sigma)_{ij} = \sigma^2\rho$ which implies all variances and all correlations are equal.
-% 
-% \begin{table}[htbp]
-%    \caption{Simulation scenarios. Specific values used in simulations for each parameter. \label{scen}} 
-%    \vspace{-.4cm}
-%      \begin{tabular}{lcc} \hline
-%           &  Bivariate    & Ten-dimensional  \\ \hline
-%       Sample size   ($n$)   & 10,50,250   &  10,50  \\
-%       Standard deviation ($\sigma$)  & 0.01, 0.1, 1, 10, 100 & 0.01, 1, 100 \\
-%       Correlation ($\rho$)   &  0, 0,25, 0.5, 0.75, 0.99  &  0, 0.99 \\ \hline
-%    \end{tabular}
-% \end{table}
-% Each scenario is replicated 5 times. 
-%We run all models in Stan software, use Potential scale reduction factor for convergence.All models have initially 3 chains with 1000 iterations after burn-in each, initial values disperse on parametric space. 
-\end{frame}
 
 \begin{frame}
 \frametitle{Impact on posterior inference}
@@ -308,32 +273,32 @@ $IW$ prior overestimate the standard deviation when its true value is very low
 	\end{columns}
 \end{frame}
 
-\section{Separation strategy in linear model}
-\begin{frame}
-\frametitle{Separation strategy in linear model}
-  \begin{columns}[T] % the "c" option specifies center vertical alignment
-  \column{.5\textwidth} % column designated by a command
-
-
-\[\begin{array}{cl}
-y_{st}  & \sim  N(\beta_{0s} + \beta_{1s} t + \beta_{2t}t^2, \sigma^2) \\
-& \\
-\begin{pmatrix} \beta_{0s} \\ \beta_{1s} \\ \beta_{2s} \end{pmatrix} & \sim  N \left( \begin{pmatrix} 0 \\ 0 \\ 0 \end{pmatrix} , \Sigma \right) \\
-& \\
-\Sigma & = \mbox{diag}(\lambda)\; \Omega\; \mbox{diag}(\lambda) \\
-& \\
-\lambda_k & \sim Ca^+(0, 1) \\ 
-& \\
-\Omega & \sim LKJ(3) 
-\end{array}
-\]
-
-  \column{.5\textwidth}
-  \pause
-  Posterior $p(\rho| y)$ 
-    \includegraphics[scale=.3]{reg_rho_den}
-  \end{columns}
-\end{frame}
+% \section{Separation strategy in linear model}
+% \begin{frame}
+% \frametitle{Separation strategy in linear model}
+%   \begin{columns}[T] % the "c" option specifies center vertical alignment
+%   \column{.5\textwidth} % column designated by a command
+% 
+% 
+% \[\begin{array}{cl}
+% y_{st}  & \sim  N(\beta_{0s} + \beta_{1s} t + \beta_{2t}t^2, \sigma^2) \\
+% & \\
+% \begin{pmatrix} \beta_{0s} \\ \beta_{1s} \\ \beta_{2s} \end{pmatrix} & \sim  N \left( \begin{pmatrix} 0 \\ 0 \\ 0 \end{pmatrix} , \Sigma \right) \\
+% & \\
+% \Sigma & = \mbox{diag}(\lambda)\; \Omega\; \mbox{diag}(\lambda) \\
+% & \\
+% \lambda_k & \sim Ca^+(0, 1) \\ 
+% & \\
+% \Omega & \sim LKJ(3) 
+% \end{array}
+% \]
+% 
+%   \column{.5\textwidth}
+%   \pause
+%   Posterior $p(\rho| y)$ 
+%     %\includegraphics[scale=.3]{reg_rho_den}
+%   \end{columns}
+% \end{frame}
 
 
 
@@ -358,10 +323,6 @@ Future steps
 Use other distributions for $IW$ parameters $\nu$ and $\Lambda$.
 \end{description}
 \end{frame}
-
-
-
-
 
 
 \begin{frame}

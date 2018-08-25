@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  10 JUN 2018 20:49
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  27 JUN 2018 10:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -962,158 +962,176 @@ LaTeX Font Warning: Font shape `OT1/cmss/m/n' in size <4> not available
 [1{/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
-LaTeX Font Info:    Try loading font information for OML+ztmcm on input line 11
-0.
+LaTeX Font Info:    Try loading font information for OML+ztmcm on input line 10
+6.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/psnfss/omlztmcm.fd
 File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
 )
-LaTeX Font Info:    Try loading font information for OMS+ztmcm on input line 11
-0.
+LaTeX Font Info:    Try loading font information for OMS+ztmcm on input line 10
+6.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/psnfss/omsztmcm.fd
 File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
 )
-LaTeX Font Info:    Try loading font information for OMX+ztmcm on input line 11
-0.
+LaTeX Font Info:    Try loading font information for OMX+ztmcm on input line 10
+6.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/psnfss/omxztmcm.fd
 File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
 )
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 110.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 106.
 
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 110.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 106.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 110.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 106.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 110.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 106.
 LaTeX Font Info:    Try loading font information for OT1+mathkerncmss on input 
-line 110.
+line 106.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/sansmathaccent/ot1mathkerncmss.fd
 File: ot1mathkerncmss.fd 2013/03/27 Fontinst v1.933 font definitions for OT1/ma
 thkerncmss.
 ) [2
 
-] [3
-
-] <../report/figs/rawtrend.pdf, id=148, 505.89pt x 289.08pt>
+] <../report/figs/rawtrend.pdf, id=112, 505.89pt x 289.08pt>
 File: ../report/figs/rawtrend.pdf Graphic file (type pdf)
 
 <use ../report/figs/rawtrend.pdf>
-Package pdftex.def Info: ../report/figs/rawtrend.pdf used on input line 136.
+Package pdftex.def Info: ../report/figs/rawtrend.pdf used on input line 131.
 (pdftex.def)             Requested size: 354.19777pt x 199.16986pt.
 
-Overfull \vbox (3.91266pt too high) detected at line 136
+Overfull \vbox (3.91266pt too high) detected at line 131
  []
 
-[4
+[3
 
  <../report/figs/rawtrend.pdf>]
-<../report/figs/ols_regs.pdf, id=184, 505.89pt x 505.89pt>
+<../report/figs/ols_regs.pdf, id=148, 505.89pt x 505.89pt>
 File: ../report/figs/ols_regs.pdf Graphic file (type pdf)
 
 <use ../report/figs/ols_regs.pdf>
-Package pdftex.def Info: ../report/figs/ols_regs.pdf used on input line 162.
+Package pdftex.def Info: ../report/figs/ols_regs.pdf used on input line 157.
 (pdftex.def)             Requested size: 151.76816pt x 151.76816pt.
- [5
+ [4
 
  <../report/figs/ols_regs.pdf>]
-<../report/figs/reg_rho_hist.pdf, id=219, 505.89pt x 505.89pt>
+<../report/figs/reg_rho_hist.pdf, id=183, 505.89pt x 505.89pt>
 File: ../report/figs/reg_rho_hist.pdf Graphic file (type pdf)
 
 <use ../report/figs/reg_rho_hist.pdf>
-Package pdftex.def Info: ../report/figs/reg_rho_hist.pdf used on input line 188
+Package pdftex.def Info: ../report/figs/reg_rho_hist.pdf used on input line 183
 .
 (pdftex.def)             Requested size: 151.76816pt x 151.76816pt.
- [6
+ [5
 
  <../report/figs/reg_rho_hist.pdf>]
 File: ../report/figs/reg_rho_hist.pdf Graphic file (type pdf)
 
 <use ../report/figs/reg_rho_hist.pdf>
-Package pdftex.def Info: ../report/figs/reg_rho_hist.pdf used on input line 188
+Package pdftex.def Info: ../report/figs/reg_rho_hist.pdf used on input line 183
 .
 (pdftex.def)             Requested size: 151.76816pt x 151.76816pt.
- [7
+ [6
 
-] (./slides_isec18.toc) [8
+] (./slides_isec18.toc) [7
 
-] [9
-
-]
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 220.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 220.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 220.
-
-[10
-
-] [11
-
-] [12
-
-] [13
+] [8
 
 ]
-<../report/figs/prior_s1s2_hex.pdf, id=463, 505.89pt x 505.89pt>
-File: ../report/figs/prior_s1s2_hex.pdf Graphic file (type pdf)
+[9
 
-<use ../report/figs/prior_s1s2_hex.pdf>
-Package pdftex.def Info: ../report/figs/prior_s1s2_hex.pdf used on input line 2
-33.
-(pdftex.def)             Requested size: 151.76816pt x 151.76816pt.
- [14
+] <../report/figs/prior_sis2.pdf, id=341, 505.89pt x 361.35pt>
+File: ../report/figs/prior_sis2.pdf Graphic file (type pdf)
 
- <../report/figs/prior_s1s2_hex.pdf>] (./slides_isec18.toc) [15
+<use ../report/figs/prior_sis2.pdf>
+Package pdftex.def Info: ../report/figs/prior_sis2.pdf used on input line 255.
+(pdftex.def)             Requested size: 151.76816pt x 108.40584pt.
+ [10
 
-] [16
+ <../report/figs/prior_sis2.pdf>]
+! Too many }'s.
+\endframe ->\egroup 
+                    \begingroup \def \@currenvir {frame}
+l.278 \end{frame}
+                 
+You've closed more groups than you opened.
+Such booboos are generally harmless, so keep going.
 
-]
-<../report/figs/fig_rho_d2.pdf, id=559, 505.89pt x 325.215pt>
+<../report/figs/fig_rho_d2.pdf, id=378, 505.89pt x 325.215pt>
 File: ../report/figs/fig_rho_d2.pdf Graphic file (type pdf)
 
 <use ../report/figs/fig_rho_d2.pdf>
-Package pdftex.def Info: ../report/figs/fig_rho_d2.pdf used on input line 272.
+Package pdftex.def Info: ../report/figs/fig_rho_d2.pdf used on input line 293.
 (pdftex.def)             Requested size: 202.3524pt x 130.0837pt.
 
-Overfull \hbox (3.18312pt too wide) in paragraph at lines 272--272
+Overfull \hbox (3.18312pt too wide) in paragraph at lines 293--293
  [] 
  []
 
-[17
+[11
 
  <../report/figs/fig_rho_d2.pdf>]
-<../report/figs/fig_s1_d2.pdf, id=596, 505.89pt x 325.215pt>
+<../report/figs/fig_s1_d2.pdf, id=413, 505.89pt x 325.215pt>
 File: ../report/figs/fig_s1_d2.pdf Graphic file (type pdf)
 
 <use ../report/figs/fig_s1_d2.pdf>
-Package pdftex.def Info: ../report/figs/fig_s1_d2.pdf used on input line 287.
+Package pdftex.def Info: ../report/figs/fig_s1_d2.pdf used on input line 309.
 (pdftex.def)             Requested size: 202.3524pt x 130.0837pt.
 
-Overfull \hbox (3.18312pt too wide) in paragraph at lines 287--287
+Overfull \hbox (3.18312pt too wide) in paragraph at lines 309--309
  [] 
  []
 
-[18
+[12
 
- <../report/figs/fig_s1_d2.pdf>] [19
-
-] (./slides_isec18.toc) [20
-
-] [21
+ <../report/figs/fig_s1_d2.pdf>] (./slides_isec18.toc) [13
 
 ]
-[22
 
-] (./slides_isec18.bbl) [23
+! LaTeX Error: File `reg_rho_den' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.336 \end{frame}
+                 
+I could not locate the file with any of these extensions:
+.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,.eps
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[14
+
+]
+
+! LaTeX Error: File `reg_rho_den' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.336 \end{frame}
+                 
+I could not locate the file with any of these extensions:
+.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,.eps
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[15
+
+] (./slides_isec18.toc) [16
+
+] [17
+
+] (./slides_isec18.bbl) [18
 
 ]
 \tf@nav=\write6
@@ -1125,13 +1143,14 @@ Overfull \hbox (3.18312pt too wide) in paragraph at lines 287--287
 \tf@snm=\write8
 \openout8 = `slides_isec18.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 339.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 339.
- (./slides_isec18.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 339.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 339.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 374.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 374.
+
+(./slides_isec18.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 374.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 374.
 Package rerunfilecheck Info: File `slides_isec18.out' has not changed.
-(rerunfilecheck)             Checksum: E192F9CAD9BEE91D85F2B4539DFFA692;344.
+(rerunfilecheck)             Checksum: F1062447BD25141BD39970C3AE94B649;290.
 
 
 LaTeX Font Warning: Size substitutions with differences
@@ -1139,11 +1158,11 @@ LaTeX Font Warning: Size substitutions with differences
 
  ) 
 Here is how much of TeX's memory you used:
- 18654 strings out of 492995
- 355219 string characters out of 6132704
- 527701 words of memory out of 5000000
- 21656 multiletter control sequences out of 15000+600000
- 37827 words of font info for 101 fonts, out of 8000000 for 9000
+ 18558 strings out of 492995
+ 353129 string characters out of 6132704
+ 526738 words of memory out of 5000000
+ 21565 multiletter control sequences out of 15000+600000
+ 26451 words of font info for 72 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  56i,17n,65p,849b,637s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
@@ -1155,13 +1174,12 @@ sr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr
 r/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb></usr
 /local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi9.pfb></usr/
 local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/l
-ocal/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/loc
-al/texlive/2017/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/
-2017/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
-Output written on slides_isec18.pdf (23 pages, 647413 bytes).
+ocal/texlive/2017/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texliv
+e/2017/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
+Output written on slides_isec18.pdf (18 pages, 1021472 bytes).
 PDF statistics:
- 833 PDF objects out of 1000 (max. 8388607)
- 760 compressed objects within 8 object streams
- 58 named destinations out of 1000 (max. 500000)
- 169 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 672 PDF objects out of 1000 (max. 8388607)
+ 607 compressed objects within 7 object streams
+ 46 named destinations out of 1000 (max. 500000)
+ 155 words of extra memory for PDF output out of 10000 (max. 10000000)
 
