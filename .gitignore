@@ -33,6 +33,7 @@ $RECYCLE.BIN/
 .Rout
 
 isec2018/*.pdf
+isec2018/*.rds
 report/*.tex
 data/*
 *.html
