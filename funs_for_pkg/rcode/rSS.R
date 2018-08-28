@@ -1,14 +1,19 @@
 #' Random generation from IW distribution
 #' @usage rIW(n, d, R)
 #' @param n number of observations
-#' @param d degrees of freedom IW parameter
+#' @param k covariance matrix dimension 
+#' @param prior_cor prior for correlation matrix
+#' @param prior_sg  prior for marginal variances
+#' @param eta degrees of freedom IW parameter
 #' @param R matrix IW parameter
+#' @param sigma_mu location of variances 
+#' @param sigma_sc scale of variances
 #' @export
 #' @examples
 #' rIW(n=4, d = 3, R = diag(2) )
 #'
 
-rSS <- function(n, k, prior_cor = NULL, prior_sg = NULL, 
+rSS <- function(n, k, prior_cor = 'lkj', prior_sg ='ln', 
                 eta = k+1, R = diag(k), 
                 sigma_mu=0, sigma_sc=1) {
   
