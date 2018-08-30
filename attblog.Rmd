@@ -1,0 +1,56 @@
+---
+title: "Inverse Wishart Bias"
+output: html_document
+---
+
+Covariance matrix estimation  
+
+* Multivariate normal sampling models 
+* random-intercept, random-slope models 
+
+$ 
+y_{ij} = \beta_{0j} + \beta_{1j} x_{ij} + \beta_{2j}z_{ij} + \epsilon_{ij} 
+$
+
+
+\begin{pmatrix} \beta_{0j} \\ \beta_{1j} \\ \beta_{2j} \end{pmatrix} &\sim&  N \left( \begin{pmatrix} \mu_{0} \\ \mu_{1} \\ \mu_{2} \end{pmatrix} , \Sigma \right) , \;\;\; \epsilon_{ij} \sim N(0, \sigma^2) 
+
+
+
+```{r, pkgs }
+library(ggplot2)
+library(plyr)
+library(reshape2)
+library(xtable)
+```
+
+
+
+```{r}
+# PART I: Simulations results, plots and tables
+res  <- read.table('data/reduced_res.csv', header=T)
+
+# reorder and relabel prior factor
+res$prior.old <- res$prior
+res$prior <- factor(res$prior, levels=c('iw','siw', 'ht', 'ss'),labels=c('IW','SIW', 'HIWht', 'BMMmu'))
+#rescov$prior <- factor(rescov$.id, levels=c('iw','siw', 'ht', 'ss'),labels=c('IW','SIW', 'HIWht', 'BMMmu'))
+# with(res, table(prior,prior.old))
+
+# for compare against pearson instead to true value
+load('data/simdata.Rdata')
+corr <- ddply(simdata.2, .(s,sim,r,ns), summarize, pearson=cor(X1,X2))
+res.p <- merge(res, corr)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+d <- subset(res.p, param=='rho')
+d$rx <- d$r + runif(nrow(d),-.05,.05)
+d$ns <- factor(d$ns, levels=c(10,50,250), labels=paste('n',c(10,50,250),sep='=='))
+d$s <- factor(d$s, levels=c(0.01,0.1,1,10,100), labels=paste('sigma',c(0.01,0.1,1,10,100),sep='=='))
+qplot(data=d ,x=pearson, y=mean,color=prior,shape=prior,xlab='True Correlation', ylab='Posterior Mean') + 
+  facet_grid(facets=ns~s,scales='free',labeller=label_parsed) + geom_abline(1) + theme(legend.position= 'bottom') + scale_x_continuous(breaks=c(0,0.5,1))
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
