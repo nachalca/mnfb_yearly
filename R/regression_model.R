@@ -73,7 +73,7 @@ res_sep %>% unnest(cfs) %>%
   theme(axis.title.x =  element_text(size=I(20) ), axis.title.y = element_text(size=I(20)) )
 #ggsave( filename = 'report/figs/ols_regs.pdf', height = 7, width = 7) 
 
-res_sep %>% unnest(cfs) %>% group_by(resp) %>%
+rhos.betahat <- res_sep %>% unnest(cfs) %>% group_by(resp) %>%
   summarise( rr = cor( `I(yearc^2)`, yearc) )
 
 # compute hierarchical model
@@ -85,7 +85,7 @@ res_hr_log <- hier_md(df = bird.yeartotal, resp = log(bird.yeartotal$count.add),
 res_hr_ave <- hier_md(df = bird.yeartotal, resp = bird.yeartotal$ave.add ,mm=reg.iw )
 
 res_hr <- list(sum = res_hr_sum, log=res_hr_log, ave=res_hr_ave)
-save(res_hr, file = 'isec2018/regHR.RData')
+save(res_hr, file = 'Routput/regHR.RData')
 
 rhos_hr <- map(res_hr, .f = function(xx) {
   extract(xx, pars='Sigma')$Sigma %>%
@@ -93,17 +93,18 @@ rhos_hr <- map(res_hr, .f = function(xx) {
     as_data_frame() %>% set_names(nm = 'smp')
 } ) %>% bind_rows(.id = 'response')
 
+
+labcolor <- paste( c('Average', 'Total in logs', 'Total'), 
+                   paste0( '(', round(rhos.betahat$rr,2), ')' ) )
   
 rhos_hr %>% ggplot() + 
   geom_density(aes(smp, color = response)) +
-  labs(x='correlation') + 
+  labs(x='', y='Posterior density') + 
   theme_bw() + 
-  theme(axis.title.x =  element_text(size=I(20) ), 
-        axis.title.y = element_text(size=I(20)), 
-        aspect.ratio = 1/2) +
-  scale_color_discrete(labels = c('Average', 'Total (logs)', 'Total')) + 
-  theme(axis.title.x =  element_text(size=I(20) ), axis.title.y = element_text(size=I(20)) ) +
-  ggsave('report/figs/reg_3modIW.pdf', height = 7, width = 7)
+  scale_color_discrete(labels = labcolor) + 
+  theme( aspect.ratio = 1/2, legend.position = c(.8, .8)  ) 
+
+ggsave('figs/reg_3modIW.pdf', height = 7, width = 7)
 
 ##########################################################################
 ##########################################################################

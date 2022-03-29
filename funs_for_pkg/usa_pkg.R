@@ -26,16 +26,30 @@ bird.yeartotal <- read.csv('data/bird_yeartotal.csv') %>%
           yearc = year - 2000) 
 
 # filter 10 species with more counts
+lim <- bird.yeartotal %>% group_by( abbrev ) %>%
+  summarise( total.count = sum(count) ) %>% 
+  mutate(rr = rank(total.count)) %>%
+  arrange(desc(rr)) %>% slice(11) %>%
+  select(total.count) %>% as.numeric()
+
 bird.top10 <- bird.yeartotal %>%
-  group_by( nrricode ) %>%
-  mutate( total.count = sum(count), rr = rank(total.count, ties.method = 'random') ) %>%
-  filter(rr < 11)  %>% select(-total.count, -rr)
+  group_by( abbrev ) %>%
+  mutate( total.count = sum(count, na.rm = TRUE) ) %>%
+  ungroup() %>% filter(total.count > lim) %>% select(-total.count)
 
 
-bird.top10 %>%
-  group_by(nrricode, year) %>%
+bird.top10 %>% 
+  mutate(abbrev = factor(abbrev)) %>%
+  group_by(abbrev, year) %>%
   summarise( total.count = sum(count) ) %>%
-  with( table(year, nrricode) )
+  ggplot( aes (year, total.count, color = abbrev) ) + geom_point() + geom_line() 
 
+smpcovs <- bird.top10 %>% 
+  mutate(abbrev = factor(abbrev) ) %>%
+  select(year, forest, abbrev, count) %>%
+  spread(forest, count) %>% select(-abbrev) %>%
+  nest(-year ) %>% 
+  mutate( smp.cov = map( data, cov) )
 
-
+smpcovs$smp.cov[[1]]
+  
