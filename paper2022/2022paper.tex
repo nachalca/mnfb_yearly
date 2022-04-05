@@ -14,7 +14,7 @@
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, filecolor=black, urlcolor=black}
 
 \usepackage[top=1.5in, bottom=1in, left=1in, right=1in]{geometry}
-
+\parskip 3mm
 \graphicspath{{../figs/}}
 
 
@@ -70,15 +70,24 @@ The objective of this study is to understand the impact of these prior choices o
 The rest of this paper is organized as follows: Section \ref{sec:models} describes the statistical methods and the covariance prior distributions we use. Section \ref{sec:results} presents a simulation study consisting in simulate data from a multivariate normal model and make inference about the covariance matrix to compare the different priors. Section \ref{sec:birds} presents an application to bird counts in the Superior National Forest. Finally, Section \ref{sec:summary} provides the applied modeler with strategies for estimating a covariance matrix. 
 
 \section{ Motivating example } 
+In Section \ref{sec:birds} a data set consisting of bird counts in national forest in the Great Lakes is used. Wihtout describing details we use this data here to show some troubles for estimating the correlacion coeficient in a simple scenario.  
+
+Let $y_{st}$ represent a measure of abundance of species $s$ in moment $t$, here we choose only two bird species: Veery (VEER) and White-throated Sparrow (WTSP). We are interested in the asociation of abundance between two species, captured by the correlation coefficient $\rho = cor(y_{1t}, y_{2t})$. 
+
+Left panel of Figure \ref{motiva.rho} shows the raw data. The two scatter-plot represent two posible ways to measure species abundance: total count across locations, or using an average count acrross many locations.
+
+In order to obtain posterior inference of the correlation coefficient, we fit a multivariate normal model with an inverse-Wishart distribution for the covariance matrix parameter. This model is described in equations \eqref{like} and \eqref{eq:wis}. 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[trim = 0 4cm 0 3cm, clip, scale=.5]{reg_3modIW.pdf} 
+%\includegraphics[trim = 0 4cm 0 3cm, clip, scale=.5]{motiva22.pdf} 
+\includegraphics[scale=.5]{motiva22.pdf} 
 %\vspace{-.5in}
-\caption{Posterior density of correlation coeficient}
+\caption{Left panel: Scatter plot for mean abundance (top) and total abundance (bottom). Right panel: posterior distribucion of $\rho$ with mean abundance (top) and total abundance (bottom), the red dashed vertical line represent the sample correlation.  }
 \label{motiva.rho} 
 \end{figure}
 
+Figure \ref{motiva.rho} shows scale of the resopnse variable might have a large impact on posterior inference and, more relevant, that using a mean response accorss locations the posterior distribution is totally off the value of the sample correlation, suggesting the prior distribution was too informative, shrinkage posterior inference towards $\rho=0$. 
 
 \section{Statistical Models \label{sec:models} }
 
@@ -411,6 +420,23 @@ The SIW, HIW$_{ht}$ and BMM$_{mu}$ priors show similar behavior no matter which 
 %\caption{Trend in some selected species. OVEN, REVI and CSWA are highly correlated while LEFL and AMRO shows no correlation with other species. \label{trend}}
 %\end{figure}
 %Figure \ref{trend}  shows the dynamics for the five species identify on the correlation matrix. AS the data are centered, the lines represent the difference between the average yearly count and the historical mean for that species. The three species with high correlation shows the same temporal pattern, a sort of inverted u-shape specially marked on the case of OVEN. The two species with small correlation have a very stable pattern with no big departures from its own mean. 
+
+\subsection{Hierarchical linear model} 
+A posible hierarchical model in this scenario is 
+\[\begin{array}{ccc}
+y_{st} \sim N(x_t^{\top}\beta_s,\; \sigma^2) & & \beta_s \sim N(0, \Sigma)
+\end{array}
+\]
+where $x_t^{\top} = (1,\; t,\; t^2)$. In order to have full Bayesian inference in this model we might set independent priors for the variances $\Sigma\sim IW(I, d+1)$ and $\sigma \sim Cauchy^{+}(0,1)$. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[trim = 0 4cm 0 3cm, clip, scale=.5]{reg_3modIW.pdf} 
+%\vspace{-.5in}
+\caption{ posterior of correlation between coeficients }
+\label{linear} 
+\end{figure}
+
 
 \section{Summary \label{sec:summary}} 
 

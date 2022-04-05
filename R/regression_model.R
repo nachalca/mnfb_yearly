@@ -102,7 +102,7 @@ rhos_hr %>% ggplot() +
   labs(x='', y='Posterior density') + 
   theme_bw() + 
   scale_color_discrete(labels = labcolor) + 
-  theme( aspect.ratio = 1/2, legend.position = c(.8, .8)  ) 
+  theme( aspect.ratio = 1/2, legend.position = c(.8, .8), legend.text = element_text(size=15)  ) 
 
 ggsave('figs/reg_3modIW.pdf', height = 7, width = 7)
 
