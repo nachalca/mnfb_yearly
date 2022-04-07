@@ -22,7 +22,6 @@ $RECYCLE.BIN/
 *.nav
 *.snm
 *.out
-*.pdf
 *.bbl
 *.toc
 *.nav
@@ -32,6 +31,8 @@ $RECYCLE.BIN/
 *.Rdata
 .Rout
 
+paper2022/*.pdf
+report/*/*.pdf
 isec2018/*.pdf
 isec2018/*.rds
 report/*.tex
