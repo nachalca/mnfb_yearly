@@ -48,6 +48,9 @@ sue2019/*.rds
 
 data/*
 
+# don't know what this is: 
+tools/* 
+
 # compiled files 
 *.html
 *.bbl
