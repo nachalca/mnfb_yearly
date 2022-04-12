@@ -26,21 +26,24 @@ bird.yeartotal <- read.csv('data/bird_yeartotal.csv') %>%
 
 # filter 10 species with more counts
 
+lim <- bird.yeartotal %>% group_by( abbrev ) %>%
+  summarise( total.count = sum(count) ) %>% 
+  mutate(rr = rank(total.count)) %>%
+  arrange(desc(rr)) %>% slice(11) %>%
+  select(total.count) %>% as.numeric()
+
+bird.top10 <- bird.yeartotal %>%
+  group_by( abbrev ) %>%
+  mutate( total.count = sum(count, na.rm = TRUE) ) %>%
+  ungroup() %>% filter(total.count > lim) %>% select(-total.count)
+
+
 top10.cutpoint <- bird.yeartotal %>%
   group_by( abbrev ) %>%
   summarise( total.count = sum(count) ) %>% 
   arrange( desc(total.count) ) %>% 
   slice(11) %>% select(total.count) %>% as.numeric()
   
-bird.top10 <- bird.yeartotal %>%
-  group_by( abbrev ) %>%
-  mutate( total.count = sum(count) ) %>% 
-  filter(total.count > top10.cutpoint) %>% select(-total.count)
-
-bird.top10 %>%
-  group_by(abbrev, year) %>%
-  summarise( total.count = sum(count) ) %>%
-  ggplot(aes(year, total.count, color=abbrev)) + geom_point() + geom_line()
 
 smpcovs <- bird.yeartotal %>%
   select(abbrev, forestN, year, ave.add) %>%
@@ -113,5 +116,12 @@ cov.data %>%
   scale_fill_manual(values=c("white", "black")) + 
   scale_color_gradient2()
 
+smpcovs <- bird.top10 %>% 
+  mutate(abbrev = factor(abbrev) ) %>%
+  select(year, forest, abbrev, count) %>%
+  spread(forest, count) %>% select(-abbrev) %>%
+  nest(-year ) %>% 
+  mutate( smp.cov = map( data, cov) )
 
-
+smpcovs$smp.cov[[1]]
+  
