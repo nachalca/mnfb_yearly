@@ -22,7 +22,6 @@ $RECYCLE.BIN/
 *.nav
 *.snm
 *.out
-*.pdf
 *.bbl
 *.toc
 *.nav
@@ -30,14 +29,24 @@ $RECYCLE.BIN/
 *.Rhistory
 .Rproj.user
 *.Rdata
-.Rout
+*.Rout
+
+# sub-folders
+paper2022/*.pdf
+
+report/cache/*
+report/*/*.pdf
+report/*.pdf
+report/*.tex
+report/*.zip
 
 isec2018/*.pdf
 isec2018/*.rds
-report/*.tex
+
 data/*
+
+# compiled files 
 *.html
-*.csv
 *.bbl
 *.log
 
