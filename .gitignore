@@ -43,6 +43,9 @@ report/*.zip
 isec2018/*.pdf
 isec2018/*.rds
 
+sue2019/*.pdf
+sue2019/*.rds
+
 data/*
 
 # compiled files 
