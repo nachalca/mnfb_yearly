@@ -4,10 +4,9 @@
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{graphicx, color}
-%\graphicspath{{figs/}}
+\graphicspath{{figs/}}
 \usepackage{natbib}
-\usepackage{url}
-%\usepackage{hyperref}
+\usepackage{hyperref}
 \usepackage{setspace}
 
 %----------------------------------
@@ -38,7 +37,7 @@
 
 %-------------------------------------
 
-\title{Bayesian inference for  a covariance matrix}
+\title{Bayesian Inference for  Covariance Matrix}
 \author{Ignacio Alvarez}
 \date{ Spring 2014 }
 
@@ -255,7 +254,7 @@ So, for comparing the prior choices marginal correlation distribution is not rea
 
 \begin{figure}[htbp]
 \begin{center}
- \includegraphics[width=\textwidth]{conditional.pdf} 
+ \includegraphics[width=\textwidth ]{conditional} 
  \vspace{-.5in}
 \caption{Correlation conditional density, $p(\rho\vert \sigma_1^2, \sigma_2^2)$, for some values of variances. Each line represent a conditional density for a combination of the two variances. The values for the variances used are $(\sigma_1^2, \sigma_2^2) = [(.1,.1), (.1, .72), (.72,.72), (10, .1), (10, .72), (10, 10) ] $ \label{condo}}
 \end{center}
@@ -395,7 +394,7 @@ To reduce Monte Carlo variability in the simulations, data set were simulated fo
 \subsubsection{A note on the computations}
 We run all models in Stan software (\cite{stan2014}) which uses a Hamiltonian Monte Carlo (HMC) algorithm to construct posterior samples with the No U-turn sampler (NUTS, \cite{hoffman2011no}) strategy. The HMC consist in a Metropolis based step for all parameters in the model at once so it makes no use of the full conditionals distributions like a Gibbs sampler and because of this having conjugate priors is not important for improve the sampling. The NUTS strategy proposal makes more likely to continue in the same path.  
 
-In all cases the initial values for the chains are automatically set as uniformly disperse on the parametric space, the model  is monitored using the Potential scale reduction factor statistic proposed by \cite{bda2003}. All models have initially 3 chains with 1000 iterations after burn-in each. Whenever the reduction factor is bigger than 1.1 or the effective samples were less than 500 we run a longer model with 2000 iterations per chain after burn-in period. 
+In all cases the initial values for the chains are automatically set as uniformly disperse on the parametric space, the model convergence is monitored using the Potential scale reduction factor statistic proposed by \cite{bda2003}. All models have initially 3 chains with 1000 iterations after burn-in each. Whenever the reduction factor is bigger than 1.1 or the effective samples were less than 500 we run a longer model with 2000 iterations per chain after burn-in period. 
 
 \input{time_ratio}
 

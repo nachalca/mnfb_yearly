@@ -1,0 +1,228 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx, color}
+\graphicspath{{figs/}}
+
+\parskip         7.2pt   % sets spacing between paragraphs
+\parindent         3mm   % sets leading space for paragraphs
+
+\begin{document}
+\section{marginal variance and conditional correlation distributions}
+
+Let $\Sigma \sim IW(\nu,\Lambda)$ where $\Lambda$ has elements $\lambda_{ij}$ and $\lambda_{ij}=\lambda_{ji}$.
+
+\subsection{IW: Notation: $\Sigma \sim IW(\nu, \Lambda)$}
+
+Marginal distribution for variance: $\sigma_i^2 \sim inv\chi^2(\nu-d+1, \frac{ \lambda_{ii} }{\nu+d-1} ) $
+
+It isn't too hard to derive the conditional distribution for the correlation in a 2-dimensional inverse-Wishart,  
+\begin{eqnarray}
+\nonumber p(\rho \vert \sigma_1,\sigma^2) &\propto & p(\Sigma) \propto | \Sigma |^{-\frac{\nu+d+1}{2} }  e^{-\frac{1}{2} tr\left(\Lambda \Sigma^{-1}\right)} \\
+\nonumber &\propto & (1-\rho^2)^{-\frac{\nu+d+1}{2}}e^{-(\lambda_{22} \sigma_1^2+\lambda_{11} \sigma_2^2 - 2\lambda_{12}\sigma_1\sigma_2)/(\sigma_1^2 \sigma_2^2(1-\rho^2)) }  
+\end{eqnarray}
+
+So with $\Lambda = I$ we get $p(\rho \vert \sigma_1,\sigma^2) \propto  (1-\rho^2)^{-\frac{\nu+d+1}{2}}e^{-(\sigma_1^2+\sigma_2^2)/(\sigma_1^2 \sigma_2^2(1-\rho^2))}$. 
+
+<<paquetes, message=FALSE>>=
+library(plyr)
+library(MCMCpack)
+library(ggplot2)
+@
+
+<<iw, echo=FALSE,fig.keep='last',message=FALSE,warning=FALSE>>=
+# Plot conditional distribution
+rho_fiw = function(rho, v=3, d=2, s1, s2,l1=1,l2=1) {
+  # identity matrix assumed for location parameter of IW distribution
+  tr = (l1*s1^2+l2*s2^2)/(s1^2*s2^2*(1-rho^2))
+  (1-rho^2)^(-(v+d+1)/2)*exp(-tr/2)
+}
+d=2
+sig <- expand.grid(s1=c(.1,.72,10),s2=c(.1,.72,10))
+rho.cndiw <- NULL
+for (i in 1:dim(sig)[1]) {
+int = integrate(function(x) rho_fiw(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i]),-1,1)
+aux <- curve(rho_fiw(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i])/int$value, -1, 1, col="red", n=1000)
+rho.cndiw <- rbind(rho.cndiw, data.frame(s1=sig$s1[i],s2=sig$s2[i],rho=aux))
+}
+qplot(data=rho.cndiw, rho.x,rho.y,geom='line',main='IW Non-informative parameters values') + facet_wrap(facets=s1~s2,scale='free')  
+@
+
+<<iw2, echo=FALSE,fig.keep='last',message=FALSE,warning=FALSE>>=
+rho_fiw = function(rho, v=3, d=2, s1, s2,l1=1,l2=1) {
+  # identity matrix assumed for location parameter of IW distribution
+  tr = (l1*s1^2+l2*s2^2)/(s1^2*s2^2*(1-rho^2))
+  (1-rho^2)^(-(v+d+1)/2)*exp(-tr/2)
+}
+d=2
+sig <- expand.grid(s1=c(.1,1,10),s2=c(.1,1,10))
+rho.cndiw2 <- NULL
+for (i in 1:dim(sig)[1]) {
+int = integrate(function(x) rho_fiw(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i],l1=sig$s1[i],l2=sig$s2[i]),-1,1)
+aux <- curve(rho_fiw(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i],l1=sig$s1[i],l2=sig$s2[i])/int$value, -1, 1, col="red", n=1000)
+rho.cndiw2 <- rbind(rho.cndiw2, data.frame(s1=sig$s1[i],s2=sig$s2[i],rho=aux))
+}
+qplot(data=rho.cndiw2, x=rho.x , y=rho.y,geom='line', main='IW using prior location parameter diagonal with the true value') + facet_wrap(facets=s1~s2,scale='free') 
+@
+
+\subsection{SS: Notation: $\Sigma \sim SS_{or}(\nu, \Lambda,b,\delta)$}
+
+Here $\Sigma = \Delta R \Delta$ where $\Delta=diag(\sigma)$ with $log(\sigma_i) \sim N(b_i, \delta_i)$ and $R= diag(q) Q diag(q) $ is the correlation matrix with $Q\sim IW(\nu, \Lambda)$ and $q_i = \sqrt{Q_{ii}}$.    
+
+Marginal distribution for variance: $\sigma_i^2 \sim logNormal(2b_i, 4\delta_i)$
+
+Actually $\rho$ and $\sigma$ are independent so the conditional correlation is 
+\[p(\rho \vert \sigma_1,\sigma^2) = p(\rho) \propto (1-\rho^2)^{\frac{\nu-d-1}{2}} 
+\]
+so for $\nu = d+1$ we get $p(\rho) \propto 1$
+
+\subsection{HT: Notation: $\Sigma \sim HT(\nu, \lambda, \delta)$}
+
+Maybe better $IW_{ht}$ or $HIW_{ht}$ is better name than just $HT$ for this. 
+
+Here $\Sigma \sim IW(\nu + d -1, 2\nu\Lambda)$ where $\Lambda = diag(\lambda)$ with $\lambda_i \sim Gamma(1/2, \delta_i^2)$ (CHECK).   
+
+Marginal distribution for variance: $\sigma_i^2 \sim t_{\nu}^+(\delta_i)$. 
+
+
+For the conditional correlation we can use the result from the IW case 
+
+\begin{eqnarray}
+\nonumber p(\rho,\lambda_1,\lambda_2 \vert \sigma_1,\sigma_2) &\propto & 
+(\lambda_1\lambda2)^{\frac{\nu+1}{2}}(1-\rho^2)^{-\frac{\nu+4}{2}}e^{-\nu(\lambda_{2} \sigma_1^2+\lambda_{1}\sigma_2^2)/(\sigma_1^2 \sigma_2^2(1-\rho^2)) }p(\lambda_1)p(\lambda_2)  \\ 
+\nonumber  &\propto &  (1-\rho^2)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_1^2(1-\rho^2)} + \delta_1)^{-\frac{\nu+4}{2}} (\frac{\nu}{\sigma_2^2(1-\rho^2)} + \delta_2)^{-\frac{\nu+4}{2}}
+\end{eqnarray}
+
+Letting $\nu=2$ marginal correlations are uniform, and fixing $\delta=1$ we get this plot for $p(\rho\vert \sigma_1\sigma_2)$
+<<ht, echo=FALSE,fig.keep='last',message=FALSE,warning=FALSE>>=
+# Plot conditional distribution
+rho_fht = function(rho, v=2, d=2,delta=1,s1=1, s2=1) {
+  v1 <- v/2
+  t1 <- (1-rho^2)  
+  t2 <- (delta+v/(s1*(1-rho^2)))
+  t3 <- (delta+v/(s2*(1-rho^2)))  
+  t1^(-v1-2)*t2^(-v1-1)*t3^(-v1-1)
+}
+d = 2
+sig <- expand.grid(s1=c(.1,1,10),s2=c(.1,1,10))
+rho.cndht <- NULL
+for (i in 1:dim(sig)[1]) {
+int = integrate(function(x) rho_fht(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i]),-1,1)
+aux <- curve(rho_fht(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i])/int$value, -1, 1, col="red", n=100)
+rho.cndht <- rbind(rho.cndht, data.frame(s1=sig$s1[i],s2=sig$s2[i],rho=aux))
+}
+qplot(data=rho.cndht, rho.x,rho.y,geom='line') + facet_wrap(facets=s1~s2,scale='free')
+
+@
+
+I relize part of this is actually done on Huang paper, where also states the marginal correlation distribution is 
+\[ p(\rho) \propto (1-\rho^2)^{\frac{\nu}{2}-1} \]
+
+\subsection{SIW: Notation $\Sigma \sim SIW((\nu, \lambda, \delta, b))$}
+
+Here $\Sigma = \Delta Q \Delta$ where $\Delta=diag(\xi)$ with $log(\xi_i) \sim N(b_i, \delta_i)$ and $Q\sim IW(\nu, \Lambda)$.
+
+Marginal distribution for variance: $\sigma^2 = \xi^2 Q_{ii}$ where $\xi$ is lognormal and from the IW the distribution for $Q_{ii}$ is inverse-gamma, $Q_{ii}= \phi_i \sim IG(\frac{\nu-d+1}{2}, \frac{ \lambda_{ii} }{2})$. From this the marginal for variance should be obtained from: 
+
+\begin{eqnarray}
+\nonumber p(\sigma^2) &=& \int p(\xi_i, \sigma^2) d\xi_i \\
+\nonumber &\propto& \int \frac{e^{-(log(\xi_i)-b_i)^2/2\delta_i}}{\xi_i} \left(\frac{\sigma^2}{\xi^2}\right)^{-(\frac{\nu-d+1}{2}-1)} e^{- \frac{\lambda_{ii}\xi^2}{2\sigma^2} } d\xi_i \\
+\nonumber &\propto& (\sigma^2)^{-(\frac{\nu-d+1}{2}-1)} \int\xi_i^{\nu-d+2}e^{ \frac{-(log(\xi_i)-b_i)^2}{2\delta_i} - \frac{\lambda_{ii}\xi^2}{2\sigma^2}}d\xi
+\end{eqnarray}
+
+but there is no solution for that integral....
+I didn't try the conditional correlation, with simulations we get a very nice histtogram
+
+<<siw, cache=TRUE>>=
+d = 2
+e = 1.05
+s = 1
+
+sim = 
+rdply(10000, {
+  repeat {
+    Q  <-  rwish(d+1,diag(nrow=d))
+    xi <- exp(rnorm(2))
+    W <- diag(xi)%*% Q %*% diag(xi)
+    if (all(s/e < diag(W), diag(W) < s*e)) break;
+  }
+data.frame(rho=W[1,2]/sqrt(W[1,1]*W[2,2]))}
+  )
+@
+
+<<siw2, dependson='siw',echo=FALSE, fig.height=4,fig.width=4>>=
+hist(sim$rho,100, prob=TRUE)
+@
+
+<<siw3, cache=TRUE, eval=FALSE,echo=FALSE>>=
+sim.siw <- function(s1,s2,n=100) {
+d = 2
+e = 1.1
+rdply(n, {
+  repeat {
+    Q  <-  rwish(d+1,diag(nrow=d))
+    xi <- exp(rnorm(2))
+    W <- diag(xi)%*% Q %*% diag(xi)
+    if (all(s1/e < diag(W)[1], diag(W)[1] < s1*e,s2/e < diag(W)[2], diag(W)[2] < s2*e)) break;
+  }
+data.frame(rho=W[1,2]/sqrt(W[1,1]*W[2,2]))}, 
+.progres = 'text'
+  )  
+}
+
+sig <- expand.grid(s1=c(.1,1,10),s2=c(.1,1,10))
+rho.cndsiw <- mdply(sig, sim.siw, n=5)
+@
+
+<<siw4, dependson='siw',echo=FALSE, fig.height=4,fig.width=4,eval=FALSE>>=
+qplot(data=rho.cndsiw, x=rho,y=..density..,geom='histogram') + facet_wrap(facets=s1~s2,scale='free')
+@
+
+<<compare,eval=FALSE, echo=FALSE,fig.keep='last',message=FALSE,warning=FALSE>>=
+# Plot conditional distribution
+rho_fiw = function(rho, v=3, d=2, s1, s2,l1=1,l2=1) {
+  # identity matrix assumed for location parameter of IW distribution
+  tr = (l1*s1^2+l2*s2^2)/(s1^2*s2^2*(1-rho^2))
+  (1-rho^2)^(-(v+d+1)/2)*exp(-tr/2)
+}
+rho_fht = function(rho, v=2, d=2,delta=1,s1=1, s2=1) {
+  v1 <- v/2
+  t1 <- (1-rho^2)  
+  t2 <- (delta+v/(s1*(1-rho^2)))
+  t3 <- (delta+v/(s2*(1-rho^2)))  
+  t1^(-v1-2)*t2^(-v1-1)*t3^(-v1-1)
+}
+
+d=2
+sig <- expand.grid(s1=c(.1,.72,10),s2=c(.1,.72))
+sig[2,] <- c(10,10)
+
+rho.cndiw <- NULL
+for (i in 1:dim(sig)[1]) {
+int = integrate(function(x) rho_fiw(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i]),-1,1)
+aux <- curve(rho_fiw(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i])/int$value, -1, 1, col="red", n=1000)
+rho.cndiw <- rbind(rho.cndiw, data.frame(prior='IW',s1=sig$s1[i],s2=sig$s2[i],rho=aux))
+}
+
+rho.cndht <- NULL
+for (i in 1:dim(sig)[1]) {
+int = integrate(function(x) rho_fht(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i]),-1,1)
+aux <- curve(rho_fht(x,d+1,d,s1=sig$s1[i], s2=sig$s2[i])/int$value, -1, 1, col="red", n=1000)
+rho.cndht <- rbind(rho.cndht, data.frame(prior='HIWht',s1=sig$s1[i],s2=sig$s2[i],rho=aux))
+}
+
+rho.cnd <- rbind(rho.cndiw, rho.cndht)
+qplot(data=rho.cnd, rho.x,rho.y,geom='line',color=prior) +facet_wrap(facets=s1~s2,scale='free_y')  
+
+rho.cnd$sig  <- factor(apply(rho.cnd[,c('s1','s2')], 1, paste, collapse='-'))
+rho.cnd$sig2  <- with(rho.cnd, (log(s1,10)+log(s2,10))/2) 
+
+pdf('report/figs/conditional.pdf', height=4)
+p <- ggplot(data=rho.cnd, aes(rho.x,rho.y,group=sig2) )
+p + ylim(c(0,4)) +geom_line(aes(colour=sig2),size=I(1))+ facet_wrap(facets=~prior,scale='free_y') + 
+  scale_colour_gradient(name=expression((log[10](sigma[1])+log[10](sigma[2]))/2) , low='black',high='red', limits=c(-1,1)) + 
+  ylab('density') + xlab(expression(rho))
+dev.off()
+
+
+\end{document}
