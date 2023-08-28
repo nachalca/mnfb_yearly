@@ -1,0 +1,28 @@
+---
+title: "more refferences"
+date: "2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Refferences in recent years .. 
+
+- (2014) An Empirical Bayesian Approach to Stein-Optimal Covariance Matrix Estimation. Ben Gillen. Calltech.   
+https://authors.library.caltech.edu/54413/2/BayesCovMats.pdf
+
+- (2018) Bayesian precision matrix estimation for graphical Gaussian models with edge and vertex symmetries. Helene Massam, Qiong Li, Xin Gao. 
+https://arxiv.org/abs/1506.04347
+
+- (2016) Exact formulas for the normalizing constants of Wishart distributions for graphical models. Caroline Uhler, Alex Lenkoski, Donald Richards
+
+- (2022) Estimation of the Covariance Matrix in Hierarchical Bayesian Spatio-Temporal Modeling via Dimension Expansion. Bin Sun, Yuehua Wu
+https://www.mdpi.com/1099-4300/24/4/492/htm
+
+- (2016) blavaan: Bayesian structural equation models via parameter expansion. Edgar C. Merkle, Yves Rosseel. 
+
+https://arxiv.org/abs/1511.05604 
+
+*is an ar package, the paper has a section on priors for covariance matrix, it seem to implement Bannard sepparate strategy prior in jags*

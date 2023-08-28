@@ -74,10 +74,9 @@ In Section \ref{sec:birds} a data set consisting of bird counts in national fore
 
 Let $y_{st}$ represent a measure of abundance of species $s$ in moment $t$, here we choose only two bird species: Veery (VEER) and White-throated Sparrow (WTSP). We are interested in the asociation of abundance between two species, captured by the correlation coefficient $\rho = cor(y_{1t}, y_{2t})$. 
 
-Left panel of Figure \ref{motiva.rho} shows the raw data. The two scatter-plot represent two posible ways to measure species abundance: total count across locations, or using an average count acrross many locations.
+In order to obtain posterior inference of the correlation coefficient, we fit a multivariate normal model with an inverse-Wishart distribution for the covariance matrix parameter. This model is described in equations \eqref{like} and \eqref{eq:wis}.
 
-In order to obtain posterior inference of the correlation coefficient, we fit a multivariate normal model with an inverse-Wishart distribution for the covariance matrix parameter. This model is described in equations \eqref{like} and \eqref{eq:wis}. 
-
+Left panel of Figure \ref{motiva.rho} shows the raw data. The two scatter-plot represent two posible ways to measure species abundance: total count across locations (bottom), or using an  average count acrross many locations (top).  Right panel of Figure \ref{motiva.rho} shows $\rho$ posterior histograms, the red dashed line indicates the pearson correlation in the observed data.  
 \begin{figure}[htbp]
 \centering
 %\includegraphics[trim = 0 4cm 0 3cm, clip, scale=.5]{motiva22.pdf} 
@@ -87,7 +86,8 @@ In order to obtain posterior inference of the correlation coefficient, we fit a 
 \label{motiva.rho} 
 \end{figure}
 
-Figure \ref{motiva.rho} shows scale of the resopnse variable might have a large impact on posterior inference and, more relevant, that using a mean response accorss locations the posterior distribution is totally off the value of the sample correlation, suggesting the prior distribution was too informative, shrinkage posterior inference towards $\rho=0$. 
+Results from this small example presented in Figure \ref{motiva.rho} shows scale of the resopnse variable might have a large impact on posterior inference and, more relevant, that using a mean response accorss locations the posterior distribution is totally off the value of the sample correlation, suggesting the prior distribution was too informative, shrinking posterior inference towards $\rho=0$.
+
 
 \section{Statistical Models \label{sec:models} }
 
