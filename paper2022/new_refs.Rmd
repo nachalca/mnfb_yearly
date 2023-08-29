@@ -8,21 +8,37 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Refferences in recent years .. 
+## Some refferences in recent years .. 
+
+<!-- Eaton, M. L. (2007). Matrix Factorizations and Jacobians. In Multivariate -->
+<!-- Statistics, 53 159–184. Institute of Mathematical Statistics. -->
 
 - (2014) An Empirical Bayesian Approach to Stein-Optimal Covariance Matrix Estimation. Ben Gillen. Calltech.   
 https://authors.library.caltech.edu/54413/2/BayesCovMats.pdf
 
+- (2014) Banerjee, S. and Ghosal, S. (2014). Posterior convergence rates for esti-
+mating large precision matrices using graphical models. Electronic Journal
+of Statistics 8 2111 – 2137.
+
+- (2015) Chung, Y., Gelman, A., Rabe-Hesketh, S., Liu, J., & Dorie, V. (2015). Weakly Informative Prior for Point Estimation of Covariance Matrices in Hierarchical Models. Journal of Educational and Behavioral Statistics, 40(2), 136–157. https://doi.org/10.3102/1076998615570945
+
+- (2016) Exact formulas for the normalizing constants of Wishart distributions for graphical models. Caroline Uhler, Alex Lenkoski, Donald Richards
+
+- (2016) blavaan: Bayesian structural equation models via parameter expansion. Edgar C. Merkle, Yves Rosseel.  https://arxiv.org/abs/1511.05604 
+
+*is an ar package, the paper has a section on priors for covariance matrix, it seem to implement Bannard sepparate strategy prior in jags*
+
 - (2018) Bayesian precision matrix estimation for graphical Gaussian models with edge and vertex symmetries. Helene Massam, Qiong Li, Xin Gao. 
 https://arxiv.org/abs/1506.04347
 
-- (2016) Exact formulas for the normalizing constants of Wishart distributions for graphical models. Caroline Uhler, Alex Lenkoski, Donald Richards
+- (2018) Mulder, J. and Pericchi, L. R. (2018). The Matrix-F Prior for Es-
+timating and Testing Covariance Matrices. Bayesian Analysis 13 1193 –
+1214.
 
 - (2022) Estimation of the Covariance Matrix in Hierarchical Bayesian Spatio-Temporal Modeling via Dimension Expansion. Bin Sun, Yuehua Wu
 https://www.mdpi.com/1099-4300/24/4/492/htm
 
-- (2016) blavaan: Bayesian structural equation models via parameter expansion. Edgar C. Merkle, Yves Rosseel. 
+- (2023) North, J. S., Risser, M. D., & Breidt, F. J. A flexible class of priors for conducting posterior inference on structured orthonormal matrices. arXiv preprint arXiv:2307.13627.
 
-https://arxiv.org/abs/1511.05604 
+- (2023) Sarkar, P., Khare, K., & Ghosh, M. (2023). High-dimensional Posterior Consistency in Multi-response Regression models with Non-informative Priors for Error Covariance Matrix. arXiv preprint arXiv:2305.13743.
 
-*is an ar package, the paper has a section on priors for covariance matrix, it seem to implement Bannard sepparate strategy prior in jags*
